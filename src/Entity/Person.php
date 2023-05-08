@@ -2,20 +2,36 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\PersonRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PersonRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection()
+    ],
+    normalizationContext: ['groups' => ['person:read']]
+)]
+#[ApiFilter(SearchFilter::class, properties: ['name' => 'exact'])]
 class Person
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("person:read")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("person:read")]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'person', targetEntity: Dice::class)]
@@ -24,9 +40,14 @@ class Person
     #[ORM\OneToOne(mappedBy: 'person', cascade: ['persist', 'remove'])]
     private ?User $user = null;
 
+    #[ORM\OneToMany(mappedBy: 'person', targetEntity: NumberOfStat::class, orphanRemoval: true)]
+    #[Groups("person:read")]
+    private Collection $numberOfStats;
+
     public function __construct()
     {
         $this->dices = new ArrayCollection();
+        $this->numberOfStats = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -94,6 +115,36 @@ class Person
         }
 
         $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, NumberOfStat>
+     */
+    public function getNumberOfStats(): Collection
+    {
+        return $this->numberOfStats;
+    }
+
+    public function addNumberOfStat(NumberOfStat $numberOfStat): self
+    {
+        if (!$this->numberOfStats->contains($numberOfStat)) {
+            $this->numberOfStats->add($numberOfStat);
+            $numberOfStat->setPerson($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNumberOfStat(NumberOfStat $numberOfStat): self
+    {
+        if ($this->numberOfStats->removeElement($numberOfStat)) {
+            // set the owning side to null (unless already changed)
+            if ($numberOfStat->getPerson() === $this) {
+                $numberOfStat->setPerson(null);
+            }
+        }
 
         return $this;
     }

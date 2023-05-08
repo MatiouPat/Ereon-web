@@ -8,8 +8,11 @@ use App\Repository\DiceRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DiceRepository::class)]
-#[ApiResource]
-#[Post]
+#[ApiResource(
+    operations: [
+        new Post()
+    ]
+)]
 class Dice
 {
     #[ORM\Id]

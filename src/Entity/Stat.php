@@ -2,20 +2,25 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\StatRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: StatRepository::class)]
+#[ApiResource(operations: [])]
 class Stat
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("person:read")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("person:read")]
     private ?string $name = null;
 
     #[ORM\Column]
@@ -30,10 +35,14 @@ class Stat
     #[ORM\OneToMany(mappedBy: 'parentStat', targetEntity: self::class)]
     private Collection $childStats;
 
+    #[ORM\OneToMany(mappedBy: 'stat', targetEntity: NumberOfStat::class, orphanRemoval: true)]
+    private Collection $numberOfStats;
+
     public function __construct()
     {
         $this->dices = new ArrayCollection();
         $this->childStats = new ArrayCollection();
+        $this->numberOfStats = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -131,6 +140,36 @@ class Stat
             // set the owning side to null (unless already changed)
             if ($childStat->getParentStat() === $this) {
                 $childStat->setParentStat(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, NumberOfStat>
+     */
+    public function getNumberOfStats(): Collection
+    {
+        return $this->numberOfStats;
+    }
+
+    public function addNumberOfStat(NumberOfStat $numberOfStat): self
+    {
+        if (!$this->numberOfStats->contains($numberOfStat)) {
+            $this->numberOfStats->add($numberOfStat);
+            $numberOfStat->setStat($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNumberOfStat(NumberOfStat $numberOfStat): self
+    {
+        if ($this->numberOfStats->removeElement($numberOfStat)) {
+            // set the owning side to null (unless already changed)
+            if ($numberOfStat->getStat() === $this) {
+                $numberOfStat->setStat(null);
             }
         }
 
