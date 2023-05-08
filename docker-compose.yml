@@ -5,8 +5,10 @@ services:
     container_name: ereon_web-db
     image: mariadb:10.9.5
     restart: always
+    env_file:
+      - .env
     expose:
-      - 3306
+      - "3306"
     networks:
       - database
     volumes:
@@ -27,7 +29,7 @@ services:
     image: adminer:4.8.1
     restart: always
     ports:
-      - 8080:8080
+      - "8080:8080"
     depends_on:
       - db
     networks:
@@ -35,6 +37,7 @@ services:
 
 networks:
   database:
+    driver: bridge
 
 volumes:
   ereon_web-db_data:
