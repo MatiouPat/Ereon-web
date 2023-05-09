@@ -7,7 +7,7 @@ html {
 .main {
     width: 100vw;
     height: 100vh;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('../images/background.jpg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('../images/logo/background.jpg');
     background-size: cover;
     display: flex;
     justify-content: center;
