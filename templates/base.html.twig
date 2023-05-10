@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="content-language" content="fr-FR">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Ereon{% endblock %}</title>
+        <meta name="description" content="Ereon, l'application pour vos parties de JDR.">
+        <link rel="shortcut icon" href="/build/images/logo/favicon.ico">
+        <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/build/images/logo/icon_180.png">
+        <link rel="icon" type="image/png" sizes="180x180" href="/build/images/logo/icon_180.png">
+        <link rel="apple-touch-icon-precomposed" type="image/png" sizes="60x60" href="/build/images/logo/icon_60.png">
+        <link rel="apple-touch-icon-precomposed" type="image/png" sizes="76x76" href="/build/images/logo/icon_76.png">
+        <link rel="apple-touch-icon-precomposed" type="image/png" sizes="120x120" href="/build/images/logo/icon_120.png">
+        <link rel="apple-touch-icon-precomposed" type="image/png" sizes="152x152" href="/build/images/logo/icon_152.png">
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Ereon">
+        <meta property="og:url" content="https://www.ereon.matthieupays.fr">
+        <meta property="og:description" content="Ereon, l'application pour vos parties de JDR.">
+        <meta property="og:image" content="/build/images/logo/social_media_icon.png">
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="https://www.ereon.matthieupays.fr">
+        <meta property="twitter:title" content="Ereon">
+        <meta property="twitter:description" content="Ereon, l'application pour vos parties de JDR.">
+        <meta property="twitter:image" content="/build/images/logo/social_media_icon.png">
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('reset') }}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+    </head>
+    <body>
+        <div class="content">
+            <header class="header">
+                <div>
+                    <div class="header-title-box">
+                        <img src="{{ asset('build/images/logo/icon_120.png') }}" alt="Ereon" width="60" height="60">
+                        <div class="header-title">
+                            <h1>Ereon</h1>
+                            <span>Tableau de bord</span>
+                        </div>
+                    </div>
+                    <nav class="navigation">
+                        <li>Personnages</li>
+                    </nav>
+                </div>
+                <a href="{{ path('app_logout') }}" class="logout-button">Se déconnecter</a>
+            </header>
+            {% block body %}{% endblock %}
+        </div>
+        <footer class="footer">
+            <span>© 2022-2023 Matthieu PAYS. Tous droits réservés.</span>
+        </footer>
+    </body>
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+    {% endblock %}
+</html>
