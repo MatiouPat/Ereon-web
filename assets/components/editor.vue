@@ -3,14 +3,20 @@
         <div class="editor" ref="map" :style="{ width: width * ratio + 'px', height: height * ratio + 'px' }">
             <picture>
                 <source type="image/webp" srcset="build/images/test2.webp">
-                <img src="build/images/test.png" alt="Map">
+                <img class="map" src="build/images/test.png" alt="Map">
             </picture>
+            <token></token>
         </div>
     </div>
 </template>
 
 <script>
+    import Token from './token.vue'
+
     export default {
+        components: {
+            Token
+        },
         data() {
             return {
                 width: 1200,
@@ -116,7 +122,7 @@
         width: 100%;
     }
 
-    .editor img {
+    .map {
         display: block;
         width: 100%;
     }
