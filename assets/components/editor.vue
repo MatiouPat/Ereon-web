@@ -68,7 +68,13 @@
                 element.addEventListener('wheel', (e) => {
                     e.preventDefault();
                     if(e.ctrlKey == true){
-                        this.ratio -= e.deltaY * 0.0004;
+                        if (this.ratio - e.deltaY * 0.0005 <= 0.1) {
+                            this.ratio = 0.1;
+                        } else if (this.ratio - e.deltaY * 0.00045 >= 2.5) {
+                            this.ratio = 2.5;
+                        } else if (this.ratio >= 0.1 && this.ratio <= 2.5) {
+                            this.ratio = this.ratio - e.deltaY * 0.0005;
+                        }
                     }
                 });
             },
