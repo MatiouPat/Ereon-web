@@ -3,6 +3,8 @@ FROM php:8.1-apache
 WORKDIR /var/www/
 
 RUN apt-get update && \
+    apt install \
+        npm \
     docker-php-ext-install \
         pdo_mysql
 
@@ -10,10 +12,12 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 COPY . /var/www/
 
-RUN rm .env.local
-
 COPY ./docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
-RUN chmod +x ./entrypoint.sh
+RUN composer install && \
+    npm install && \
+    npm run build
 
-RUN composer install
+RUN chmod +x ./docker/entrypoint.sh
+
+ENTRYPOINT [ "./docker/entrypoint.sh" ]
