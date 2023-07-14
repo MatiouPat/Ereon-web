@@ -16,7 +16,8 @@ services:
   php:
     container_name: ereon_web-php
     build:
-      context: .
+      context: ./
+      dockerfile: ./docker/Dockerfile
     ports:
       - "80:80"
     entrypoint: ./entrypoint.sh
@@ -24,20 +25,12 @@ services:
       - db
     networks:
       - database
-  adminer:
-    container_name: ereon_web-adminer
-    image: adminer:4.8.1
-    restart: always
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    networks:
-      - database
-
+      - proxy
 networks:
   database:
-    driver: bridge
+    name: database
+  proxy:
+    name: proxy
 
 volumes:
   ereon_web-db_data:

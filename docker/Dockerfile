@@ -1,4 +1,4 @@
-FROM php:8.1.2-apache
+FROM php:8.1-apache
 
 WORKDIR /var/www/
 
@@ -12,7 +12,7 @@ COPY . /var/www/
 
 RUN rm .env.local
 
-COPY ./apache.conf /etc/apache2/sites-available/000-default.conf
+COPY ./docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
 RUN chmod +x ./entrypoint.sh
 
