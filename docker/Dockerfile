@@ -8,7 +8,8 @@ RUN apt-get update && \
         npm
 
 RUN docker-php-ext-install \
-        pdo_mysql
+        pdo_mysql \
+        zip
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
