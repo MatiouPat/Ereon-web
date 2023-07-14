@@ -4,7 +4,7 @@ WORKDIR /var/www/
 
 RUN apt-get update && \
     apt install -y \
-        libzip \
+        libzip-dev \
         npm
 
 RUN docker-php-ext-install \
