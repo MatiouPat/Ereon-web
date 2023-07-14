@@ -1,7 +1,7 @@
 <template>
-    <picture ref="token" @mousedown="onMouseDown" @mouseup="onMouseUp" :style="{top: top + 'px', left: left + 'px'}">
+    <picture ref="token" @mousedown.stop="onMouseDown" :style="{top: top + 'px', left: left + 'px'}">
         <source type="image/webp" srcset="build/images/token.webp">
-        <img width="100" height="100" src="build/images/token.png" alt="Token">
+        <img :style="{width: width + 'px', height: height + 'px'}" src="build/images/token.png" alt="Token">
     </picture>
 </template>
 
@@ -12,7 +12,9 @@
                 top: 0,
                 left: 0,
                 startX: 0,
-                startY: 0
+                startY: 0,
+                width: 100,
+                height: 100
             }
         },
         methods: {
@@ -26,6 +28,7 @@
                     this.startX = e.screenX - this.$refs.token.offsetLeft;
                     this.startY = e.screenY - this.$refs.token.offsetTop;
                     document.addEventListener('mousemove', this.onMouseMove)
+                    document.addEventListener('mouseup', this.onMouseUp)
                 }
             },
             /**
@@ -34,8 +37,12 @@
              */
             onMouseMove: function(e) {
                 e.preventDefault();
-                this.left += e.screenX - this.$refs.token.offsetLeft - this.startX
-                this.top += e.screenY - this.$refs.token.offsetTop - this.startY
+                if (e.screenX - this.startX > -this.width/2) {
+                    this.left += e.screenX - this.$refs.token.offsetLeft - this.startX
+                }
+                if (e.screenY - this.startY > -this.height/2) {
+                    this.top += e.screenY - this.$refs.token.offsetTop - this.startY
+                }
             },
             /**
              * 

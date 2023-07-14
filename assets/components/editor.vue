@@ -1,6 +1,6 @@
 <template>
     <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @contextmenu="onContextMenu" ref="editor">
-        <div class="editor" ref="map" :style="{ width: width * ratio + 'px', height: height * ratio + 'px' }">
+        <div class="editor" ref="map" :style="{ width: width + 'px', height: height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
             <picture>
                 <source type="image/webp" srcset="build/images/test2.webp">
                 <img class="map" src="build/images/test.png" alt="Map">
@@ -22,6 +22,7 @@
                 width: 1200,
                 height: 1200,
                 ratio: 1,
+                margin: 200,
                 startX: 0,
                 startY: 0,
                 mapX: 0,
@@ -66,9 +67,9 @@
                 if(e.ctrlKey == true){
                     if (this.ratio - e.deltaY * 0.0005 <= 0.1) {
                         this.ratio = 0.1;
-                    } else if (this.ratio - e.deltaY * 0.00045 >= 2.5) {
-                        this.ratio = 2.5;
-                    } else if (this.ratio >= 0.1 && this.ratio <= 2.5) {
+                    } else if (this.ratio - e.deltaY * 0.00045 >= 2.3) {
+                        this.ratio = 2.3;
+                    } else if (this.ratio >= 0.1 && this.ratio <= 2.3) {
                         this.ratio = this.ratio - e.deltaY * 0.0005;
                     }
                 }
@@ -95,7 +96,7 @@
     .editor {
         position: relative;
         display: inline-block;
-        margin: 200px;
+        margin: 800px;
         width: 2000px;
     }
 
