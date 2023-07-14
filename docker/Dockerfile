@@ -3,7 +3,7 @@ FROM php:8.1-apache
 WORKDIR /var/www/
 
 RUN apt-get update && \
-    apt install \
+    apt install -y \
         npm && \
     docker-php-ext-install \
         pdo_mysql
