@@ -4,7 +4,7 @@ WORKDIR /var/www/
 
 RUN apt-get update && \
     apt install \
-        npm \
+        npm && \
     docker-php-ext-install \
         pdo_mysql
 
