@@ -29,6 +29,9 @@
             {{ encore_entry_link_tags('reset') }}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+        {% endblock %}
     </head>
     <body>
         <div class="content">
@@ -42,18 +45,16 @@
                         </div>
                     </div>
                     <nav class="navigation">
-                        <li>Personnages</li>
                     </nav>
                 </div>
                 <a href="{{ path('app_logout') }}" class="logout-button">Se déconnecter</a>
             </header>
-            {% block body %}{% endblock %}
+            <main id="editor">
+                {% block body %}{% endblock %}
+            </main>
         </div>
         <footer class="footer">
             <span>© 2022-2023 Matthieu PAYS. Tous droits réservés.</span>
         </footer>
     </body>
-    {% block javascripts %}
-        {{ encore_entry_script_tags('app') }}
-    {% endblock %}
 </html>
