@@ -4,9 +4,11 @@ WORKDIR /var/www/
 
 RUN apt-get update && \
     apt install -y \
-        npm && \
-    docker-php-ext-install \
-        pdo_mysql
+        npm
+
+RUN docker-php-ext-install \
+        pdo_mysql \
+        zip
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
