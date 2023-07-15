@@ -24,4 +24,5 @@ jobs:
           cd /home/matiou/Ereon-web
           git pull origin main
           docker-compose down
+          docker volume rm ereon-web_ereon
           docker-compose up --build -d

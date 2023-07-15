@@ -1,6 +1,16 @@
 version: "3.4"
 
 services:
+  reverse-proxy:
+    container_name: reverse-proxy
+    image: nginx:alpine
+    ports:
+      - 8000:8000
+    networks:
+      - proxy
+    volumes:
+      - ./docker/proxy.conf:/etc/nginx/conf.d/default.conf:rw
+    restart: always
   ereon-web:
     container_name: ereon-web
     image: nginx:alpine
