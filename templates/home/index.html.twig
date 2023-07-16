@@ -10,5 +10,10 @@
 {% endblock %}
 
 {% block body %}
-    <editor></editor>
+    <main id="editor">
+        <editor></editor>
+    </main>
+    <aside id="dialog-box">
+        <dialog-box :dices="{{ dices }}"></dialog-box>
+    </aside>
 {% endblock %}

@@ -5,7 +5,7 @@
                 <source type="image/webp" srcset="build/images/test2.webp">
                 <img class="map" src="build/images/test.png" alt="Map">
             </picture>
-            <token></token>
+            <Token></Token>
         </div>
     </div>
 </template>
@@ -89,7 +89,7 @@
     .editor-wrapper {
         overflow: scroll;
         height: 100%;
-        width: calc(100dvw - 145px);
+        width: calc(100dvw - 445px);
         background-color: #E2E2E2;
     }
 

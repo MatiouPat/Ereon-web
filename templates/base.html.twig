@@ -49,9 +49,7 @@
                 </div>
                 <a href="{{ path('app_logout') }}" class="logout-button">Se déconnecter</a>
             </header>
-            <main id="editor">
-                {% block body %}{% endblock %}
-            </main>
+            {% block body %}{% endblock %}
         </div>
         <footer class="footer">
             <span>© 2022-2023 Matthieu PAYS. Tous droits réservés.</span>
