@@ -2,13 +2,19 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
 use App\Repository\DiceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\GreaterThan;
+use Symfony\Component\Validator\Constraints\LessThanOrEqual;
+use Symfony\Component\Validator\Constraints\Regex;
 
 #[ORM\Entity(repositoryClass: DiceRepository::class)]
 #[ApiResource(
+    denormalizationContext: ['groups' => ['dice:write']],
     operations: [
         new Post()
     ]
@@ -21,6 +27,8 @@ class Dice
     private ?int $id = null;
 
     #[ORM\Column]
+    #[GreaterThan(1)]
+    #[LessThanOrEqual(100)]
     private ?int $diceNumber = null;
 
     #[ORM\Column]
@@ -30,10 +38,21 @@ class Dice
     private ?int $finalValue = null;
 
     #[ORM\Column(length: 255)]
+    #[Regex(
+        pattern: '/^([1-9]\d*)?d([1-9]\d?|100)([\-\+][1-9]\d*)*$/',
+        message: 'Cette valeur n\'est pas un jet de dé valide.'
+    )]
+    #[Groups('dice:write')]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => "d100+20"
+        ]
+    )]
     private ?string $computation = null;
 
     #[ORM\ManyToOne(inversedBy: 'dices')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups('dice:write')]
     private ?Person $person = null;
 
     #[ORM\ManyToOne(inversedBy: 'dices')]
