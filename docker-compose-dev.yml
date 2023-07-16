@@ -42,13 +42,22 @@ services:
     restart: always
     env_file:
       - .env
+      - .env.local
     expose:
       - 3306
     networks:
       - database
     volumes:
       - ereon-db_data:/var/lib/mysql
-  
+  ereon-mercure:
+    container_name: ereon-mercure
+    image: dunglas/mercure:v0.14
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+      - .env.local
+
 networks:
   database:
     name: database

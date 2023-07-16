@@ -31,7 +31,7 @@ class Person
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("person:read")]
+    #[Groups(['dice:read',"person:read"])]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'person', targetEntity: Dice::class)]
