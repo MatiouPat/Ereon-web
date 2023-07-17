@@ -33,14 +33,15 @@
                     computation: this.computation,
                     person: '/api/people/1'
                 }).then(() => {
-                    this.computation = ''
+                    this.computation = '';
                 }).catch(e => {
-                    this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - d100+20-4')
+                    this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - d100+20-4');
+                    this.computation = '';
                 })
             }
         },
         mounted: function() {
-            const u = new URL('http://localhost:3000/.well-known/mercure');
+            const u = new URL('http://lescanardsmousquetaires.fr:3000/.well-known/mercure');
             u.searchParams.append('topic', 'http://example.com/dice');
 
             const es = new EventSource(u);
