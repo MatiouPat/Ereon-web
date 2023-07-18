@@ -42,8 +42,8 @@ services:
   ereon-mercure:
     container_name: ereon-mercure
     image: dunglas/mercure:v0.14
-    ports:
-      - "3000:3000"
+    expose:
+      - 3000
     environment:
       SERVER_NAME: ':3000'
       MERCURE_EXTRA_DIRECTIVES: |-
