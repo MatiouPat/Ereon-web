@@ -44,6 +44,8 @@ services:
     image: dunglas/mercure:v0.14
     expose:
       - 3000
+    networks:
+      - proxy
     environment:
       SERVER_NAME: ':3000'
       MERCURE_EXTRA_DIRECTIVES: |-
