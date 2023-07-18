@@ -44,6 +44,11 @@ services:
     image: dunglas/mercure:v0.14
     ports:
       - "3000:3000"
+    environment:
+      SERVER_NAME: ':3000'
+      MERCURE_EXTRA_DIRECTIVES: |-
+        cors_origins "https://lescanardsmousquetaires.fr"
+        anonymous
     env_file:
       - .env
       - .env.local
