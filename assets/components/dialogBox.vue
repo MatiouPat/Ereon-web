@@ -41,8 +41,8 @@
             }
         },
         mounted: function() {
-            const u = new URL('http://lescanardsmousquetaires.fr:3000/.well-known/mercure');
-            u.searchParams.append('topic', 'http://example.com/dice');
+            const u = new URL('https://lescanardsmousquetaires.fr:3000/.well-known/mercure');
+            u.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/dice');
 
             const es = new EventSource(u);
             es.onmessage = e => {
