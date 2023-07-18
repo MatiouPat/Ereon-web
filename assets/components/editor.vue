@@ -1,5 +1,5 @@
 <template>
-    <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @contextmenu="onContextMenu" ref="editor">
+    <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu" ref="editor">
         <div class="editor" ref="map" :style="{ width: width + 'px', height: height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
             <picture>
                 <source type="image/webp" srcset="build/images/test2.webp">
@@ -98,15 +98,19 @@
         display: inline-block;
         margin: 800px;
         width: 2000px;
+        background-color: #FFF;
     }
 
     .editor picture {
         display: block;
-        width: 100%;
+        max-width: 1200px;
+    }
+
+    .editor img {
+        max-width: 1200px;
     }
 
     .map {
         display: block;
-        width: 100%;
     }
 </style>
