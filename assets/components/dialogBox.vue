@@ -29,14 +29,13 @@
         ],
         methods: {
             rollDice: function () {
+                let computation = this.computation;
+                this.computation = '';
                 axios.post('/api/dices', {
-                    computation: this.computation,
+                    computation: computation,
                     person: '/api/people/1'
-                }).then(() => {
-                    this.computation = '';
                 }).catch(e => {
                     this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - d100+20-4');
-                    this.computation = '';
                 })
             }
         },
