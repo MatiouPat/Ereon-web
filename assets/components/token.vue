@@ -1,5 +1,5 @@
 <template>
-    <div class="token" ref="token" :style="{top: top + 'px', left: left + 'px', width: width + 'px', height: height + 'px'}" @mousedown.stop="onMouseDown">
+    <div class="token" ref="token" :style="{top: top + 'px', left: left + 'px', width: width + 'px', height: height + 'px'}" @mousedown="onMouseDown">
         <div class="resizers" :class="{isResizing: isResizing}">
             <div class="resizer top-left" @mousedown.stop="resize"></div>
             <div class="resizer top-middle" @mousedown.stop="resize"></div>
@@ -10,10 +10,7 @@
             <div class="resizer bottom-middle" @mousedown.stop="resize"></div>
             <div class="resizer bottom-right" @mousedown.stop="resize"></div>
         </div>
-        <picture class="token-content">
-            <source type="image/webp" srcset="build/images/token.webp">
-            <img :style="{width: width + 'px', height: height + 'px'}" src="build/images/token.png" alt="Token">
-        </picture>
+        <slot name="token"></slot>
     </div>
     
 </template>
@@ -43,9 +40,9 @@
              */
             onMouseDown: function (e) {
                 e.preventDefault();
-                this.isResizing = true;
-                window.addEventListener('click', this.clickOutside)
                 if(e.button === 0) {
+                    this.isResizing = true;
+                    window.addEventListener('click', this.clickOutside)
                     this.startX = e.screenX - this.$refs.token.offsetLeft;
                     this.startY = e.screenY - this.$refs.token.offsetTop;
                     document.addEventListener('mousemove', this.onMouseMove)
@@ -129,9 +126,11 @@
     }
 </script>
 
-<style>
+<style scoped>
     .token {
         position: absolute;
+        top: 0;
+        left: 0;
         z-index: 2;
     }
 
@@ -190,9 +189,16 @@
         cursor: nwse-resize;
     }
 
-    .token-content {
+    picture {
         position: absolute;
         top: 0;
         left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
     }
 </style>

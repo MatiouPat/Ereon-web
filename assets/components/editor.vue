@@ -1,11 +1,22 @@
 <template>
     <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu" ref="editor">
         <div class="editor" ref="map" :style="{ width: width + 'px', height: height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
-            <picture>
-                <source type="image/webp" srcset="build/images/test2.webp">
-                <img class="map" src="build/images/test.png" alt="Map">
-            </picture>
-            <Token></Token>
+            <Token>
+                <template v-slot:token>
+                    <picture>
+                        <source type="image/webp" srcset="build/images/test2.webp">
+                        <img src="build/images/test.png" alt="Map">
+                    </picture>
+                </template>
+            </Token>
+            <Token>
+                <template v-slot:token>
+                    <picture class="token">
+                        <source type="image/webp" srcset="build/images/token.webp">
+                        <img src="build/images/token.png" alt="Token">
+                    </picture>
+                </template>
+            </Token>
         </div>
     </div>
 </template>
@@ -102,15 +113,10 @@
     }
 
     .editor picture {
-        display: block;
         max-width: 1200px;
     }
 
     .editor img {
         max-width: 1200px;
-    }
-
-    .map {
-        display: block;
     }
 </style>
