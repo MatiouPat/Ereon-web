@@ -22,7 +22,8 @@
 </template>
 
 <script>
-    import Token from './token.vue'
+    import axios from 'axios';
+import Token from './token.vue'
 
     export default {
         components: {
@@ -40,6 +41,9 @@
                 mapY: 0 
             }
         },
+        props: [
+            'map'
+        ],
         methods: {
             /**
              * 
@@ -92,6 +96,19 @@
             onContextMenu: function (e) {
                 e.preventDefault();
             }
+        },
+        mounted() {
+            this.$root.$on('choose-map', (map) => {
+                axios.get('api/maps/' + map).then((e) => {
+                    this.width = e.data.width
+                    this.height = e.data.height
+                    console.log(e.data.width);
+                })
+            })
+            axios.get('api/maps/' + this.map).then((e) => {
+                this.width = e.data.width
+                this.height = e.data.height
+            })
         }
     }
 </script>
