@@ -1,17 +1,29 @@
 <template>
-    <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @contextmenu="onContextMenu" ref="editor">
+    <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu" ref="editor">
         <div class="editor" ref="map" :style="{ width: width + 'px', height: height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
-            <picture>
-                <source type="image/webp" srcset="build/images/test2.webp">
-                <img class="map" src="build/images/test.png" alt="Map">
-            </picture>
-            <Token></Token>
+            <Token>
+                <template v-slot:token>
+                    <picture>
+                        <source type="image/webp" srcset="build/images/test2.webp">
+                        <img src="build/images/test.png" alt="Map">
+                    </picture>
+                </template>
+            </Token>
+            <Token>
+                <template v-slot:token>
+                    <picture class="token">
+                        <source type="image/webp" srcset="build/images/token.webp">
+                        <img src="build/images/token.png" alt="Token">
+                    </picture>
+                </template>
+            </Token>
         </div>
     </div>
 </template>
 
 <script>
-    import Token from './token.vue'
+    import axios from 'axios';
+import Token from './token.vue'
 
     export default {
         components: {
@@ -29,6 +41,9 @@
                 mapY: 0 
             }
         },
+        props: [
+            'map'
+        ],
         methods: {
             /**
              * 
@@ -81,6 +96,19 @@
             onContextMenu: function (e) {
                 e.preventDefault();
             }
+        },
+        mounted() {
+            this.$root.$on('choose-map', (map) => {
+                axios.get('api/maps/' + map).then((e) => {
+                    this.width = e.data.width
+                    this.height = e.data.height
+                    console.log(e.data.width);
+                })
+            })
+            axios.get('api/maps/' + this.map).then((e) => {
+                this.width = e.data.width
+                this.height = e.data.height
+            })
         }
     }
 </script>
@@ -98,15 +126,14 @@
         display: inline-block;
         margin: 800px;
         width: 2000px;
+        background-color: #FFF;
     }
 
     .editor picture {
-        display: block;
-        width: 100%;
+        max-width: 1200px;
     }
 
-    .map {
-        display: block;
-        width: 100%;
+    .editor img {
+        max-width: 1200px;
     }
 </style>

@@ -4,6 +4,7 @@ body {
 
 
 main {
+    position: relative;
     width: calc(100% - 445px);
     height: 100%;
 }

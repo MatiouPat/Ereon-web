@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints\Regex;
 #[ApiResource(
     denormalizationContext: ['groups' => ['dice:write']],
     operations: [
-        new GetCollection,
+        new GetCollection(),
         new Post()
     ]
 )]
