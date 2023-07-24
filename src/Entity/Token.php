@@ -26,10 +26,6 @@ class Token
     #[Groups("user:read")]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups("user:read")]
-    private ?string $view = null;
-
     #[ORM\Column]
     #[Groups("user:read")]
     private ?int $width = null;
@@ -49,6 +45,9 @@ class Token
     #[ORM\ManyToMany(targetEntity: Map::class, inversedBy: 'tokens')]
     private Collection $maps;
 
+    #[ORM\ManyToOne(inversedBy: 'tokens')]
+    private ?Asset $asset = null;
+
     public function __construct()
     {
         $this->maps = new ArrayCollection();
@@ -57,18 +56,6 @@ class Token
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getView(): ?string
-    {
-        return $this->view;
-    }
-
-    public function setView(string $view): self
-    {
-        $this->view = $view;
-
-        return $this;
     }
 
     public function getWidth(): ?int
@@ -139,6 +126,18 @@ class Token
     public function removeMap(Map $map): self
     {
         $this->maps->removeElement($map);
+
+        return $this;
+    }
+
+    public function getAsset(): ?Asset
+    {
+        return $this->asset;
+    }
+
+    public function setAsset(?Asset $asset): self
+    {
+        $this->asset = $asset;
 
         return $this;
     }

@@ -1,7 +1,8 @@
 <template>
     <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu" ref="editor">
         <div class="editor" ref="map" :style="{ width: map.map.width + 'px', height: map.map.height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
-            <Token>
+            {{ this.map.map.tokens }}
+            <!--<Token>
                 <template v-slot:token>
                     <picture>
                         <source type="image/webp" srcset="build/images/test2.webp">
@@ -16,7 +17,7 @@
                         <img src="build/images/token.png" alt="Token">
                     </picture>
                 </template>
-            </Token>
+            </Token>-->
         </div>
     </div>
 </template>
