@@ -1,6 +1,6 @@
 <template>
     <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu" ref="editor">
-        <div class="editor" ref="map" :style="{ width: width + 'px', height: height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
+        <div class="editor" ref="map" :style="{ width: map.map.width + 'px', height: map.map.height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
             <Token>
                 <template v-slot:token>
                     <picture>
@@ -11,7 +11,7 @@
             </Token>
             <Token>
                 <template v-slot:token>
-                    <picture class="token">
+                    <picture>
                         <source type="image/webp" srcset="build/images/token.webp">
                         <img src="build/images/token.png" alt="Token">
                     </picture>
@@ -22,8 +22,9 @@
 </template>
 
 <script>
-    import axios from 'axios';
+import axios from 'axios';
 import Token from './token.vue'
+import { mapActions, mapState } from 'vuex';
 
     export default {
         components: {
@@ -31,8 +32,6 @@ import Token from './token.vue'
         },
         data() {
             return {
-                width: 1200,
-                height: 1200,
                 ratio: 1,
                 margin: 200,
                 startX: 0,
@@ -42,9 +41,15 @@ import Token from './token.vue'
             }
         },
         props: [
-            'map'
+            'user'
         ],
+        computed: mapState({
+            map: state => state.map
+        }),
         methods: {
+            ...mapActions('map', [
+                'setMap'
+            ]),
             /**
              * 
              * @param {*} e 
@@ -98,22 +103,12 @@ import Token from './token.vue'
             }
         },
         mounted() {
-            this.$root.$on('choose-map', (map) => {
-                axios.get('api/maps/' + map).then((e) => {
-                    this.width = e.data.width
-                    this.height = e.data.height
-                    console.log(e.data.width);
-                })
-            })
-            axios.get('api/maps/' + this.map).then((e) => {
-                this.width = e.data.width
-                this.height = e.data.height
-            })
+            this.setMap(this.user.map.id)
         }
     }
 </script>
 
-<style>
+<style scoped>
     .editor-wrapper {
         overflow: scroll;
         height: 100%;

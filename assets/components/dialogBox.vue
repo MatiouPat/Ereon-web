@@ -59,7 +59,7 @@
     }
 </script>
 
-<style>
+<style scoped>
 
     .dialog-box {
         padding: 16px 8px;

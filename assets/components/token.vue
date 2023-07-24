@@ -16,6 +16,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
     export default {
         data() {
             return {
@@ -33,6 +35,9 @@
                 startMouseY: 0,
             }
         },
+        computed: mapState({
+            map: state => state.map
+        }),
         methods: {
             /**
              * 
@@ -55,10 +60,10 @@
              */
             onMouseMove: function(e) {
                 e.preventDefault();
-                if (e.screenX - this.startX > -this.width/2 && e.screenX - this.startX < this.$parent.width - this.width/2) {
+                if (e.screenX - this.startX > -this.width/2 && e.screenX - this.startX < this.map.map.width - this.width/2) {
                     this.left += e.screenX - this.$refs.token.offsetLeft - this.startX
                 }
-                if (e.screenY - this.startY > -this.height/2 && e.screenY - this.startY < this.$parent.height - this.height/2) {
+                if (e.screenY - this.startY > -this.height/2 && e.screenY - this.startY < this.map.map.height - this.height/2) {
                     this.top += e.screenY - this.$refs.token.offsetTop - this.startY
                 }
             },
@@ -189,7 +194,7 @@
         cursor: nwse-resize;
     }
 
-    picture {
+    :slotted(picture) {
         position: absolute;
         top: 0;
         left: 0;
@@ -197,7 +202,7 @@
         height: 100%;
     }
 
-    img {
+    :slotted(img) {
         width: 100%;
         height: 100%;
     }

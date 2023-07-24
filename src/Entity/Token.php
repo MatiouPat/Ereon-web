@@ -9,6 +9,7 @@ use App\Repository\TokenRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TokenRepository::class)]
 #[ApiResource(
@@ -22,21 +23,27 @@ class Token
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("user:read")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("user:read")]
     private ?string $view = null;
 
     #[ORM\Column]
+    #[Groups("user:read")]
     private ?int $width = null;
 
     #[ORM\Column]
+    #[Groups("user:read")]
     private ?int $height = null;
 
     #[ORM\Column]
+    #[Groups("user:read")]
     private ?int $topPosition = null;
 
     #[ORM\Column]
+    #[Groups("user:read")]
     private ?int $leftPosition = null;
 
     #[ORM\ManyToMany(targetEntity: Map::class, inversedBy: 'tokens')]

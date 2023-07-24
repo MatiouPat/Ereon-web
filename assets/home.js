@@ -1,20 +1,25 @@
 import './styles/home.css';
-import Vue from 'vue';
 import Editor from './components/editor.vue'
 import DialogBox from './components/dialogBox.vue'
 import MapBox from './components/mapBox.vue'
+import { createApp } from 'vue';
+import store from './store'
 
-new Vue({
-    el: '#editor',
+let editor = createApp({
     components: {
         Editor,
         MapBox
     }
 })
 
-new Vue({
-    el: '#dialog-box',
+editor.use(store)
+
+editor.mount('#editor')
+
+let dialogBox = createApp({
     components: {
         DialogBox
     }
 })
+
+dialogBox.mount('#dialog-box')

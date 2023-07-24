@@ -1,7 +1,7 @@
 <template>
     <div class="map-box" :class="{isDisplayed: isDisplayed}">
         <div class="maps" v-for="map in maps" :key="map.id">
-            <div class="map" @click="chooseMap(map.id)" >{{ map.name }}</div>
+            <div class="map" @click="setMap(map.id)" >{{ map.name }}</div>
         </div>
         <button class="map-open" name="menu" type="button" :class="{isDisplayed: isDisplayed}" @click="display">
             <svg width="32" height="32" viewBox="0 0 100 100">
@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
     export default {
         data() {
             return {
@@ -24,11 +26,11 @@
             'maps'
         ],
         methods: {
+            ...mapActions('map', [
+                'setMap'
+            ]),
             display: function () {
                 this.isDisplayed = !this.isDisplayed;
-            },
-            chooseMap: function(map) {
-                this.$root.$emit('choose-map', map)
             }
         }
     }
