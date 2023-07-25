@@ -2,12 +2,17 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\AssetRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AssetRepository::class)]
+#[ApiResource(
+    operations: []
+)]
 class Asset
 {
     #[ORM\Id]
@@ -16,6 +21,7 @@ class Asset
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("user:read")]
     private ?string $image = null;
 
     #[ORM\OneToMany(mappedBy: 'asset', targetEntity: Token::class)]
@@ -33,13 +39,25 @@ class Asset
 
     public function getImage(): ?string
     {
-        return $this->image;
+        return $this->image . '.png';
     }
 
-    public function setImage(string $image): self
+    public function setImage(string $image): static
     {
-        $this->image = $image;
 
+        $this->image = explode('.', $image)[0];
+
+        return $this;
+    }
+
+    #[Groups("user:read")]
+    public function getCompressedImage(): ?string
+    {
+        return $this->image . '.webp';
+    }
+
+    public function setCompressedImage(string $image): static
+    {
         return $this;
     }
 

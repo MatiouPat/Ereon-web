@@ -46,6 +46,7 @@ class Token
     private Collection $maps;
 
     #[ORM\ManyToOne(inversedBy: 'tokens')]
+    #[Groups("user:read")]
     private ?Asset $asset = null;
 
     public function __construct()
