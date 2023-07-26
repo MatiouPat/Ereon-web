@@ -25,23 +25,23 @@ class Token
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("user:read")]
+    #[Groups(["user:read", "token:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups("user:read")]
+    #[Groups(["user:read", "token:read"])]
     private ?int $width = null;
 
     #[ORM\Column]
-    #[Groups("user:read")]
+    #[Groups(["user:read", "token:read"])]
     private ?int $height = null;
 
     #[ORM\Column]
-    #[Groups("user:read")]
+    #[Groups(["user:read", "token:read"])]
     private ?int $topPosition = null;
 
     #[ORM\Column]
-    #[Groups("user:read")]
+    #[Groups(["user:read", "token:read"])]
     private ?int $leftPosition = null;
 
     #[ORM\ManyToMany(targetEntity: Map::class, inversedBy: 'tokens')]

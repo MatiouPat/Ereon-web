@@ -32,7 +32,8 @@ import { mapActions, mapState } from 'vuex';
         }),
         methods: {
             ...mapActions('map', [
-                'setMap'
+                'setMap',
+                'updateToken'
             ]),
             /**
              * 
@@ -88,6 +89,20 @@ import { mapActions, mapState } from 'vuex';
         },
         mounted() {
             this.setMap(this.user.map.id)
+            const u = new URL('https://lescanardsmousquetaires.fr:3000/.well-known/mercure');
+            u.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token');
+
+            const es = new EventSource(u);
+            es.onmessage = e => {
+                let data = JSON.parse(e.data)
+                this.updateToken({
+                    id: data.id,
+                    width: data.width,
+                    height: data.height,
+                    top: data.topPosition,
+                    left: data.leftPosition
+                })
+            }
         }
     }
 </script>
