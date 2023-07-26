@@ -1,5 +1,5 @@
 <template>
-    <div class="token" ref="token" :style="{top: top + 'px', left: left + 'px', width: width + 'px', height: height + 'px'}" @mousedown="onMouseDown">
+    <div class="token" ref="token" :style="{top: token.top + 'px', left: token.left + 'px', width: token.width + 'px', height: token.height + 'px'}" @mousedown="onMouseDown">
         <div class="resizers" :class="{isResizing: isResizing}">
             <div class="resizer top-left" @mousedown.stop="resize"></div>
             <div class="resizer top-middle" @mousedown.stop="resize"></div>
@@ -10,21 +10,19 @@
             <div class="resizer bottom-middle" @mousedown.stop="resize"></div>
             <div class="resizer bottom-right" @mousedown.stop="resize"></div>
         </div>
-        <slot name="token"></slot>
+        <picture>
+            <source type="image/webp" :srcset="'/uploads/images/asset/' + token.compressedImage">
+            <img :src="'/uploads/images/asset/' + token.image" alt="Map">
+        </picture>
     </div>
-    
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
     export default {
         data() {
             return {
-                top: 0,
-                left: 0,
-                width: 100,
-                height: 100,
                 resizer: null,
                 isResizing: false,
                 startX: 0,
@@ -35,10 +33,23 @@ import { mapState } from 'vuex';
                 startMouseY: 0,
             }
         },
-        computed: mapState({
-            map: state => state.map
-        }),
+        props: [
+            'id'
+        ],
+        computed: {
+            ...mapGetters('map', [
+                'map',
+                'getTokenById'
+            ]),
+            token() {
+                return this.getTokenById(this.id)
+            },
+        },
         methods: {
+            ...mapActions('map', [
+                'updateToken',
+                'finishUpdateToken'
+            ]),
             /**
              * 
              * @param {*} e 
@@ -50,76 +61,107 @@ import { mapState } from 'vuex';
                     window.addEventListener('click', this.clickOutside)
                     this.startX = e.screenX - this.$refs.token.offsetLeft;
                     this.startY = e.screenY - this.$refs.token.offsetTop;
-                    document.addEventListener('mousemove', this.onMouseMove)
-                    document.addEventListener('mouseup', this.onMouseUp)
+                    document.addEventListener('mousemove', this.onMove)
+                    document.addEventListener('mouseup', () => {
+                        this.finishUpdateToken({
+                            id: this.token.id,
+                            width: this.token.width,
+                            height: this.token.height,
+                            left: this.token.left,
+                            top: this.token.top
+                        })
+                        document.removeEventListener('mousemove', this.onMove)
+                    }, { once: true })
                 }
             },
             /**
              * 
              * @param {*} e 
              */
-            onMouseMove: function(e) {
+            onMove: function(e) {
+                let left = this.token.left
+                let top = this.token.top
                 e.preventDefault();
-                if (e.screenX - this.startX > -this.width/2 && e.screenX - this.startX < this.map.map.width - this.width/2) {
-                    this.left += e.screenX - this.$refs.token.offsetLeft - this.startX
+                if (e.screenX - this.startX > -this.token.width/2 && e.screenX - this.startX < this.map.width - this.token.width/2) {
+                    left += e.screenX - this.$refs.token.offsetLeft - this.startX
                 }
-                if (e.screenY - this.startY > -this.height/2 && e.screenY - this.startY < this.map.map.height - this.height/2) {
-                    this.top += e.screenY - this.$refs.token.offsetTop - this.startY
+                if (e.screenY - this.startY > -this.token.height/2 && e.screenY - this.startY < this.map.height - this.token.height/2) {
+                    top += e.screenY - this.$refs.token.offsetTop - this.startY
                 }
-            },
-            /**
-             * 
-             */
-            onMouseUp: function() {
-                document.removeEventListener('mousemove', this.onMouseMove)
+                this.updateToken({
+                    id: this.token.id,
+                    width: this.token.width,
+                    height: this.token.height,
+                    left: left,
+                    top: top
+                })
             },
             resize: function(e) {
                 e.preventDefault()
                 this.resizer = e.target
-                this.startWidth = this.width;
-                this.startHeight = this.height;
-                this.startX = this.left;
-                this.startY = this.top;
+                this.startWidth = this.token.width;
+                this.startHeight = this.token.height;
+                this.startX = this.token.left;
+                this.startY = this.token.top;
                 this.startMouseX = e.pageX;
                 this.startMouseY = e.pageY;
                 document.addEventListener('mousemove', this.onResize)
                 document.addEventListener('mouseup', () => {
+                    this.finishUpdateToken({
+                        id: this.token.id,
+                        width: this.token.width,
+                        height: this.token.height,
+                        left: this.token.left,
+                        top: this.token.top
+                    })
                     document.removeEventListener('mousemove', this.onResize)
-                })
+                }, { once: true })
             },
             onResize: function(e) {
+                let width = this.startWidth
+                let height = this.startHeight
+                let top = this.startY
+                let left = this.startX
                 if (this.resizer.classList.contains('bottom-right')) {
-                    let diff = (this.startWidth + (e.pageX - this.startMouseX)) - this.width
-                    this.width =  this.startWidth + (e.pageX - this.startMouseX)
-                    this.height += diff 
+                    let diff = (this.startWidth + (e.pageX - this.startMouseX)) - this.startWidth
+                    width = this.startWidth + (e.pageX - this.startMouseX)
+                    height = this.startHeight + diff
                 }else if (this.resizer.classList.contains('middle-right')) {
-                    this.width =  this.startWidth + (e.pageX - this.startMouseX)
+                    width =  this.startWidth + (e.pageX - this.startMouseX)
                 }else if (this.resizer.classList.contains('bottom-middle')) {
-                    this.height = this.startHeight + (e.pageY - this.startMouseY)
+                    height = this.startHeight + (e.pageY - this.startMouseY)
                 }else if (this.resizer.classList.contains('top-right')) {
-                    let diffScale = (this.startWidth + (e.pageX - this.startMouseX)) - this.width
-                    this.width = this.startWidth + (e.pageX - this.startMouseX)
-                    this.height += diffScale; 
-                    this.top = this.startX - (e.pageX - this.startMouseX);
+                    let diffScale = (this.startWidth + (e.pageX - this.startMouseX)) - this.startWidth
+                    width = this.startWidth + (e.pageX - this.startMouseX)
+                    height = this.startHeight + diffScale; 
+                    top = this.startX - (e.pageX - this.startMouseX);
                 }else if (this.resizer.classList.contains('bottom-left')) {
-                    let diffScale = (this.startWidth - (e.pageX - this.startMouseX)) - this.width
-                    this.width = this.startWidth - (e.pageX - this.startMouseX)
-                    this.height += diffScale; 
-                    this.left = this.startX + (e.pageX - this.startMouseX)
+                    let diffScale = (this.startWidth - (e.pageX - this.startMouseX)) - this.startWidth
+                    width = this.startWidth - (e.pageX - this.startMouseX)
+                    height = this.startHeight + diffScale; 
+                    left = this.startX + (e.pageX - this.startMouseX)
                 }else if (this.resizer.classList.contains('middle-left')) {
-                    this.width = this.startWidth - (e.pageX - this.startMouseX)
-                    this.left = this.startX + (e.pageX - this.startMouseX)
+                    width = this.startWidth - (e.pageX - this.startMouseX)
+                    left = this.startX + (e.pageX - this.startMouseX)
                 }else if (this.resizer.classList.contains('top-middle')) {
-                    this.height = this.startHeight - (e.pageY - this.startMouseY); 
-                    this.top = this.startY + (e.pageY - this.startMouseY);
+                    height = this.startHeight - (e.pageY - this.startMouseY); 
+                    top = this.startY + (e.pageY - this.startMouseY);
                 }else if (this.resizer.classList.contains('top-left')) {
-                    let diffScale = (this.startWidth - (e.pageX - this.startMouseX)) - this.width
-                    this.width = this.startWidth - (e.pageX - this.startMouseX)
-                    this.height += diffScale; 
-                    let diffPosition = (this.startX + (e.pageX - this.startMouseX)) - this.left
-                    this.left = this.startX + (e.pageX - this.startMouseX)
-                    this.top += diffPosition;
+                    let diffScale = (this.startWidth - (e.pageX - this.startMouseX)) - this.startWidth
+                    width = this.startWidth - (e.pageX - this.startMouseX)
+                    height = this.startHeight + diffScale; 
+                    let diffPosition = (this.startX + (e.pageX - this.startMouseX)) - this.startX
+                    left = this.startX + (e.pageX - this.startMouseX)
+                    top = this.startY + diffPosition;
                 }
+                console.log(width, height, top, left)
+                this.updateToken({
+                    id: this.token.id,
+                    width: width,
+                    height: height,
+                    left: left,
+                    top: top
+                })
             },
             clickOutside: function(e) {
                 if(!this.$el.contains(e.target)){
@@ -194,7 +236,7 @@ import { mapState } from 'vuex';
         cursor: nwse-resize;
     }
 
-    :slotted(picture) {
+    picture {
         position: absolute;
         top: 0;
         left: 0;
@@ -202,7 +244,7 @@ import { mapState } from 'vuex';
         height: 100%;
     }
 
-    :slotted(img) {
+    img {
         width: 100%;
         height: 100%;
     }

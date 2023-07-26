@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\TokenRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -15,7 +16,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations: [
         new GetCollection(),
-        new Post()
+        new Post(),
+        new Patch()
     ]
 )]
 class Token

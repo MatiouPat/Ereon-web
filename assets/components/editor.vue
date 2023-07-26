@@ -1,29 +1,12 @@
 <template>
     <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu" ref="editor">
         <div class="editor" ref="map" :style="{ width: map.map.width + 'px', height: map.map.height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
-            {{ this.map.map.tokens }}
-            <!--<Token>
-                <template v-slot:token>
-                    <picture>
-                        <source type="image/webp" srcset="build/images/test2.webp">
-                        <img src="build/images/test.png" alt="Map">
-                    </picture>
-                </template>
-            </Token>
-            <Token>
-                <template v-slot:token>
-                    <picture>
-                        <source type="image/webp" srcset="build/images/token.webp">
-                        <img src="build/images/token.png" alt="Token">
-                    </picture>
-                </template>
-            </Token>-->
+            <Token :id="token.id" v-for="token in map.tokens"></Token>
         </div>
     </div>
 </template>
 
 <script>
-import axios from 'axios';
 import Token from './token.vue'
 import { mapActions, mapState } from 'vuex';
 
