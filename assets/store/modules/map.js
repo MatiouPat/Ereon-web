@@ -42,6 +42,17 @@ const actions = {
                 'Content-Type': 'application/merge-patch+json'
             }
         })
+    },
+    changeZIndex({commit, getters}, data) {
+        let token = getters.getTokenById(data.id)
+        commit('changeZIndex', {token, data}),
+        axios.patch('/api/tokens/' + token.id, {
+            "zIndex": data.zIndex
+        }, {
+            headers: {
+                'Content-Type': 'application/merge-patch+json'
+            }
+        })
     }
 }
 
@@ -60,6 +71,7 @@ const mutations = {
                 height: token.height,
                 top: token.topPosition,
                 left: token.leftPosition,
+                zIndex: token.zIndex,
                 image: token.asset.image,
                 compressedImage: token.asset.compressedImage
             })
@@ -70,6 +82,9 @@ const mutations = {
         token.height = data.height
         token.top = data.top
         token.left = data.left
+    },
+    changeZIndex(state, {token, data}) {
+        token.zIndex = data.zIndex
     }
 }
 

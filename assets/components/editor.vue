@@ -100,7 +100,8 @@ import { mapActions, mapState } from 'vuex';
                     width: data.width,
                     height: data.height,
                     top: data.topPosition,
-                    left: data.leftPosition
+                    left: data.leftPosition,
+                    zIndex: data.zIndex
                 })
             }
         }

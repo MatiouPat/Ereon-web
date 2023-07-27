@@ -1,5 +1,5 @@
 <template>
-    <div class="token" ref="token" :style="{top: token.top + 'px', left: token.left + 'px', width: token.width + 'px', height: token.height + 'px'}" @mousedown="onMouseDown">
+    <div class="token" ref="token" :style="{top: token.top + 'px', left: token.left + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown="move" @contextmenu="showActions">
         <div class="resizers" :class="{isResizing: isResizing}">
             <div class="resizer top-left" @mousedown.stop="resize"></div>
             <div class="resizer top-middle" @mousedown.stop="resize"></div>
@@ -10,6 +10,10 @@
             <div class="resizer bottom-middle" @mousedown.stop="resize"></div>
             <div class="resizer bottom-right" @mousedown.stop="resize"></div>
         </div>
+        <ul class="context-menu" :class="{isContexting: isContexting}">
+            <li @click="upZIndex">Vers l'avant</li>
+            <li @click="downZIndex">Vers l'arrière</li>
+        </ul>
         <picture>
             <source type="image/webp" :srcset="'/uploads/images/asset/' + token.compressedImage">
             <img :src="'/uploads/images/asset/' + token.image" alt="Map">
@@ -25,6 +29,7 @@ import { mapActions, mapGetters } from 'vuex';
             return {
                 resizer: null,
                 isResizing: false,
+                isContexting: false,
                 startX: 0,
                 startY: 0,
                 startWidth: 0,
@@ -48,17 +53,35 @@ import { mapActions, mapGetters } from 'vuex';
         methods: {
             ...mapActions('map', [
                 'updateToken',
-                'finishUpdateToken'
+                'finishUpdateToken',
+                'changeZIndex'
             ]),
+            showActions: function (e) {
+                e.preventDefault()
+                this.isContexting = true;
+            },
+            upZIndex: function () {
+                this.changeZIndex({
+                    id: this.token.id,
+                    zIndex: this.token.zIndex + 1
+                })
+                this.isContexting = false;
+            },
+            downZIndex: function () {
+                this.changeZIndex({
+                    id: this.token.id,
+                    zIndex: this.token.zIndex - 1
+                })
+                this.isContexting = false;
+            },
             /**
              * 
              * @param {*} e 
              */
-            onMouseDown: function (e) {
+            move: function (e) {
                 e.preventDefault();
                 if(e.button === 0) {
                     this.isResizing = true;
-                    window.addEventListener('click', this.clickOutside)
                     this.startX = e.screenX - this.$refs.token.offsetLeft;
                     this.startY = e.screenY - this.$refs.token.offsetTop;
                     document.addEventListener('mousemove', this.onMove)
@@ -68,11 +91,13 @@ import { mapActions, mapGetters } from 'vuex';
                             width: this.token.width,
                             height: this.token.height,
                             left: this.token.left,
-                            top: this.token.top
+                            top: this.token.top,
+                            zIndex: this.token.zIndex
                         })
                         document.removeEventListener('mousemove', this.onMove)
                     }, { once: true })
                 }
+                window.addEventListener('mousedown', this.clickOutside)
             },
             /**
              * 
@@ -93,9 +118,14 @@ import { mapActions, mapGetters } from 'vuex';
                     width: this.token.width,
                     height: this.token.height,
                     left: left,
-                    top: top
+                    top: top,
+                    zIndex: this.token.zIndex
                 })
             },
+            /**
+             * 
+             * @param {*} e 
+             */
             resize: function(e) {
                 e.preventDefault()
                 this.resizer = e.target
@@ -112,11 +142,16 @@ import { mapActions, mapGetters } from 'vuex';
                         width: this.token.width,
                         height: this.token.height,
                         left: this.token.left,
-                        top: this.token.top
+                        top: this.token.top,
+                        zIndex: this.token.zIndex
                     })
                     document.removeEventListener('mousemove', this.onResize)
                 }, { once: true })
             },
+            /**
+             * 
+             * @param {*} e 
+             */
             onResize: function(e) {
                 let width = this.startWidth
                 let height = this.startHeight
@@ -160,13 +195,19 @@ import { mapActions, mapGetters } from 'vuex';
                     width: width,
                     height: height,
                     left: left,
-                    top: top
+                    top: top,
+                    zIndex: this.token.zIndex
                 })
             },
+            /**
+             * 
+             * @param {*} e 
+             */
             clickOutside: function(e) {
+                window.removeEventListener('click', this.clickOutside)
                 if(!this.$el.contains(e.target)){
                     this.isResizing = false;
-                    window.removeEventListener('click', this.clickOutside)
+                    this.isContexting = false;
                 }
             }
         }
@@ -176,9 +217,6 @@ import { mapActions, mapGetters } from 'vuex';
 <style scoped>
     .token {
         position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 2;
     }
 
     .resizers{
@@ -234,6 +272,29 @@ import { mapActions, mapGetters } from 'vuex';
         right: -5px;
         bottom: -5px;
         cursor: nwse-resize;
+    }
+
+    .context-menu {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        display: none;
+    }
+
+    .context-menu.isContexting {
+        display: block;
+    }
+
+    .context-menu li {
+        background-color: #FFF;
+        border: solid 1px #000;
+        padding: 2px 4px;
+        cursor: pointer;
+    }
+
+    .context-menu li:hover {
+        background-color: #AAA;
     }
 
     picture {

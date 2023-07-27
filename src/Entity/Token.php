@@ -44,6 +44,10 @@ class Token
     #[Groups(["user:read", "token:read"])]
     private ?int $leftPosition = null;
 
+    #[ORM\Column]
+    #[Groups(["user:read", "token:read"])]
+    private ?int $zIndex = null;
+
     #[ORM\ManyToMany(targetEntity: Map::class, inversedBy: 'tokens')]
     private Collection $maps;
 
@@ -105,6 +109,18 @@ class Token
     public function setLeftPosition(int $leftPosition): self
     {
         $this->leftPosition = $leftPosition;
+
+        return $this;
+    }
+
+    public function getZIndex(): ?int
+    {
+        return $this->zIndex;
+    }
+
+    public function setZIndex(int $zIndex): self
+    {
+        $this->zIndex = $zIndex;
 
         return $this;
     }
