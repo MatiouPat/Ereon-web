@@ -1,0 +1,46 @@
+<template>
+    <div class="assets-box">
+        <picture v-for="asset in assets" @dragend="addToken">
+            <source type="image/webp" :srcset="'/uploads/images/asset/' + asset.compressedImage">
+            <img :src="'/uploads/images/asset/' + asset.image" :alt="asset.id" width="64" height="64">
+        </picture>
+    </div>
+</template>
+
+<script>
+import axios from 'axios';
+import { mapActions } from 'vuex';
+
+    export default {
+        data() {
+            return {
+                assets: []
+            }
+        },
+        methods: {
+            ...mapActions('map', [
+                'addTokenOnMap'
+            ]),
+            addToken: function(e) {
+                if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor-zone'))) {
+                    this.addTokenOnMap({
+                        id: e.target.alt,
+                    })
+                }
+            }
+        },
+        mounted: function() {
+            axios.get('/api/assets')
+                .then(response => {
+                    this.assets = response.data['hydra:member']
+                })
+        }
+    }
+</script>
+
+<style scoped>
+    .assets-box {
+        display: flex;
+        gap: 8px;
+    }
+</style>

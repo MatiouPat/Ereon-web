@@ -14,6 +14,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TokenRepository::class)]
 #[ApiResource(
+    normalizationContext: ['groups' => ['token:read']],
     operations: [
         new GetCollection(),
         new Post(),
@@ -52,7 +53,7 @@ class Token
     private Collection $maps;
 
     #[ORM\ManyToOne(inversedBy: 'tokens')]
-    #[Groups("user:read")]
+    #[Groups(["user:read", "token:read"])]
     private ?Asset $asset = null;
 
     public function __construct()

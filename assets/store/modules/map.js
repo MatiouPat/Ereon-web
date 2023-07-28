@@ -26,6 +26,31 @@ const actions = {
             commit('setMap', e.data)
         })
     },
+    addTokenOnMap({commit, getters}, data) {
+        axios.post('api/tokens', {
+            "width": 64,
+            "height": 64,
+            'topPosition': 0,
+            "leftPosition": 0,
+            "zIndex": 0,
+            "maps": [
+                "/api/maps/" + getters.map.id
+            ],
+            "asset": "/api/assets/" + data.id
+        }).then(response => {
+            let token = response.data
+            commit('addToken', {
+                id: token.id,
+                width: token.width,
+                height: token.height,
+                top: token.topPosition,
+                left: token.leftPosition,
+                zIndex: token.zIndex,
+                image: token.asset.image,
+                compressedImage: token.asset.compressedImage
+            })
+        })
+    },
     updateToken({commit, getters}, data) {
         let token = getters.getTokenById(data.id)
         commit('updateToken', {token, data})
@@ -76,6 +101,9 @@ const mutations = {
                 compressedImage: token.asset.compressedImage
             })
         });
+    },
+    addToken(state, token) {
+        state.tokens.push(token)
     },
     updateToken(state, {token, data}) {
         token.width = data.width

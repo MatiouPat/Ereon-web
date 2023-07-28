@@ -15,6 +15,7 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 #[ORM\Entity(repositoryClass: DiceRepository::class)]
 #[ApiResource(
+    normalizationContext: ['groups' => ['dice:read']],
     denormalizationContext: ['groups' => ['dice:write']],
     operations: [
         new GetCollection(),
