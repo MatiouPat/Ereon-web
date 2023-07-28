@@ -40,7 +40,7 @@
             }
         },
         mounted: function() {
-            const u = new URL('https://lescanardsmousquetaires.fr:3000/.well-known/mercure');
+            const u = new URL(process.env.MERCURE_PUBLIC_URL);
             u.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/dice');
 
             const es = new EventSource(u);
