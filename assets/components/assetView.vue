@@ -25,6 +25,7 @@ import { mapActions } from 'vuex';
                 if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor-zone'))) {
                     this.addTokenOnMap({
                         id: e.target.alt,
+                        mercure: false
                     })
                 }
             }

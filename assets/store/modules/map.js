@@ -27,29 +27,53 @@ const actions = {
         })
     },
     addTokenOnMap({commit, getters}, data) {
-        axios.post('api/tokens', {
-            "width": 64,
-            "height": 64,
-            'topPosition': 0,
-            "leftPosition": 0,
-            "zIndex": 0,
-            "maps": [
-                "/api/maps/" + getters.map.id
-            ],
-            "asset": "/api/assets/" + data.id
-        }).then(response => {
-            let token = response.data
-            commit('addToken', {
-                id: token.id,
-                width: token.width,
-                height: token.height,
-                top: token.topPosition,
-                left: token.leftPosition,
-                zIndex: token.zIndex,
-                image: token.asset.image,
-                compressedImage: token.asset.compressedImage
+        if (!data.mercure) {
+            axios.post('api/tokens', {
+                "width": 64,
+                "height": 64,
+                'topPosition': 0,
+                "leftPosition": 0,
+                "zIndex": 0,
+                "maps": [
+                    "/api/maps/" + getters.map.id
+                ],
+                "asset": "/api/assets/" + data.id
+            }).then(response => {
+                let token = response.data
+                commit('addToken', {
+                    id: token.id,
+                    width: token.width,
+                    height: token.height,
+                    top: token.topPosition,
+                    left: token.leftPosition,
+                    zIndex: token.zIndex,
+                    image: token.asset.image,
+                    compressedImage: token.asset.compressedImage
+                })
             })
+        } else {
+            commit('addToken', {
+                id: data.id,
+                width: data.width,
+                height: data.height,
+                top: data.top,
+                left: data.left,
+                zIndex: data.zIndex,
+                image: data.image,
+                compressedImage: data.compressedImage
+            })
+        }
+        
+    },
+    removeTokenOnMap({commit, getters}, data) {
+        let token = getters.getTokenById(data.id)
+        if (!data.mercure) {
+            axios.delete('/api/tokens/' + token.id)
+        }
+        let index = state.tokens.findIndex(object => {
+            return object.id === data.id;
         })
+        commit('removeToken', index)
     },
     updateToken({commit, getters}, data) {
         let token = getters.getTokenById(data.id)
@@ -104,6 +128,9 @@ const mutations = {
     },
     addToken(state, token) {
         state.tokens.push(token)
+    },
+    removeToken(state, tokenId) {
+        state.tokens.splice(tokenId, 1)
     },
     updateToken(state, {token, data}) {
         token.width = data.width

@@ -52,6 +52,7 @@ import { mapActions, mapGetters } from 'vuex';
         },
         methods: {
             ...mapActions('map', [
+                'removeTokenOnMap',
                 'updateToken',
                 'finishUpdateToken',
                 'changeZIndex'
@@ -84,6 +85,7 @@ import { mapActions, mapGetters } from 'vuex';
                     this.isResizing = true;
                     this.startX = e.screenX - this.$refs.token.offsetLeft;
                     this.startY = e.screenY - this.$refs.token.offsetTop;
+                    document.addEventListener('keydown', this.removeToken)
                     document.addEventListener('mousemove', this.onMove)
                     document.addEventListener('mouseup', () => {
                         this.finishUpdateToken({
@@ -153,6 +155,7 @@ import { mapActions, mapGetters } from 'vuex';
              * @param {*} e 
              */
             onResize: function(e) {
+                console.log(e)
                 let width = this.startWidth
                 let height = this.startHeight
                 let top = this.startY
@@ -199,6 +202,14 @@ import { mapActions, mapGetters } from 'vuex';
                     zIndex: this.token.zIndex
                 })
             },
+            removeToken: function(e) {
+                if (e.key === "Delete") {
+                    this.isResizing = false;
+                    this.isContexting = false;
+                    document.removeEventListener('keydown', this.removeToken)
+                    this.removeTokenOnMap({id: this.token.id, mercure: false})
+                }
+            },
             /**
              * 
              * @param {*} e 
@@ -208,6 +219,7 @@ import { mapActions, mapGetters } from 'vuex';
                 if(!this.$el.contains(e.target)){
                     this.isResizing = false;
                     this.isContexting = false;
+                    document.removeEventListener('keydown', this.removeToken)
                 }
             }
         }

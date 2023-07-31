@@ -32,8 +32,10 @@ import { mapActions, mapState } from 'vuex';
         }),
         methods: {
             ...mapActions('map', [
+                'addTokenOnMap',
                 'setMap',
-                'updateToken'
+                'updateToken',
+                'removeTokenOnMap'
             ]),
             /**
              * 
@@ -89,12 +91,34 @@ import { mapActions, mapState } from 'vuex';
         },
         mounted() {
             this.setMap(this.user.map.id)
-            const u = new URL(process.env.MERCURE_PUBLIC_URL);
-            u.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token');
 
-            const es = new EventSource(u);
-            es.onmessage = e => {
+            const postUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            postUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/post');
+
+            const postEs = new EventSource(postUrl);
+            postEs.onmessage = e => {
                 let data = JSON.parse(e.data)
+                console.log("post")
+                this.addTokenOnMap({
+                    id: data.id,
+                    width: data.width,
+                    height: data.height,
+                    top: data.topPosition,
+                    left: data.leftPosition,
+                    zIndex: data.zIndex,
+                    image: data.asset.image,
+                    compressedImage: data.asset.compressedImage,
+                    mercure: true
+                })
+            }
+
+            const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/update');
+
+            const updateEs = new EventSource(updateUrl);
+            updateEs.onmessage = e => {
+                let data = JSON.parse(e.data)
+                console.log("update")
                 this.updateToken({
                     id: data.id,
                     width: data.width,
@@ -102,6 +126,19 @@ import { mapActions, mapState } from 'vuex';
                     top: data.topPosition,
                     left: data.leftPosition,
                     zIndex: data.zIndex
+                })
+            }
+
+            const deleteUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            deleteUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/remove');
+
+            const deleteEs = new EventSource(deleteUrl);
+            deleteEs.onmessage = e => {
+                let data = JSON.parse(e.data)
+                console.log("remove")
+                this.removeTokenOnMap({
+                    id: data.id,
+                    mercure: true
                 })
             }
         }
