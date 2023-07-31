@@ -67,6 +67,15 @@
         overflow-y: scroll;
     }
 
+    .messages::-webkit-scrollbar {
+        width: .4em;
+    }
+    
+    .messages::-webkit-scrollbar-thumb {
+        background-color: #666666;
+    }
+
+
     .textinput {
         display: flex;
         flex-direction: column;

@@ -24,16 +24,12 @@ import { mapActions, mapState } from 'vuex';
                 mapY: 0 
             }
         },
-        props: [
-            'user'
-        ],
         computed: mapState({
             map: state => state.map
         }),
         methods: {
             ...mapActions('map', [
                 'addTokenOnMap',
-                'setMap',
                 'updateToken',
                 'removeTokenOnMap'
             ]),
@@ -90,8 +86,6 @@ import { mapActions, mapState } from 'vuex';
             }
         },
         mounted() {
-            this.setMap(this.user.map.id)
-
             const postUrl = new URL(process.env.MERCURE_PUBLIC_URL);
             postUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/post');
 
@@ -149,8 +143,17 @@ import { mapActions, mapState } from 'vuex';
     .editor-wrapper {
         overflow: scroll;
         height: 100%;
-        width: calc(100dvw - 445px);
+        width: calc(100dvw - 300px);
         background-color: #E2E2E2;
+    }
+
+    .editor-wrapper::-webkit-scrollbar {
+        width: .4em;
+        height: .4em;
+    }
+    
+    .editor-wrapper::-webkit-scrollbar-thumb {
+        background-color: #666666;
     }
 
     .editor {

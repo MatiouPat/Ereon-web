@@ -1,5 +1,5 @@
 <template>
-    <div class="map-box" :class="{isDisplayed: isDisplayed}">
+    <div class="map-box" :class="{isDisplayed: isDisplayed, isVisible: isGameMaster}">
         <div class="maps" v-for="map in maps" :key="map.id">
             <div class="map" @click="setMap(map.id)" >{{ map.name }}</div>
         </div>
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
     export default {
         data() {
@@ -25,6 +25,11 @@ import { mapActions } from 'vuex';
         props: [
             'maps'
         ],
+        computed: {
+            ...mapGetters('user', [
+                'isGameMaster',
+            ]),
+        },
         methods: {
             ...mapActions('map', [
                 'setMap'
@@ -39,6 +44,7 @@ import { mapActions } from 'vuex';
 <style scoped>
 
     .map-box {
+        display: none;
         position: absolute;
         top: -256px;
         left: 10%;
@@ -47,6 +53,10 @@ import { mapActions } from 'vuex';
         z-index: 5;
         background-color: #FFF;
         transition: .1s ease-in-out;
+    }
+
+    .map-box.isVisible {
+        display: block;
     }
 
     .map-box.isDisplayed {
@@ -111,6 +121,14 @@ import { mapActions } from 'vuex';
         height: 100%;
         overflow-y: scroll;
         padding: 8px;
+    }
+
+    .maps::-webkit-scrollbar {
+        width: .4em;
+    }
+    
+    .maps::-webkit-scrollbar-thumb {
+        background-color: #666666;
     }
 
     .map {

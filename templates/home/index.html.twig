@@ -12,7 +12,7 @@
 {% block body %}
     <main id="editor">
         <map-box :maps="{{ maps }}"></map-box>
-        <editor :user="{{ app.user|serialize('json', { groups: 'user:read'}) }}"></editor>
+        <editor></editor>
     </main>
     <aside id="right-side-box">
         <right-side-box></right-side-box>

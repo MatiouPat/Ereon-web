@@ -35,24 +35,10 @@
     </head>
     <body>
         <div class="content">
-            <header class="header">
-                <div>
-                    <div class="header-title-box">
-                        <img src="{{ asset('build/images/logo/icon_120.png') }}" alt="Ereon" width="60" height="60">
-                        <div class="header-title">
-                            <h1>Ereon</h1>
-                            <span>Tableau de bord</span>
-                        </div>
-                    </div>
-                    <nav class="navigation">
-                    </nav>
-                </div>
-                <a href="{{ path('app_logout') }}" class="logout-button">Se déconnecter</a>
+            <header class="header" id="header">
+                <account :connected-user="{{ app.user|serialize('json', { groups: 'user:read'}) }}"></account>
             </header>
             {% block body %}{% endblock %}
         </div>
-        <footer class="footer">
-            <span>© 2022-2023 Matthieu PAYS. Tous droits réservés.</span>
-        </footer>
     </body>
 </html>

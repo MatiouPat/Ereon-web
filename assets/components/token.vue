@@ -1,5 +1,5 @@
 <template>
-    <div class="token" ref="token" :style="{top: token.top + 'px', left: token.left + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown="move" @contextmenu="showActions">
+    <div v-if="isGameMaster" class="token" ref="token" :style="{top: token.top + 'px', left: token.left + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown="move" @contextmenu="showActions">
         <div class="resizers" :class="{isResizing: isResizing}">
             <div class="resizer top-left" @mousedown.stop="resize"></div>
             <div class="resizer top-middle" @mousedown.stop="resize"></div>
@@ -14,6 +14,12 @@
             <li @click="upZIndex">Vers l'avant</li>
             <li @click="downZIndex">Vers l'arrière</li>
         </ul>
+        <picture>
+            <source type="image/webp" :srcset="'/uploads/images/asset/' + token.compressedImage">
+            <img :src="'/uploads/images/asset/' + token.image" alt="Map">
+        </picture>
+    </div>
+    <div v-else class="token" ref="token" :style="{top: token.top + 'px', left: token.left + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown="move">
         <picture>
             <source type="image/webp" :srcset="'/uploads/images/asset/' + token.compressedImage">
             <img :src="'/uploads/images/asset/' + token.image" alt="Map">
@@ -45,6 +51,9 @@ import { mapActions, mapGetters } from 'vuex';
             ...mapGetters('map', [
                 'map',
                 'getTokenById'
+            ]),
+            ...mapGetters('user', [
+                'isGameMaster',
             ]),
             token() {
                 return this.getTokenById(this.id)
