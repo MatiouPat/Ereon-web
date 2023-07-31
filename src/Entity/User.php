@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -49,6 +51,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(nullable: false)]
     #[Groups("user:read")]
     private ?Map $map = null;
+
+    #[ORM\ManyToMany(targetEntity: Token::class, mappedBy: 'users')]
+    private Collection $tokens;
+
+    public function __construct()
+    {
+        $this->tokens = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -152,6 +162,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setMap(?Map $map): self
     {
         $this->map = $map;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Token>
+     */
+    public function getTokens(): Collection
+    {
+        return $this->tokens;
+    }
+
+    public function addToken(Token $token): self
+    {
+        if (!$this->tokens->contains($token)) {
+            $this->tokens->add($token);
+            $token->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeToken(Token $token): self
+    {
+        if ($this->tokens->removeElement($token)) {
+            $token->removeUser($this);
+        }
 
         return $this;
     }

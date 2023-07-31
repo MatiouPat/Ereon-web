@@ -33,9 +33,7 @@ const actions = {
                 'topPosition': 0,
                 "leftPosition": 0,
                 "zIndex": 0,
-                "maps": [
-                    "/api/maps/" + getters.map.id
-                ],
+                "map": "/api/maps/" + getters.map.id,
                 "asset": "/api/assets/" + data.id
             }).then(response => {
                 let token = response.data

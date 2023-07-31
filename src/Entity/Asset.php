@@ -24,7 +24,7 @@ class Asset
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["user:read", "token:read"])]
+    #[Groups(["map:read", "token:read"])]
     private ?string $image = null;
 
     #[ORM\OneToMany(mappedBy: 'asset', targetEntity: Token::class)]
@@ -53,7 +53,7 @@ class Asset
         return $this;
     }
 
-    #[Groups(["user:read", "token:read"])]
+    #[Groups(["map:read", "token:read"])]
     public function getCompressedImage(): ?string
     {
         return $this->image . '.webp';

@@ -28,39 +28,43 @@ class Token
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["user:read", "token:read"])]
+    #[Groups(["map:read", "token:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["user:read", "token:read"])]
+    #[Groups(["map:read", "token:read"])]
     private ?int $width = null;
 
     #[ORM\Column]
-    #[Groups(["user:read", "token:read"])]
+    #[Groups(["map:read", "token:read"])]
     private ?int $height = null;
 
     #[ORM\Column]
-    #[Groups(["user:read", "token:read"])]
+    #[Groups(["map:read", "token:read"])]
     private ?int $topPosition = null;
 
     #[ORM\Column]
-    #[Groups(["user:read", "token:read"])]
+    #[Groups(["map:read", "token:read"])]
     private ?int $leftPosition = null;
 
     #[ORM\Column]
-    #[Groups(["user:read", "token:read"])]
+    #[Groups(["map:read", "token:read"])]
     private ?int $zIndex = null;
 
-    #[ORM\ManyToMany(targetEntity: Map::class, inversedBy: 'tokens')]
-    private Collection $maps;
+    #[ORM\ManyToOne(inversedBy: 'tokens')]
+    #[Groups(["map:read", "token:read"])]
+    private ?Asset $asset = null;
 
     #[ORM\ManyToOne(inversedBy: 'tokens')]
-    #[Groups(["user:read", "token:read"])]
-    private ?Asset $asset = null;
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Map $map = null;
+
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'tokens')]
+    private Collection $users;
 
     public function __construct()
     {
-        $this->maps = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -128,30 +132,6 @@ class Token
         return $this;
     }
 
-    /**
-     * @return Collection<int, Map>
-     */
-    public function getMaps(): Collection
-    {
-        return $this->maps;
-    }
-
-    public function addMap(Map $map): self
-    {
-        if (!$this->maps->contains($map)) {
-            $this->maps->add($map);
-        }
-
-        return $this;
-    }
-
-    public function removeMap(Map $map): self
-    {
-        $this->maps->removeElement($map);
-
-        return $this;
-    }
-
     public function getAsset(): ?Asset
     {
         return $this->asset;
@@ -160,6 +140,42 @@ class Token
     public function setAsset(?Asset $asset): self
     {
         $this->asset = $asset;
+
+        return $this;
+    }
+
+    public function getMap(): ?Map
+    {
+        return $this->map;
+    }
+
+    public function setMap(?Map $map): self
+    {
+        $this->map = $map;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        $this->users->removeElement($user);
 
         return $this;
     }
