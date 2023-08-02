@@ -41,17 +41,21 @@ class Map
     #[Groups("map:read")]
     private ?int $height = null;
 
-    #[ORM\OneToMany(mappedBy: 'map', targetEntity: User::class)]
-    private Collection $users;
-
     #[ORM\OneToMany(mappedBy: 'map', targetEntity: Token::class, orphanRemoval: true)]
     #[Groups("map:read")]
     private Collection $tokens;
 
+    #[ORM\ManyToOne(inversedBy: 'maps')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?World $world = null;
+
+    #[ORM\OneToMany(mappedBy: 'currentMap', targetEntity: Connection::class)]
+    private Collection $connections;
+
     public function __construct()
     {
-        $this->users = new ArrayCollection();
         $this->tokens = new ArrayCollection();
+        $this->connections = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -96,36 +100,6 @@ class Map
     }
 
     /**
-     * @return Collection<int, User>
-     */
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
-
-    public function addUser(User $user): self
-    {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->setMap($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUser(User $user): self
-    {
-        if ($this->users->removeElement($user)) {
-            // set the owning side to null (unless already changed)
-            if ($user->getMap() === $this) {
-                $user->setMap(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, Token>
      */
     public function getTokens(): Collection
@@ -149,6 +123,48 @@ class Map
             // set the owning side to null (unless already changed)
             if ($token->getMap() === $this) {
                 $token->setMap(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getWorld(): ?World
+    {
+        return $this->world;
+    }
+
+    public function setWorld(?World $world): self
+    {
+        $this->world = $world;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Connection>
+     */
+    public function getConnections(): Collection
+    {
+        return $this->connections;
+    }
+
+    public function addConnection(Connection $connection): self
+    {
+        if (!$this->connections->contains($connection)) {
+            $this->connections->add($connection);
+            $connection->setCurrentMap($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConnection(Connection $connection): self
+    {
+        if ($this->connections->removeElement($connection)) {
+            // set the owning side to null (unless already changed)
+            if ($connection->getCurrentMap() === $this) {
+                $connection->setCurrentMap(null);
             }
         }
 

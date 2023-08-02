@@ -57,12 +57,12 @@ class Dice
     private ?string $computation = null;
 
     #[ORM\ManyToOne(inversedBy: 'dices')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['dice:read', 'dice:write'])]
-    private ?Person $person = null;
+    private ?Stat $stat = null;
 
     #[ORM\ManyToOne(inversedBy: 'dices')]
-    private ?Stat $stat = null;
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['dice:read', 'dice:write'])]
+    private ?Personage $personage = null;
 
     public function getId(): ?int
     {
@@ -117,18 +117,6 @@ class Dice
         return $this;
     }
 
-    public function getPerson(): ?Person
-    {
-        return $this->person;
-    }
-
-    public function setPerson(?Person $person): self
-    {
-        $this->person = $person;
-
-        return $this;
-    }
-
     public function getStat(): ?Stat
     {
         return $this->stat;
@@ -137,6 +125,18 @@ class Dice
     public function setStat(?Stat $stat): self
     {
         $this->stat = $stat;
+
+        return $this;
+    }
+
+    public function getPersonage(): ?Personage
+    {
+        return $this->personage;
+    }
+
+    public function setPersonage(?Personage $personage): self
+    {
+        $this->personage = $personage;
 
         return $this;
     }

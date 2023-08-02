@@ -44,20 +44,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $discordIdentifier = null;
 
-    #[ORM\OneToOne(inversedBy: 'user', cascade: ['persist', 'remove'])]
-    private ?Person $person = null;
-
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups("user:read")]
-    private ?Map $map = null;
-
     #[ORM\ManyToMany(targetEntity: Token::class, mappedBy: 'users')]
     private Collection $tokens;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Connection::class, orphanRemoval: true)]
+    #[Groups("user:read")]
+    private Collection $connections;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Personage::class)]
+    private Collection $personages;
 
     public function __construct()
     {
         $this->tokens = new ArrayCollection();
+        $this->connections = new ArrayCollection();
+        $this->personages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -142,30 +143,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getPerson(): ?Person
-    {
-        return $this->person;
-    }
-
-    public function setPerson(?Person $person): self
-    {
-        $this->person = $person;
-
-        return $this;
-    }
-
-    public function getMap(): ?Map
-    {
-        return $this->map;
-    }
-
-    public function setMap(?Map $map): self
-    {
-        $this->map = $map;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Token>
      */
@@ -188,6 +165,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->tokens->removeElement($token)) {
             $token->removeUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Connection>
+     */
+    public function getConnections(): Collection
+    {
+        return $this->connections;
+    }
+
+    public function addConnection(Connection $connection): self
+    {
+        if (!$this->connections->contains($connection)) {
+            $this->connections->add($connection);
+            $connection->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConnection(Connection $connection): self
+    {
+        if ($this->connections->removeElement($connection)) {
+            // set the owning side to null (unless already changed)
+            if ($connection->getUser() === $this) {
+                $connection->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Personage>
+     */
+    public function getPersonages(): Collection
+    {
+        return $this->personages;
+    }
+
+    public function addPersonage(Personage $personage): self
+    {
+        if (!$this->personages->contains($personage)) {
+            $this->personages->add($personage);
+            $personage->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePersonage(Personage $personage): self
+    {
+        if ($this->personages->removeElement($personage)) {
+            // set the owning side to null (unless already changed)
+            if ($personage->getUser() === $this) {
+                $personage->setUser(null);
+            }
         }
 
         return $this;

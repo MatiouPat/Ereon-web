@@ -7,13 +7,13 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use App\Repository\PersonRepository;
+use App\Repository\PersonageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: PersonRepository::class)]
+#[ORM\Entity(repositoryClass: PersonageRepository::class)]
 #[ApiResource(
     operations: [
         new Get(),
@@ -22,7 +22,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['person:read']]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['name' => 'exact'])]
-class Person
+class Personage
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -34,16 +34,20 @@ class Person
     #[Groups(['dice:read',"person:read"])]
     private ?string $name = null;
 
-    #[ORM\OneToMany(mappedBy: 'person', targetEntity: Dice::class)]
+    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Dice::class, orphanRemoval: true)]
     private Collection $dices;
 
-    #[ORM\OneToOne(mappedBy: 'person', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'personages')]
     #[Groups("person:read")]
     private ?User $user = null;
 
-    #[ORM\OneToMany(mappedBy: 'person', targetEntity: NumberOfStat::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfStat::class, orphanRemoval: true)]
     #[Groups("person:read")]
     private Collection $numberOfStats;
+
+    #[ORM\ManyToOne(inversedBy: 'personages')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?World $world = null;
 
     public function __construct()
     {
@@ -80,7 +84,7 @@ class Person
     {
         if (!$this->dices->contains($dice)) {
             $this->dices->add($dice);
-            $dice->setPerson($this);
+            $dice->setPersonage($this);
         }
 
         return $this;
@@ -90,8 +94,8 @@ class Person
     {
         if ($this->dices->removeElement($dice)) {
             // set the owning side to null (unless already changed)
-            if ($dice->getPerson() === $this) {
-                $dice->setPerson(null);
+            if ($dice->getPersonage() === $this) {
+                $dice->setPersonage(null);
             }
         }
 
@@ -105,16 +109,6 @@ class Person
 
     public function setUser(?User $user): self
     {
-        // unset the owning side of the relation if necessary
-        if ($user === null && $this->user !== null) {
-            $this->user->setPerson(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($user !== null && $user->getPerson() !== $this) {
-            $user->setPerson($this);
-        }
-
         $this->user = $user;
 
         return $this;
@@ -132,7 +126,7 @@ class Person
     {
         if (!$this->numberOfStats->contains($numberOfStat)) {
             $this->numberOfStats->add($numberOfStat);
-            $numberOfStat->setPerson($this);
+            $numberOfStat->setPersonage($this);
         }
 
         return $this;
@@ -142,12 +136,23 @@ class Person
     {
         if ($this->numberOfStats->removeElement($numberOfStat)) {
             // set the owning side to null (unless already changed)
-            if ($numberOfStat->getPerson() === $this) {
-                $numberOfStat->setPerson(null);
+            if ($numberOfStat->getPersonage() === $this) {
+                $numberOfStat->setPersonage(null);
             }
         }
 
         return $this;
     }
 
+    public function getWorld(): ?World
+    {
+        return $this->world;
+    }
+
+    public function setWorld(?World $world): self
+    {
+        $this->world = $world;
+
+        return $this;
+    }
 }
