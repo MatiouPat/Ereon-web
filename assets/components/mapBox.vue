@@ -1,7 +1,7 @@
 <template>
     <div class="map-box" :class="{isDisplayed: isDisplayed, isVisible: isGameMaster}">
-        <div class="maps" v-for="map in maps" :key="map.id">
-            <div class="map" @click="setMap(map.id)" >{{ map.name }}</div>
+        <div class="maps">
+            <div class="map" @click="setMap(map.id)" v-for="map in maps">{{ map.name }}</div>
         </div>
         <button class="map-open" name="menu" type="button" :class="{isDisplayed: isDisplayed}" @click="display">
             <svg width="32" height="32" viewBox="0 0 100 100">
@@ -117,6 +117,8 @@ import { mapActions, mapGetters } from 'vuex';
     }
 
     .maps {
+        display: flex;
+        gap: 16px;
         width: 100%;
         height: 100%;
         overflow-y: scroll;
@@ -132,9 +134,6 @@ import { mapActions, mapGetters } from 'vuex';
     }
 
     .map {
-        display: flex;
-        justify-content: center;
-        align-items: center;
         background-color: dimgrey;
         width: 128px;
         height: 128px;

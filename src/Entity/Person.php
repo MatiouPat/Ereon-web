@@ -38,6 +38,7 @@ class Person
     private Collection $dices;
 
     #[ORM\OneToOne(mappedBy: 'person', cascade: ['persist', 'remove'])]
+    #[Groups("person:read")]
     private ?User $user = null;
 
     #[ORM\OneToMany(mappedBy: 'person', targetEntity: NumberOfStat::class, orphanRemoval: true)]

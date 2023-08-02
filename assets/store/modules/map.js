@@ -16,6 +16,12 @@ const getters = {
     },
     getTokenById: (state) => (id) => {
         return state.tokens.find(token => token.id === id)
+    },
+    canControlledBy: (state) => (userId, tokenId) => {
+        return state.tokens.find(token => token.id === tokenId && token.users.find(user => user.id == userId)) != null
+    },
+    getIndexOfUser: (state) => (user, tokenId) => {
+        return state.tokens.find(token => token.id === tokenId).users.indexOf(user)
     }
 }
 
@@ -45,7 +51,8 @@ const actions = {
                     left: token.leftPosition,
                     zIndex: token.zIndex,
                     image: token.asset.image,
-                    compressedImage: token.asset.compressedImage
+                    compressedImage: token.asset.compressedImage,
+                    users: token.users
                 })
             })
         } else {
@@ -57,7 +64,8 @@ const actions = {
                 left: data.left,
                 zIndex: data.zIndex,
                 image: data.image,
-                compressedImage: data.compressedImage
+                compressedImage: data.compressedImage,
+                users: data.users
             })
         }
         
@@ -82,7 +90,9 @@ const actions = {
             "width": data.width,
             "height": data.height,
             'topPosition': data.top,
-            "leftPosition": data.left
+            "leftPosition": data.left,
+            "zIndex": data.zIndex,
+            "users": data.users
         }, {
             headers: {
                 'Content-Type': 'application/merge-patch+json'
@@ -110,7 +120,14 @@ const mutations = {
         state.map.width = map.width
         state.map.height = map.height
         /*Tokens*/
+        state.tokens = []
         map.tokens.forEach(token => {
+            let users = []
+            token.users.forEach(user => {
+                users.push({
+                    id: user.id
+                })
+            })
             state.tokens.push({
                 id: token.id,
                 width: token.width,
@@ -119,7 +136,8 @@ const mutations = {
                 left: token.leftPosition,
                 zIndex: token.zIndex,
                 image: token.asset.image,
-                compressedImage: token.asset.compressedImage
+                compressedImage: token.asset.compressedImage,
+                users: users
             })
         });
     },
@@ -134,8 +152,31 @@ const mutations = {
         token.height = data.height
         token.top = data.top
         token.left = data.left
+        token.zIndex = data.zIndex
+        token.users = data.users
     },
-    changeZIndex(state, {token, data}) {
+    setTokenWidth(state, data) {
+        data.token.width = data.width
+    },
+    setTokenHeight(state, data) {
+        data.token.height = data.height
+    },
+    setTokenTop(state, data) {
+        data.token.top = data.top
+    },
+    setTokenLeft(state, data) {
+        data.token.left = data.left
+    },
+    setTokenZIndex(state, data) {
+        data.token.zIndex = data.zIndex
+    },
+    addTokenPlayer(state, data) {
+        data.token.users.push(data.user)
+    },
+    removeTokenPlayer(state, data) {
+        data.token.users.splice(data.user, 1)
+    },
+    changeZIndex(state, data) {
         token.zIndex = data.zIndex
     }
 }

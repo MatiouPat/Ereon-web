@@ -60,6 +60,7 @@ class Token
     private ?Map $map = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'tokens')]
+    #[Groups(["map:read", "token:read"])]
     private Collection $users;
 
     public function __construct()

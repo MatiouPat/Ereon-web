@@ -9,6 +9,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import { mapActions, mapState } from 'vuex';
 
     export default {
@@ -25,8 +26,10 @@ import { mapActions, mapState } from 'vuex';
         }),
         methods: {
             ...mapActions('user', [
+                'setId',
                 'setGameMaster',
-                'setUserName'
+                'setUserName',
+                'setPlayers'
             ]),
             ...mapActions('map', [
                 'setMap'
@@ -39,8 +42,13 @@ import { mapActions, mapState } from 'vuex';
             if(this.connectedUser.roles.includes("ROLE_ADMIN")) {
                 this.setGameMaster(true)
             }
+            this.setId(this.connectedUser.id)
             this.setUserName(this.connectedUser.username)
             this.setMap(this.connectedUser.map.id)
+            axios.get('/api/people')
+                .then(response => {
+                    this.setPlayers(response.data['hydra:member'])
+                })
         },
     }
 </script>

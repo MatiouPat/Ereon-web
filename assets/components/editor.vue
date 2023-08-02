@@ -92,7 +92,6 @@ import { mapActions, mapState } from 'vuex';
             const postEs = new EventSource(postUrl);
             postEs.onmessage = e => {
                 let data = JSON.parse(e.data)
-                console.log("post")
                 this.addTokenOnMap({
                     id: data.id,
                     width: data.width,
@@ -112,14 +111,14 @@ import { mapActions, mapState } from 'vuex';
             const updateEs = new EventSource(updateUrl);
             updateEs.onmessage = e => {
                 let data = JSON.parse(e.data)
-                console.log("update")
                 this.updateToken({
                     id: data.id,
                     width: data.width,
                     height: data.height,
                     top: data.topPosition,
                     left: data.leftPosition,
-                    zIndex: data.zIndex
+                    zIndex: data.zIndex,
+                    users: data.users
                 })
             }
 
@@ -129,7 +128,6 @@ import { mapActions, mapState } from 'vuex';
             const deleteEs = new EventSource(deleteUrl);
             deleteEs.onmessage = e => {
                 let data = JSON.parse(e.data)
-                console.log("remove")
                 this.removeTokenOnMap({
                     id: data.id,
                     mercure: true
@@ -159,9 +157,8 @@ import { mapActions, mapState } from 'vuex';
     .editor {
         position: relative;
         display: inline-block;
-        margin: 800px;
-        width: 2000px;
         background-color: #FFF;
+        overflow: hidden;
     }
 
     .editor picture {
