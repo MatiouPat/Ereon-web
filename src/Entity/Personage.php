@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
@@ -14,35 +13,24 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PersonageRepository::class)]
-#[ApiResource(
-    operations: [
-        new Get(),
-        new GetCollection()
-    ],
-    normalizationContext: ['groups' => ['person:read']]
-)]
-#[ApiFilter(SearchFilter::class, properties: ['name' => 'exact'])]
 class Personage
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("person:read")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['dice:read',"person:read"])]
+    #[Groups('dice:read')]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Dice::class, orphanRemoval: true)]
     private Collection $dices;
 
     #[ORM\ManyToOne(inversedBy: 'personages')]
-    #[Groups("person:read")]
     private ?User $user = null;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfStat::class, orphanRemoval: true)]
-    #[Groups("person:read")]
     private Collection $numberOfStats;
 
     #[ORM\ManyToOne(inversedBy: 'personages')]

@@ -6,6 +6,7 @@ use App\Repository\WorldRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: WorldRepository::class)]
 class World
@@ -13,12 +14,15 @@ class World
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["world:read", "user:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["world:read", "user:read"])]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Connection::class, orphanRemoval: true)]
+    #[Groups("world:read")]
     private Collection $connections;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Personage::class, orphanRemoval: true)]
@@ -139,5 +143,10 @@ class World
         }
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->name;
     }
 }

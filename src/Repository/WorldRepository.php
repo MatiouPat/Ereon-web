@@ -39,6 +39,23 @@ class WorldRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return World[]
+     */
+    public function findWorldByUser(int $id): array
+    {
+        return $this->createQueryBuilder('w')
+            ->leftJoin('w.connections', 'c')
+            ->leftJoin('c.user', 'u')
+            ->andWhere('u.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
 //    /**
 //     * @return World[] Returns an array of World objects
 //     */

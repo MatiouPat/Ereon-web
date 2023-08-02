@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ConnectionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ConnectionRepository::class)]
 class Connection
@@ -11,12 +12,15 @@ class Connection
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["world:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups("world:read")]
     private ?bool $isGameMaster = null;
 
     #[ORM\Column]
+    #[Groups("world:read")]
     private ?bool $isConnected = null;
 
     #[ORM\ManyToOne(inversedBy: 'connections')]
@@ -25,10 +29,12 @@ class Connection
 
     #[ORM\ManyToOne(inversedBy: 'connections')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups("world:read")]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'connections')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups("world:read")]
     private ?Map $currentMap = null;
 
     public function getId(): ?int

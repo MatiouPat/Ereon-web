@@ -19,29 +19,45 @@
             <div v-if="isPropertiesContexting" class="modal-wrapper">
                 <div class="modal-box">
                     <form>
-                        <div>
-                            <label>Width</label>
-                            <input :value="token.width" type="number" @input="setTokenWidth">
+                        <div class="form-part">
+                            <h3>Positionnement</h3>
+                            <div class="row">
+                                <div class="field">
+                                    <label>Width</label>
+                                    <input :value="token.width" type="number" @input="setTokenWidth">
+                                </div>
+                                <div class="field">
+                                    <label>Height</label>
+                                    <input :value="token.height" type="number" @input="setTokenHeight">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="field">
+                                    <label>Top</label>
+                                    <input :value="token.top" type="number" @input="setTokenTop">
+                                </div>
+                                <div class="field">
+                                    <label>Left</label>
+                                    <input :value="token.left" type="number" @input="setTokenLeft">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="field">
+                                    <label>Zindex</label>
+                                    <input :value="token.zIndex" type="number" @input="setTokenZIndex">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label>Height</label>
-                            <input :value="token.height" type="number" @input="setTokenHeight">
+                        <div class="form-part" v-if="getPlayers.length">
+                            <h3>Contrôle</h3>
+                            <div v-for="player in getPlayers">
+                                <label>{{ player.username }}</label>
+                                <input type="checkbox" :value="player.id" :checked="canControlledBy(player.id, token.id)" @change="addTokenPlayer">
+                            </div>
                         </div>
-                        <div>
-                            <label>Top</label>
-                            <input :value="token.top" type="number" @input="setTokenTop">
-                        </div>
-                        <div>
-                            <label>Left</label>
-                            <input :value="token.left" type="number" @input="setTokenLeft">
-                        </div>
-                        <div>
-                            <label>Zindex</label>
-                            <input :value="token.zIndex" type="number" @input="setTokenZIndex">
-                        </div>
-                        <div v-for="player in getPlayers">
-                            <label>{{ player.name }}</label>
-                            <input type="checkbox" :value="player.id" :checked="canControlledBy(player.id, token.id)" @change="addTokenPlayer">
+                        <div class="form-part" v-else >
+                            <h3>Contrôle</h3>
+                            <span>Aucun joueur présent sur cette partie</span>
                         </div>
                         <button type="button" class="btn" @click="submitForm">Valider</button>
                     </form>
@@ -212,7 +228,6 @@ import { mapActions, mapGetters } from 'vuex';
              * @param {*} e 
              */
             onResize: function(e) {
-                console.log(e)
                 let width = this.startWidth
                 let height = this.startHeight
                 let top = this.startY
@@ -456,15 +471,32 @@ import { mapActions, mapGetters } from 'vuex';
         background-color: #FFF;
     }
 
-    .btn {
-        display: inline-block;
-        border: none;
-        border-radius: 24px;
-        background-color: #D68836;
-        color: #fff;
-        padding: 8px;
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .form-part {
+        width: 100%;
+    }
+
+    .row {
+        display: flex;
+        gap: 8px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    h3 {
+        font-size: 1.2rem;
         font-weight: 700;
-        font-size: 1rem;
-        margin-top: 16px;
+        color: #D68836;
+        margin-bottom: 4px;
     }
 </style>

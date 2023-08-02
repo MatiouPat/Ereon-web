@@ -18,7 +18,7 @@ const getters = {
         return state.tokens.find(token => token.id === id)
     },
     canControlledBy: (state) => (userId, tokenId) => {
-        return state.tokens.find(token => token.id === tokenId && token.users.find(user => user.id == userId)) != null
+        return (state.tokens.find(token => token.id === tokenId && token.users.find(user => user.id == userId)) != null) ? true : false
     },
     getIndexOfUser: (state) => (user, tokenId) => {
         return state.tokens.find(token => token.id === tokenId).users.indexOf(user)

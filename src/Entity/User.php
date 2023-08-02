@@ -2,8 +2,11 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -14,25 +17,26 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ApiResource(
+    normalizationContext: ['groups' => ['user:read']],
     operations: [
-        new Get()
-    ],
-    normalizationContext: ['groups' => ['user:read']]
+        new GetCollection()
+    ]
 )]
+#[ApiFilter(BooleanFilter::class, properties: ['connections.isGameMaster'])]
+#[ApiFilter(SearchFilter::class, properties: ['connections.world.id' => 'exact'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["user:read", "map:read", "person:read", "token:read"])]
+    #[Groups(["world:read", "user:read", "map:read", "person:read", "token:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups("user:read")]
+    #[Groups(["world:read", "user:read"])]
     private ?string $username = null;
 
     #[ORM\Column]
-    #[Groups("user:read")]
     private array $roles = [];
 
     /**
@@ -48,7 +52,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $tokens;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Connection::class, orphanRemoval: true)]
-    #[Groups("user:read")]
     private Collection $connections;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Personage::class)]

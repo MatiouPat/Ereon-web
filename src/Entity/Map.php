@@ -26,7 +26,7 @@ class Map
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["map:read","user:read"])]
+    #[Groups(["world:read", "map:read","user:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
