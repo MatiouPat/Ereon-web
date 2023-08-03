@@ -10,6 +10,7 @@ use App\Repository\MapRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MapRepository::class)]
 #[ApiResource(
@@ -17,34 +18,44 @@ use Doctrine\ORM\Mapping as ORM;
         new GetCollection(),
         new Get(),
         new Post()
-    ]
+    ],
+    normalizationContext: ['groups' => ['map:read']]
 )]
 class Map
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["world:read", "map:read","user:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("map:read")]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups("map:read")]
     private ?int $width = null;
 
     #[ORM\Column]
+    #[Groups("map:read")]
     private ?int $height = null;
 
-    #[ORM\ManyToMany(targetEntity: Token::class, mappedBy: 'maps')]
+    #[ORM\OneToMany(mappedBy: 'map', targetEntity: Token::class, orphanRemoval: true)]
+    #[Groups("map:read")]
     private Collection $tokens;
 
-    #[ORM\OneToMany(mappedBy: 'map', targetEntity: User::class)]
-    private Collection $users;
+    #[ORM\ManyToOne(inversedBy: 'maps')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?World $world = null;
+
+    #[ORM\OneToMany(mappedBy: 'currentMap', targetEntity: Connection::class)]
+    private Collection $connections;
 
     public function __construct()
     {
         $this->tokens = new ArrayCollection();
-        $this->users = new ArrayCollection();
+        $this->connections = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -100,7 +111,7 @@ class Map
     {
         if (!$this->tokens->contains($token)) {
             $this->tokens->add($token);
-            $token->addMap($this);
+            $token->setMap($this);
         }
 
         return $this;
@@ -109,36 +120,51 @@ class Map
     public function removeToken(Token $token): self
     {
         if ($this->tokens->removeElement($token)) {
-            $token->removeMap($this);
+            // set the owning side to null (unless already changed)
+            if ($token->getMap() === $this) {
+                $token->setMap(null);
+            }
         }
+
+        return $this;
+    }
+
+    public function getWorld(): ?World
+    {
+        return $this->world;
+    }
+
+    public function setWorld(?World $world): self
+    {
+        $this->world = $world;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, User>
+     * @return Collection<int, Connection>
      */
-    public function getUsers(): Collection
+    public function getConnections(): Collection
     {
-        return $this->users;
+        return $this->connections;
     }
 
-    public function addUser(User $user): self
+    public function addConnection(Connection $connection): self
     {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->setMap($this);
+        if (!$this->connections->contains($connection)) {
+            $this->connections->add($connection);
+            $connection->setCurrentMap($this);
         }
 
         return $this;
     }
 
-    public function removeUser(User $user): self
+    public function removeConnection(Connection $connection): self
     {
-        if ($this->users->removeElement($user)) {
+        if ($this->connections->removeElement($connection)) {
             // set the owning side to null (unless already changed)
-            if ($user->getMap() === $this) {
-                $user->setMap(null);
+            if ($connection->getCurrentMap() === $this) {
+                $connection->setCurrentMap(null);
             }
         }
 

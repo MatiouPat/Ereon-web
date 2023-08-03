@@ -10,3 +10,16 @@ import './styles/app.css';
 
 // start the Stimulus application
 import './bootstrap';
+import Account from './components/account.vue'
+import { createApp } from 'vue';
+import store from './store'
+
+let account = createApp({
+    components: {
+        Account
+    }
+})
+
+account.use(store)
+
+account.mount('#header')

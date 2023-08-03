@@ -1,29 +1,14 @@
 <template>
     <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu" ref="editor">
-        <div class="editor" ref="map" :style="{ width: width + 'px', height: height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
-            <Token>
-                <template v-slot:token>
-                    <picture>
-                        <source type="image/webp" srcset="build/images/test2.webp">
-                        <img src="build/images/test.png" alt="Map">
-                    </picture>
-                </template>
-            </Token>
-            <Token>
-                <template v-slot:token>
-                    <picture class="token">
-                        <source type="image/webp" srcset="build/images/token.webp">
-                        <img src="build/images/token.png" alt="Token">
-                    </picture>
-                </template>
-            </Token>
+        <div class="editor" id="editor-zone" ref="map" :style="{ width: map.map.width + 'px', height: map.map.height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
+            <Token :id="token.id" v-for="token in map.tokens"></Token>
         </div>
     </div>
 </template>
 
 <script>
-    import axios from 'axios';
 import Token from './token.vue'
+import { mapActions, mapState } from 'vuex';
 
     export default {
         components: {
@@ -31,8 +16,6 @@ import Token from './token.vue'
         },
         data() {
             return {
-                width: 1200,
-                height: 1200,
                 ratio: 1,
                 margin: 200,
                 startX: 0,
@@ -41,10 +24,15 @@ import Token from './token.vue'
                 mapY: 0 
             }
         },
-        props: [
-            'map'
-        ],
+        computed: mapState({
+            map: state => state.map
+        }),
         methods: {
+            ...mapActions('map', [
+                'addTokenOnMap',
+                'updateToken',
+                'removeTokenOnMap'
+            ]),
             /**
              * 
              * @param {*} e 
@@ -98,35 +86,79 @@ import Token from './token.vue'
             }
         },
         mounted() {
-            this.$root.$on('choose-map', (map) => {
-                axios.get('api/maps/' + map).then((e) => {
-                    this.width = e.data.width
-                    this.height = e.data.height
-                    console.log(e.data.width);
+            const postUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            postUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/post');
+
+            const postEs = new EventSource(postUrl);
+            postEs.onmessage = e => {
+                let data = JSON.parse(e.data)
+                this.addTokenOnMap({
+                    id: data.id,
+                    width: data.width,
+                    height: data.height,
+                    top: data.topPosition,
+                    left: data.leftPosition,
+                    zIndex: data.zIndex,
+                    image: data.asset.image,
+                    compressedImage: data.asset.compressedImage,
+                    mercure: true
                 })
-            })
-            axios.get('api/maps/' + this.map).then((e) => {
-                this.width = e.data.width
-                this.height = e.data.height
-            })
+            }
+
+            const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/update');
+
+            const updateEs = new EventSource(updateUrl);
+            updateEs.onmessage = e => {
+                let data = JSON.parse(e.data)
+                this.updateToken({
+                    id: data.id,
+                    width: data.width,
+                    height: data.height,
+                    top: data.topPosition,
+                    left: data.leftPosition,
+                    zIndex: data.zIndex,
+                    users: data.users
+                })
+            }
+
+            const deleteUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            deleteUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/remove');
+
+            const deleteEs = new EventSource(deleteUrl);
+            deleteEs.onmessage = e => {
+                let data = JSON.parse(e.data)
+                this.removeTokenOnMap({
+                    id: data.id,
+                    mercure: true
+                })
+            }
         }
     }
 </script>
 
-<style>
+<style scoped>
     .editor-wrapper {
         overflow: scroll;
         height: 100%;
-        width: calc(100dvw - 445px);
+        width: calc(100dvw - 300px);
         background-color: #E2E2E2;
+    }
+
+    .editor-wrapper::-webkit-scrollbar {
+        width: .4em;
+        height: .4em;
+    }
+    
+    .editor-wrapper::-webkit-scrollbar-thumb {
+        background-color: #666666;
     }
 
     .editor {
         position: relative;
         display: inline-block;
-        margin: 800px;
-        width: 2000px;
         background-color: #FFF;
+        overflow: hidden;
     }
 
     .editor picture {

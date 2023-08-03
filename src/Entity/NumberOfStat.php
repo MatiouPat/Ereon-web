@@ -23,12 +23,12 @@ class NumberOfStat
 
     #[ORM\ManyToOne(inversedBy: 'numberOfStats')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Person $person = null;
+    #[Groups("person:read")]
+    private ?Stat $stat = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfStats')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups("person:read")]
-    private ?Stat $stat = null;
+    private ?Personage $personage = null;
 
     public function getId(): ?int
     {
@@ -47,18 +47,6 @@ class NumberOfStat
         return $this;
     }
 
-    public function getPerson(): ?Person
-    {
-        return $this->person;
-    }
-
-    public function setPerson(?Person $person): self
-    {
-        $this->person = $person;
-
-        return $this;
-    }
-
     public function getStat(): ?Stat
     {
         return $this->stat;
@@ -67,6 +55,18 @@ class NumberOfStat
     public function setStat(?Stat $stat): self
     {
         $this->stat = $stat;
+
+        return $this;
+    }
+
+    public function getPersonage(): ?Personage
+    {
+        return $this->personage;
+    }
+
+    public function setPersonage(?Personage $personage): self
+    {
+        $this->personage = $personage;
 
         return $this;
     }

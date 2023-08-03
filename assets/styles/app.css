@@ -20,50 +20,13 @@ a {
     height: 100dvh;
 }
 
-.header {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border-right: solid 1px #E5E5E5;
-}
-
-.header-title-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 16px;
-    border-bottom: solid 1px #E5E5E5;
-}
-
-.header-title {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.header-title h1 {
+.btn {
+    display: inline-block;
+    border: none;
+    border-radius: 24px;
+    background-color: #D68836;
+    color: #fff;
+    padding: 8px;
     font-weight: 700;
-}
-
-.header-title span {
-    font-size: 0.9rem;
-}
-
-.navigation {
-    margin-top: 32px;
-    padding: 16px;
-    list-style: none;
-}
-
-.logout-button {
-    margin: 16px;
-}
-
-.footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #262626;
-    color: #FFF;
-    padding: 12px;
+    font-size: 1rem;
 }

@@ -27,7 +27,7 @@
     }
 </script>
 
-<style>
+<style scoped>
     .message {
         display: block;
         margin: 4px 0;

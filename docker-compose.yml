@@ -11,6 +11,7 @@ services:
       - database
     volumes:
       - ereon:/var/www:rw
+      - ereon-upload:/var/www/public/upload:rw
       - ./docker/nginx/ereon.conf:/etc/nginx/conf.d/default.conf:rw
     depends_on:
       - ereon-php
@@ -26,6 +27,7 @@ services:
       - 9000
     volumes:
       - ereon:/var/www/:rw
+      - ereon-upload:/var/www/public/upload:rw
   ereon-db:
     container_name: ereon-db
     image: mariadb:10.9.5
@@ -63,4 +65,5 @@ networks:
 
 volumes:
   ereon:
+  ereon-upload:
   ereon-db_data:

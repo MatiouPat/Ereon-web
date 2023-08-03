@@ -47,7 +47,7 @@ class DiceListener
      */
     public function postPersist(Dice $dice):void
     {
-        $update = new Update('http://example.com/dice', $this->serializer->serialize($dice, 'json', ['groups' => 'dice:read']));
+        $update = new Update('https://lescanardsmousquetaires.fr/dice', $this->serializer->serialize($dice, 'json', ['groups' => 'dice:read']));
         $this->hub->publish($update);
     }
 
