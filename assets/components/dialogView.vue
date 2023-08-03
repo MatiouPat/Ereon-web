@@ -87,6 +87,8 @@
         display: block;
         height: 100%;
         resize: none;
+        border: solid 1px #565656;
+        border-radius: 8px;
     }
 
     .textinput button {
