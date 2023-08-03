@@ -14,15 +14,17 @@
             <span>Veuillez contacter un administrateur</span>
         </div>
         <div class="world-layout" v-else v-for="world in worlds">
-            <div class="world" @click="chooseWorld(world)">
+            <div v-for="connection in world.connections">
+                <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world.id)">
                     <picture>
                         <source>
                         <img src="build/images/logo/icon_180.png" alt="">
                     </picture>
-                    <div v-if="world.connections[0].isGameMaster == 0" class="role">Joueur</div>
+                    <div v-if="connection.isGameMaster == 0" class="role">Joueur</div>
                     <div v-else class="role">MJ</div>
                     <h2>{{ world.name }}</h2>
                 </div>
+            </div>
         </div>
         <a class="btn" href="/logout">Se déconnecter</a>
     </div>
@@ -59,12 +61,12 @@ import { mapActions, mapState } from 'vuex';
             viewAccount: function() {
                 this.isVisible = !this.isVisible
             },
-            chooseWorld: function(world) {
-                this.setMap(world.connections[0].currentMap.id)
-                this.setGameMaster(world.connections[0].isGameMaster)
-                this.setId(world.connections[0].user.id)
-                this.setUserName(world.connections[0].user.username)
-                axios.get('/api/users?connections.isGameMaster=false&connections.world.id=' + world.id)
+            chooseWorld: function(connection, worldId) {
+                this.setMap(connection.currentMap.id)
+                this.setGameMaster(connection.isGameMaster)
+                this.setId(connection.user.id)
+                this.setUserName(connection.user.username)
+                axios.get('/api/users?connections.isGameMaster=false&connections.world.id=' + worldId)
                     .then(response => {
                         this.setPlayers(response.data['hydra:member'])
                     })
@@ -78,7 +80,7 @@ import { mapActions, mapState } from 'vuex';
 
     .header {
         position: absolute;
-        top: 16px;
+        bottom: 32px;
         left: 16px;
         z-index: 2;
         box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
@@ -163,7 +165,7 @@ import { mapActions, mapState } from 'vuex';
         height: 10dvw;
         max-height: 200px;
         max-width: 200px;
-        background-color: red;
+        background-color: #333333;
     }
 
     .world img {
