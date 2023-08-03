@@ -14,7 +14,7 @@ class World
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["world:read", "user:read"])]
+    #[Groups(["world:read", "user:read", "connection:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]

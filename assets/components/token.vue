@@ -286,8 +286,8 @@ import { mapActions, mapGetters } from 'vuex';
              * @param {*} e 
              */
             clickOutside: function(e) {
-                window.removeEventListener('click', this.clickOutside)
                 if(!this.$el.contains(e.target)){
+                    window.removeEventListener('click', this.clickOutside)
                     this.isResizing = false;
                     this.isContexting = false;
                     document.removeEventListener('keydown', this.removeToken)

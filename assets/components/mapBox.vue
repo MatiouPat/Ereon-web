@@ -36,6 +36,13 @@ import { mapActions, mapGetters } from 'vuex';
             ]),
             display: function () {
                 this.isDisplayed = !this.isDisplayed;
+                window.addEventListener('click', this.clickOutside)
+            },
+            clickOutside: function(e) {
+                if(!this.$el.contains(e.target)){
+                    window.removeEventListener('click', this.clickOutside)
+                    this.isDisplayed = false;
+                }
             }
         }
     }
