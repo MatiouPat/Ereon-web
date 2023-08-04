@@ -7,5 +7,5 @@ export default createStore({
         map,
         user
     },
-    strict: true
+    strict: false
 })

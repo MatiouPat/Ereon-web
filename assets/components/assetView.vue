@@ -14,6 +14,9 @@ import { mapActions } from 'vuex';
     export default {
         data() {
             return {
+                /**
+                 * The list of all assets
+                 */
                 assets: []
             }
         },
@@ -21,6 +24,10 @@ import { mapActions } from 'vuex';
             ...mapActions('map', [
                 'addTokenOnMap'
             ]),
+            /**
+             * Add a token with the selected asset to the current map 
+             * @param {*} e 
+             */
             addToken: function(e) {
                 if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor-zone'))) {
                     this.addTokenOnMap({

@@ -16,11 +16,29 @@ import { mapActions, mapState } from 'vuex';
         },
         data() {
             return {
+                /**
+                 * The zoom in on the map
+                 */
                 ratio: 1,
+                /**
+                 * The margin around the map
+                 */
                 margin: 200,
+                /**
+                 * The X position where the user begins scrolling
+                 */
                 startX: 0,
+                /**
+                 * The Y position where the user begins scrolling
+                 */
                 startY: 0,
+                /**
+                 * The X position at which the user begins scrolling in relation to the map
+                 */
                 mapX: 0,
+                /**
+                 * The Y position at which the user begins scrolling in relation to the map
+                 */
                 mapY: 0 
             }
         },
@@ -34,7 +52,7 @@ import { mapActions, mapState } from 'vuex';
                 'removeTokenOnMap'
             ]),
             /**
-             * 
+             * Starts scrolling the map after right-clicking
              * @param {*} e 
              */
             onMouseDown: function (e) {
@@ -48,7 +66,7 @@ import { mapActions, mapState } from 'vuex';
                 }
             },
             /**
-             * 
+             * Calculating scrolling position during movement
              * @param {*} e 
              */
             onMouseMove: function (e) {
@@ -56,13 +74,13 @@ import { mapActions, mapState } from 'vuex';
                 this.$el.scrollTop = this.mapY - (e.screenY - this.$el.offsetTop - this.startY)
             },
             /**
-             * 
+             * Stops scrolling after click release
              */
             onMouseUp: function () {
                 document.removeEventListener('mousemove', this.onMouseMove);
             },
             /**
-             * 
+             * Calculate zoom using mouse wheel
              * @param {*} e 
              */
             onWheel: function (e) {
@@ -78,7 +96,7 @@ import { mapActions, mapState } from 'vuex';
                 }
             },
             /**
-             * 
+             * Avoid right-click context menus
              * @param {*} e 
              */
             onContextMenu: function (e) {

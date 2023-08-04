@@ -4,7 +4,8 @@
             <DialogMessage v-for="message in messages" :key="message.id" :dice="message"></DialogMessage>
         </div>
         <div class="textinput">
-            <textarea v-model="computation" @keydown.enter="rollDice"></textarea>
+            <textarea :disabled="isDisabled" :class="{isDisabled: isDisabled}" v-model="computation" @keydown.enter="rollDice"></textarea>
+            <span v-if="isDisabled" class="alert alert-danger">Vous n'avez aucun personnage</span>
             <button type="button" @click="rollDice">Envoyer</button>
         </div>
     </div>
@@ -13,6 +14,7 @@
 <script>
     import axios from 'axios';
     import DialogMessage from './dialogMessage.vue'
+    import { mapGetters } from 'vuex';
 
     export default {
         components: {
@@ -20,17 +22,37 @@
         },
         data() {
             return {
+                /**
+                 * The list of all messages
+                 */
                 messages: [],
+                /**
+                 * The dice roll requested by the user mapped to the textarea
+                 */
                 computation: ''
             }
         },
+        computed: {
+            ...mapGetters('user', [
+                'getPersonages'
+            ]),
+            /**
+             * If the user has a character in the world
+             */
+            isDisabled() {
+                return !this.getPersonages.length
+            }
+        },
         methods: {
+            /**
+             * Call the API to roll a die
+             */
             rollDice: function () {
                 let computation = this.computation;
                 this.computation = '';
                 axios.post('/api/dices', {
                     computation: computation,
-                    person: '/api/people/1'
+                    personage: '/api/personages/' + this.getPersonages[0].id
                 }).catch(e => {
                     this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - d100+20-4');
                 })
@@ -43,6 +65,7 @@
             const es = new EventSource(u);
             es.onmessage = e => {
                 let data = JSON.parse(e.data)
+                console.log(data)
                 this.messages.push(data);
             }
 
@@ -55,7 +78,7 @@
                 }) 
         },
         updated() {
-            this.$refs.messages.scrollTop = this.$refs.messages.scrollHeight
+            this.$refs.messages.scrollTop = this.$refs.messages.scrollTopMax
         },
     }
 </script>
@@ -80,6 +103,7 @@
         display: flex;
         flex-direction: column;
         justify-content: end;
+        gap: 8px;
         height: calc(15dvh - 16px);
     }
 
@@ -87,6 +111,12 @@
         display: block;
         height: 100%;
         resize: none;
+        border: solid 1px #565656;
+        border-radius: 8px;
+    }
+
+    .textinput textarea.isDisabled {
+        background-color: #C8C8C8;
     }
 
     .textinput button {

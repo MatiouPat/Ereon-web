@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\MapRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -17,7 +18,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new GetCollection(),
         new Get(),
-        new Post()
+        new Post(),
+        new Patch()
     ],
     normalizationContext: ['groups' => ['map:read']]
 )]
@@ -26,7 +28,7 @@ class Map
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["world:read", "map:read","user:read"])]
+    #[Groups(["world:read", "map:read","user:read", "connection:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -50,6 +52,7 @@ class Map
     private ?World $world = null;
 
     #[ORM\OneToMany(mappedBy: 'currentMap', targetEntity: Connection::class)]
+    #[Groups("map:read")]
     private Collection $connections;
 
     public function __construct()

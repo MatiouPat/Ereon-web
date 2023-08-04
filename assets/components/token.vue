@@ -83,9 +83,21 @@ import { mapActions, mapGetters } from 'vuex';
     export default {
         data() {
             return {
+                /**
+                 * The token being resized
+                 */
                 resizer: null,
+                /**
+                 * If you need to display resizers to resize the token
+                 */
                 isResizing: false,
+                /**
+                 * If you need to display the context box
+                 */
                 isContexting: false,
+                /**
+                 * If you need to display token parameters
+                 */
                 isPropertiesContexting: false,
                 startX: 0,
                 startY: 0,
@@ -110,6 +122,9 @@ import { mapActions, mapGetters } from 'vuex';
                 'isGameMaster',
                 'getPlayers'
             ]),
+            /**
+             * The token to display
+             */
             token() {
                 return this.getTokenById(this.id)
             },
@@ -121,10 +136,17 @@ import { mapActions, mapGetters } from 'vuex';
                 'finishUpdateToken',
                 'changeZIndex'
             ]),
+            /**
+             * Show contextual box
+             * @param {*} e 
+             */
             showActions: function (e) {
                 e.preventDefault()
                 this.isContexting = true;
             },
+            /**
+             * Putting the token a little further forward
+             */
             upZIndex: function () {
                 this.changeZIndex({
                     id: this.token.id,
@@ -133,6 +155,9 @@ import { mapActions, mapGetters } from 'vuex';
                 this.isResizing = false;
                 this.isContexting = false;
             },
+            /**
+             * Put the token a little further back
+             */
             downZIndex: function () {
                 this.changeZIndex({
                     id: this.token.id,
@@ -141,13 +166,16 @@ import { mapActions, mapGetters } from 'vuex';
                 this.isResizing = false;
                 this.isContexting = false;
             },
+            /**
+             * Display token parameters
+             */
             showProperties: function () {
                 this.isPropertiesContexting = true
                 this.isResizing = false;
                 this.isContexting = false;
             },
             /**
-             * 
+             * Start moving the token on the map by left-clicking on it
              * @param {*} e 
              */
             move: function (e) {
@@ -175,7 +203,7 @@ import { mapActions, mapGetters } from 'vuex';
                 }
             },
             /**
-             * 
+             * Moving the token on the map
              * @param {*} e 
              */
             onMove: function(e) {
@@ -198,7 +226,7 @@ import { mapActions, mapGetters } from 'vuex';
                 })
             },
             /**
-             * 
+             * Start token resizing after clicking on a resizer
              * @param {*} e 
              */
             resize: function(e) {
@@ -224,7 +252,7 @@ import { mapActions, mapGetters } from 'vuex';
                 }, { once: true })
             },
             /**
-             * 
+             * Resize token
              * @param {*} e 
              */
             onResize: function(e) {
@@ -273,6 +301,10 @@ import { mapActions, mapGetters } from 'vuex';
                     zIndex: this.token.zIndex
                 })
             },
+            /**
+             * 
+             * @param {*} e 
+             */
             removeToken: function(e) {
                 if (e.key === "Delete") {
                     this.isResizing = false;
@@ -282,12 +314,12 @@ import { mapActions, mapGetters } from 'vuex';
                 }
             },
             /**
-             * 
+             * Hide context box when clicked outside it
              * @param {*} e 
              */
             clickOutside: function(e) {
-                window.removeEventListener('click', this.clickOutside)
                 if(!this.$el.contains(e.target)){
+                    window.removeEventListener('click', this.clickOutside)
                     this.isResizing = false;
                     this.isContexting = false;
                     document.removeEventListener('keydown', this.removeToken)
@@ -336,6 +368,9 @@ import { mapActions, mapGetters } from 'vuex';
                     })
                 }
             },
+            /**
+             * Change token settings after form submission
+             */
             submitForm: function() {
                 let users = []
                 this.token.users.forEach(user => {

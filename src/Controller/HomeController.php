@@ -15,6 +15,16 @@ use Symfony\Component\Serializer\SerializerInterface;
 class HomeController extends AbstractController
 {
     #[Route('/', name: 'app_home')]
+    /**
+     * View map editor
+     *
+     * @param Security $security
+     * @param WorldRepository $worldRepository
+     * @param DiceRepository $diceRepository
+     * @param MapRepository $mapRepository
+     * @param SerializerInterface $serializer
+     * @return Response
+     */
     public function index(Security $security, WorldRepository $worldRepository, DiceRepository $diceRepository, MapRepository $mapRepository, SerializerInterface $serializer): Response
     {
         /**
@@ -26,7 +36,7 @@ class HomeController extends AbstractController
         $worlds = $worldRepository->findWorldByUser($user->getId());
         return $this->render('home/index.html.twig', [
             'dices' => $serializer->serialize($dices, 'json', ['groups' => 'dice:read']),
-            'maps' => $serializer->serialize($maps, 'json'),
+            'maps' => $serializer->serialize($maps, 'json', ['groups' => 'map:read']),
             'worlds' => $serializer->serialize($worlds, 'json', ['groups' => 'world:read'])
         ]);
     }

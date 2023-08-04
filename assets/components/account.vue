@@ -1,12 +1,18 @@
 <template>
     <div v-if="isConnected" class="header">
         <div class="header-title-box" @click="viewAccount">
-            <img src="build/images/logo/icon_120.png" alt="Ereon" width="80" height="80">
+            <img class="account-picture" src="build/images/logo/icon_120.png" alt="Ereon" width="120" height="120">
             <span class="account-username">{{ user.username }}</span>
         </div>
         <ul class="account-actions" v-if="isVisible">
             <li><a href="/logout" style="font-weight: 700; color: red;">Se déconnecter</a></li>
         </ul>
+        <div class="connectedUsers" v-for="connectedUser in getConnectedUser">
+            <div class="header-title-box" @click="viewAccount">
+                <img class="other-user-picture" src="build/images/logo/icon_120.png" alt="Ereon" width="80" height="80">
+                <span class="account-username">{{ connectedUser.username }}</span>
+            </div>
+        </div>
     </div>
     <div v-else class="worlds-page">
         <div class="world-layout" v-if="!worlds.length">
@@ -15,7 +21,7 @@
         </div>
         <div class="world-layout" v-else v-for="world in worlds">
             <div v-for="connection in world.connections">
-                <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world.id)">
+                <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world)">
                     <picture>
                         <source>
                         <img src="build/images/logo/icon_180.png" alt="">
@@ -32,12 +38,18 @@
 
 <script>
 import axios from 'axios';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
     export default {
         data() {
             return {
+                /**
+                 * If the account context box is visible
+                 */
                 isVisible: false,
+                /**
+                 * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
+                 */
                 isConnected: false
             }
         },
@@ -45,32 +57,72 @@ import { mapActions, mapState } from 'vuex';
             'connectedUser',
             'worlds'
         ],
-        computed: mapState({
-            user: state => state.user
-        }),
+        computed: {
+            ...mapState({
+                user: state => state.user
+            }),
+            ...mapGetters('user', [
+                    'getConnectedUser'
+                ]),
+        },
         methods: {
             ...mapActions('user', [
-                'setId',
-                'setGameMaster',
+                'setUserId',
                 'setUserName',
-                'setPlayers'
+                'setPlayers',
+                'setConnection',
+                'setWorld',
+                'sendIsConnected',
+                'getAllConnections',
+                'downloadPersonages'
             ]),
             ...mapActions('map', [
                 'setMap'
             ]),
+            /**
+             * Display account context box when clicked
+             */
             viewAccount: function() {
                 this.isVisible = !this.isVisible
+                window.addEventListener('click', this.clickOutside)
             },
-            chooseWorld: function(connection, worldId) {
+            /**
+             * Loading information after choosing a world
+             * @param {*} connection The connection between player and world
+             * @param {*} world The selected world
+             */
+            chooseWorld: function(connection, world) {
                 this.setMap(connection.currentMap.id)
-                this.setGameMaster(connection.isGameMaster)
-                this.setId(connection.user.id)
+                this.setUserId(connection.user.id)
                 this.setUserName(connection.user.username)
-                axios.get('/api/users?connections.isGameMaster=false&connections.world.id=' + worldId)
+                this.setConnection(connection)
+                this.setWorld(world)
+                this.sendIsConnected()
+                this.getAllConnections()
+                axios.get('/api/users?connections.isGameMaster=false&connections.world.id=' + world.id)
                     .then(response => {
                         this.setPlayers(response.data['hydra:member'])
                     })
+                this.downloadPersonages()
                 this.isConnected = true
+                const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+                updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
+
+                const updateEs = new EventSource(updateUrl);
+                updateEs.onmessage = e => {
+                    let data = JSON.parse(e.data)
+                    this.setMap(data.currentMap.id)
+                }
+            },
+            /**
+             * Hide context box when clicked outside it
+             * @param {*} e 
+             */
+            clickOutside: function(e) {
+                if(!this.$el.contains(e.target)){
+                    window.removeEventListener('click', this.clickOutside)
+                    this.isVisible = false;
+                }
             }
         }
     }
@@ -80,15 +132,16 @@ import { mapActions, mapState } from 'vuex';
 
     .header {
         position: absolute;
-        bottom: 32px;
+        bottom: 16px;
         left: 16px;
         z-index: 2;
-        box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-        border-radius: 50%;
+        display: flex;
         justify-content: space-between;
+        gap: 16px;
     }
 
     .header-title-box {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -96,23 +149,39 @@ import { mapActions, mapState } from 'vuex';
 
     .header-title-box img {
         border-radius: 50%;
+        box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    }
+
+    .account-picture {
+        position: absolute;
+        bottom: 16px;
+        left: calc(50% - 60px);
+        z-index: 1;
     }
 
     .account-username {
-        position: absolute;
-        bottom: -16px;
-        left: 0;
+        z-index: 2;
         padding: 8px;
+        min-width: 120px;
         background-color: rgba(0, 0, 0, 0.8);
         color: #FFFFFF;
+        text-align: center;
     }
 
     .account-actions {
         position: absolute;
-        top: 24px;
+        bottom: 60px;
         left: 96px;
         width: 160px;
+        z-index: 3;
         background-color: #FFFFFF;
+    }
+
+    .other-user-picture {
+        position: absolute;
+        bottom: 16px;
+        left: calc(50% - 40px);
+        z-index: 1;
     }
 
     .account-actions::after {

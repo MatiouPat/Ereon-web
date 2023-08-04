@@ -27,7 +27,7 @@ services:
       - 9000
     volumes:
       - ereon:/var/www/:rw
-      - ereon-upload:/var/www/public/upload:rw
+      - ereon-uploads:/var/www/public/uploads:rw
   ereon-db:
     container_name: ereon-db
     image: mariadb:10.9.5
@@ -65,5 +65,5 @@ networks:
 
 volumes:
   ereon:
-  ereon-upload:
+  ereon-uploads:
   ereon-db_data:

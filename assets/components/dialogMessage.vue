@@ -1,7 +1,7 @@
 <template>
-    <div class="message" v-if="dice.person">
+    <div class="message" v-if="dice.personage">
         <div class="message-step">
-            <span class="message-author">{{ dice.person.name }}: </span>
+            <span class="message-author">{{ dice.personage.name }}: </span>
             <span>{{ dice.computation }}</span>
         </div>
         <span class="message-step">{{ calculation }}</span><br>
@@ -13,13 +13,14 @@
 </template>
 
 <script>
-    const axios = require('axios');
-
     export default {
         props: [
             'dice'
         ],
         computed: {
+            /**
+             * Render view for dice calculation
+             */
             calculation() {
                 return '(' + this.dice.brutValue + ')' + this.dice.computation.replace(/d[1-9]\d*/, '')
             }
