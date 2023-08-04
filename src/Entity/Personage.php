@@ -2,9 +2,9 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use App\Repository\PersonageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -13,21 +13,30 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PersonageRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['personage:read']],
+    operations: [
+        new GetCollection()
+    ]
+)]
+#[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact'])]
 class Personage
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["personage:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('dice:read')]
+    #[Groups(["personage:read", 'dice:read'])]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Dice::class, orphanRemoval: true)]
     private Collection $dices;
 
     #[ORM\ManyToOne(inversedBy: 'personages')]
+    #[Groups(["personage:read"])]
     private ?User $user = null;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfStat::class, orphanRemoval: true)]
@@ -35,6 +44,7 @@ class Personage
 
     #[ORM\ManyToOne(inversedBy: 'personages')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["personage:read"])]
     private ?World $world = null;
 
     public function __construct()

@@ -67,7 +67,8 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                 'setConnection',
                 'setWorld',
                 'sendIsConnected',
-                'getAllConnections'
+                'getAllConnections',
+                'downloadPersonages'
             ]),
             ...mapActions('map', [
                 'setMap'
@@ -88,6 +89,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                     .then(response => {
                         this.setPlayers(response.data['hydra:member'])
                     })
+                this.downloadPersonages()
                 this.isConnected = true
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);

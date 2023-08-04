@@ -13,7 +13,8 @@ const state = {
         }
     },
     connectedUser: [],
-    world: null
+    world: null,
+    personages: []
 }
 
 const getters = {
@@ -37,6 +38,9 @@ const getters = {
     },
     getCurrentMapId: (state) => {
         return state.connection.currentMap.id
+    },
+    getPersonages: (state) => {
+        return state.personages
     }
 }
 
@@ -91,6 +95,12 @@ const actions = {
                 'Content-Type': 'application/merge-patch+json'
             }
         })
+    },
+    downloadPersonages({commit, getters}) {
+        axios.get('/api/personages?world.id=' + getters.getWorld.id + '&user.id=' + getters.getUserId)
+        .then(response => {
+            commit('setPersonages', response.data['hydra:member'])
+        })
     }
 }
 
@@ -128,6 +138,9 @@ const mutations = {
     },
     setCurrentMap(state, currentMapId) {
         state.connection.currentMap.id = currentMapId
+    },
+    setPersonages(state, personages) {
+        state.personages = personages
     }
 }
 

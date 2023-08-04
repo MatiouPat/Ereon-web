@@ -29,7 +29,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["user:read", "world:read", "map:read", "person:read", "token:read", "connection:read"])]
+    #[Groups(["user:read", "world:read", "map:read", "personage:read", "token:read", "connection:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
