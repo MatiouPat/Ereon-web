@@ -26,7 +26,7 @@ class HomeController extends AbstractController
         $worlds = $worldRepository->findWorldByUser($user->getId());
         return $this->render('home/index.html.twig', [
             'dices' => $serializer->serialize($dices, 'json', ['groups' => 'dice:read']),
-            'maps' => $serializer->serialize($maps, 'json'),
+            'maps' => $serializer->serialize($maps, 'json', ['groups' => 'map:read']),
             'worlds' => $serializer->serialize($worlds, 'json', ['groups' => 'world:read'])
         ]);
     }

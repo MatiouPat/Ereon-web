@@ -28,7 +28,7 @@ class Connection
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["connection:read", "world:read"])]
+    #[Groups(["connection:read", "world:read", "map:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
@@ -46,12 +46,12 @@ class Connection
 
     #[ORM\ManyToOne(inversedBy: 'connections')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["connection:read", "world:read"])]
+    #[Groups(["connection:read", "world:read", "map:read"])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'connections')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups("world:read")]
+    #[Groups(["connection:read", "world:read", "map:read"])]
     private ?Map $currentMap = null;
 
     public function getId(): ?int
@@ -117,5 +117,9 @@ class Connection
         $this->currentMap = $currentMap;
 
         return $this;
+    }
+
+    public function __toString() {
+        return strval($this->id);
     }
 }

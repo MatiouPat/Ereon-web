@@ -7,7 +7,10 @@ const state = {
     connection: {
         id: 0,
         isGameMaster: false,
-        lastConnectionAt: new Date()
+        lastConnectionAt: new Date(),
+        currentMap : {
+            id: 0
+        }
     },
     connectedUser: [],
     world: null
@@ -31,6 +34,9 @@ const getters = {
     },
     getConnectedUser: (state) => {
         return state.connectedUser
+    },
+    getCurrentMapId: (state) => {
+        return state.connection.currentMap.id
     }
 }
 
@@ -75,6 +81,16 @@ const actions = {
         setTimeout(() => {
             dispatch("getAllConnections")
         }, 15000)
+    },
+    setCurrentMap({commit, getters}, currentMapId) {
+        commit('setCurrentMap', currentMapId)
+        axios.patch('/api/connections/' + getters.getConnection.id, {
+            currentMap: "/api/maps/" + currentMapId
+        }, {
+            headers: {
+                'Content-Type': 'application/merge-patch+json'
+            }
+        })
     }
 }
 
@@ -92,6 +108,7 @@ const mutations = {
         state.connection.id = connection.id
         state.connection.isGameMaster = connection.isGameMaster
         state.connection.lastConnectionAt = connection.lastConnectionAt
+        state.connection.currentMap.id = connection.currentMap.id
     },
     setWorld(state, world) {
         state.world = world
@@ -108,6 +125,9 @@ const mutations = {
                 })
             }
         });
+    },
+    setCurrentMap(state, currentMapId) {
+        state.connection.currentMap.id = currentMapId
     }
 }
 

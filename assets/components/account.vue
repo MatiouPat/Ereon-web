@@ -89,6 +89,14 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                         this.setPlayers(response.data['hydra:member'])
                     })
                 this.isConnected = true
+                const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+                updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
+
+                const updateEs = new EventSource(updateUrl);
+                updateEs.onmessage = e => {
+                    let data = JSON.parse(e.data)
+                    this.setMap(data.currentMap.id)
+                }
             },
             clickOutside: function(e) {
                 if(!this.$el.contains(e.target)){

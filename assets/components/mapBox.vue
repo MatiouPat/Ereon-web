@@ -1,7 +1,12 @@
 <template>
-    <div class="map-box" :class="{isDisplayed: isDisplayed, isVisible: isGameMaster}">
+    <div class="map-box" v-if="isGameMaster" :class="{isDisplayed: isDisplayed}">
         <div class="maps">
-            <div class="map" @click="setMap(map.id)" v-for="map in maps">{{ map.name }}</div>
+            <div class="map" @click="chooseMap(map.id)" v-for="map in maps" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
+                <span>{{ map.name }}</span>
+                <ul class="map-actions">
+                    <li><img @click.stop="showMapParameter(map.id)" src="build/images/settings.svg" alt="Paramètres" width="16" height="16"></li>
+                </ul>
+            </div>
         </div>
         <button class="map-open" name="menu" type="button" :class="{isDisplayed: isDisplayed}" @click="display">
             <svg width="32" height="32" viewBox="0 0 100 100">
@@ -10,16 +15,64 @@
                 <path class="line line3" d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
             </svg>
         </button>
+        <Teleport to="#editor">
+            <div v-if="isParametersDisplayed" class="modal-wrapper">
+                <div class="modal-box">
+                    <form>
+                        <div class="form-part">
+                            <h3>Positionnement</h3>
+                            <div class="row">
+                                <div class="field">
+                                    <label>Name</label>
+                                    <input v-model="map.name" type="text">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="field">
+                                    <label>Width</label>
+                                    <input v-model="map.width" type="number">
+                                </div>
+                                <div class="field">
+                                    <label>Height</label>
+                                    <input v-model="map.height" type="number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-part" v-if="connections.length">
+                            <h3>Sur map</h3>
+                            <div v-for="connection in connections">
+                                <label>{{ connection.username }}</label>
+                                <input type="checkbox" v-model="connection.checked" :checked="connection.checked">
+                            </div>
+                        </div>
+                        <div class="form-part" v-else >
+                            <h3>Sur map</h3>
+                            <span>Aucun joueur présent sur cette partie</span>
+                        </div>
+                        <button type="button" class="btn" @click="submitForm">Valider</button>
+                    </form>
+                </div>
+            </div>
+        </Teleport>
     </div>
 </template>
 
 <script>
+import axios from 'axios';
 import { mapActions, mapGetters } from 'vuex';
 
     export default {
         data() {
             return {
-                isDisplayed: false
+                isDisplayed: false,
+                isParametersDisplayed: false,
+                map: {
+                    id: 0,
+                    name: "",
+                    width: 0,
+                    height: 0
+                },
+                connections: []
             }
         },
         props: [
@@ -28,15 +81,72 @@ import { mapActions, mapGetters } from 'vuex';
         computed: {
             ...mapGetters('user', [
                 'isGameMaster',
+                'getCurrentMapId',
+                'getPlayers',
+                "getWorld"
             ]),
         },
         methods: {
+            ...mapActions('user', [
+                'setCurrentMap'
+            ]),
             ...mapActions('map', [
                 'setMap'
             ]),
             display: function () {
                 this.isDisplayed = !this.isDisplayed;
+                console.log(this.isDisplayed)
                 window.addEventListener('click', this.clickOutside)
+            },
+            chooseMap: function (mapId) {
+                this.setMap(mapId)
+                this.setCurrentMap(mapId)
+                this.isDisplayed = false;
+            },
+            showMapParameter: function (mapId) {
+                this.isParametersDisplayed = true
+                axios.get('/api/maps/' + mapId)
+                    .then(response => {
+                        let map = response.data
+                        this.map.id = map.id 
+                        this.map.name = map.name 
+                        this.map.width = map.width 
+                        this.map.height = map.height 
+                    })
+                axios.get('/api/connections/?world.id=' + this.getWorld.id)
+                    .then(response => {
+                        let connections = response.data['hydra:member']
+                        this.connections = []
+                        connections.forEach(connection => {
+                            console.log(connection)
+                            this.connections.push({
+                                id: connection.id,
+                                username: connection.user.username,
+                                checked: this.map.id == connection.currentMap.id
+                            })
+                        });
+                    })
+            },
+            submitForm: function() {
+                console.log(this.map, this.connections)
+                let connections = []
+                this.connections.forEach(connection => {
+                    if(connection.checked) {
+                        connections.push('/api/connections/' + connection.id)
+                    }
+                });
+                axios.patch('/api/maps/' + this.map.id, {
+                    name: this.map.name,
+                    width: this.map.width,
+                    height: this.map.height,
+                    connections: connections
+                }, {
+                    headers: {
+                        'Content-Type': 'application/merge-patch+json'
+                    }
+                })
+                this.isParametersDisplayed = false
+                this.isDisplayed = false;
             },
             clickOutside: function(e) {
                 if(!this.$el.contains(e.target)){
@@ -51,7 +161,6 @@ import { mapActions, mapGetters } from 'vuex';
 <style scoped>
 
     .map-box {
-        display: none;
         position: absolute;
         top: -256px;
         left: 10%;
@@ -60,10 +169,6 @@ import { mapActions, mapGetters } from 'vuex';
         z-index: 5;
         background-color: #FFF;
         transition: .1s ease-in-out;
-    }
-
-    .map-box.isVisible {
-        display: block;
     }
 
     .map-box.isDisplayed {
@@ -141,9 +246,43 @@ import { mapActions, mapGetters } from 'vuex';
     }
 
     .map {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         background-color: dimgrey;
         width: 128px;
         height: 128px;
     }
+
+    .map-actions {
+        position: absolute;
+        left: calc(50% - 8px);
+        bottom: 0;
+    }
+
+    .map-actions li {
+        cursor: pointer;
+    }
+
+    .modal-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.75);
+    }
+
+    .modal-box {
+        display: block;
+        width: 400px;
+        margin: auto;
+        padding: 16px;
+        background-color: #FFF;
+    }
+
 
 </style>
