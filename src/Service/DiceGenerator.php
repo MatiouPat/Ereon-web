@@ -8,7 +8,7 @@ class DiceGenerator
 {
 
     /**
-     * Undocumented function
+     * Roll a dice of a given value
      *
      * @param Dice $dice
      * @return Dice

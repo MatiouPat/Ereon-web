@@ -22,7 +22,13 @@
         },
         data() {
             return {
+                /**
+                 * The list of all messages
+                 */
                 messages: [],
+                /**
+                 * The dice roll requested by the user mapped to the textarea
+                 */
                 computation: ''
             }
         },
@@ -30,11 +36,17 @@
             ...mapGetters('user', [
                 'getPersonages'
             ]),
+            /**
+             * If the user has a character in the world
+             */
             isDisabled() {
                 return !this.getPersonages.length
             }
         },
         methods: {
+            /**
+             * Call the API to roll a die
+             */
             rollDice: function () {
                 let computation = this.computation;
                 this.computation = '';

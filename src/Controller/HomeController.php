@@ -15,6 +15,16 @@ use Symfony\Component\Serializer\SerializerInterface;
 class HomeController extends AbstractController
 {
     #[Route('/', name: 'app_home')]
+    /**
+     * View map editor
+     *
+     * @param Security $security
+     * @param WorldRepository $worldRepository
+     * @param DiceRepository $diceRepository
+     * @param MapRepository $mapRepository
+     * @param SerializerInterface $serializer
+     * @return Response
+     */
     public function index(Security $security, WorldRepository $worldRepository, DiceRepository $diceRepository, MapRepository $mapRepository, SerializerInterface $serializer): Response
     {
         /**

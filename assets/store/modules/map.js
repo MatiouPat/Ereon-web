@@ -1,12 +1,18 @@
 import axios from "axios"
 
 const state = {
+    /**
+     * The current map
+     */
     map: {
         id: null,
         name: '',
         width: null,
         height: null
     },
+    /**
+     * The list of tokens present on the current map
+     */
     tokens: []
 }
 
@@ -26,11 +32,21 @@ const getters = {
 }
 
 const actions = {
+    /**
+     * Define current map
+     * @param {*} param0 
+     * @param {*} map 
+     */
     setMap({commit}, map) {
         axios.get('api/maps/' + map).then((e) => {
             commit('setMap', e.data)
         })
     },
+    /**
+     * Add a token to the map
+     * @param {*} param0 
+     * @param {*} data 
+     */
     addTokenOnMap({commit, getters}, data) {
         if (!data.mercure) {
             axios.post('api/tokens', {
@@ -70,6 +86,11 @@ const actions = {
         }
         
     },
+    /**
+     * Delete a token on the map
+     * @param {*} param0 
+     * @param {*} data 
+     */
     removeTokenOnMap({commit, getters}, data) {
         let token = getters.getTokenById(data.id)
         if (!data.mercure) {
@@ -80,10 +101,20 @@ const actions = {
         })
         commit('removeToken', index)
     },
+    /**
+     * Update token information on the map
+     * @param {*} param0 
+     * @param {*} data 
+     */
     updateToken({commit, getters}, data) {
         let token = getters.getTokenById(data.id)
         commit('updateToken', {token, data})
     },
+    /**
+     * Push updated token information via API
+     * @param {*} param0 
+     * @param {*} data 
+     */
     finishUpdateToken({commit, getters}, data) {
         let token = getters.getTokenById(data.id)
         axios.patch('/api/tokens/' + token.id, {
@@ -99,6 +130,11 @@ const actions = {
             }
         })
     },
+    /**
+     * Update only token depth and push modification via API
+     * @param {*} param0 
+     * @param {*} data 
+     */
     changeZIndex({commit, getters}, data) {
         let token = getters.getTokenById(data.id)
         commit('changeZIndex', {token, data}),

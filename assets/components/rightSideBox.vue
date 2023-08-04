@@ -26,10 +26,16 @@ import { mapGetters } from 'vuex'
         },
         data () {
             return {
+                /**
+                 * The list of components
+                 */
                 pages: [
                     DialogView,
                     AssetView
                 ],
+                /**
+                 * The index to choose the component to display
+                 */
                 pageIndex: 0
             }
         },
@@ -39,6 +45,10 @@ import { mapGetters } from 'vuex'
             ])
         },
         methods: {
+            /**
+             * Change the component to display
+             * @param {*} index 
+             */
             choose: function(index) {
                 this.pageIndex = index
             }

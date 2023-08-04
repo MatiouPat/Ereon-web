@@ -23,6 +23,13 @@ class ConnectionListener
         $this->serializer = $serializer;
     }
 
+    /**
+     * Send information to the customer following a connection modification
+     * This method is used to display connected users in real time.
+     *
+     * @param Connection $connection
+     * @return void
+     */
     public function postUpdate(Connection $connection):void
     {
         $update = new Update('https://lescanardsmousquetaires.fr/connection/' . $connection->getId(), $this->serializer->serialize($connection, 'json', ['groups' => 'connection:read']));

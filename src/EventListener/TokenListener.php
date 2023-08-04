@@ -25,18 +25,36 @@ class TokenListener
         $this->serializer = $serializer;
     }
 
+    /**
+     * Send information to client-side following token creation
+     *
+     * @param Token $token
+     * @return void
+     */
     public function postPersist(Token $token):void
     {
         $update = new Update('https://lescanardsmousquetaires.fr/token/post', $this->serializer->serialize($token, 'json', ['groups' => 'token:read']));
         $this->hub->publish($update);
     }
 
+    /**
+     * Send information to client-side following token modification
+     *
+     * @param Token $token
+     * @return void
+     */
     public function postUpdate(Token $token):void
     {
         $update = new Update('https://lescanardsmousquetaires.fr/token/update', $this->serializer->serialize($token, 'json', ['groups' => 'token:read']));
         $this->hub->publish($update);
     }
 
+    /**
+     * Send information to client-side following token deletion
+     *
+     * @param Token $token
+     * @return void
+     */
     public function preRemove(Token $token):void
     {
         $update = new Update('https://lescanardsmousquetaires.fr/token/remove', $this->serializer->serialize($token, 'json', ['groups' => 'token:read']));

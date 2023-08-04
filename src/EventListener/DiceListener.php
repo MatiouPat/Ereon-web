@@ -29,7 +29,7 @@ class DiceListener
     }
 
     /**
-     * Undocumented function
+     * Roll the dice to complete this information
      *
      * @param Dice $dice
      * @return void
@@ -40,7 +40,7 @@ class DiceListener
     }
 
     /**
-     * Undocumented function
+     * Send dice to client-side after modification
      *
      * @param Dice $dice
      * @return void

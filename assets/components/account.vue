@@ -43,7 +43,13 @@ import { mapActions, mapGetters, mapState } from 'vuex';
     export default {
         data() {
             return {
+                /**
+                 * If the account context box is visible
+                 */
                 isVisible: false,
+                /**
+                 * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
+                 */
                 isConnected: false
             }
         },
@@ -73,10 +79,18 @@ import { mapActions, mapGetters, mapState } from 'vuex';
             ...mapActions('map', [
                 'setMap'
             ]),
+            /**
+             * Display account context box when clicked
+             */
             viewAccount: function() {
                 this.isVisible = !this.isVisible
                 window.addEventListener('click', this.clickOutside)
             },
+            /**
+             * Loading information after choosing a world
+             * @param {*} connection The connection between player and world
+             * @param {*} world The selected world
+             */
             chooseWorld: function(connection, world) {
                 this.setMap(connection.currentMap.id)
                 this.setUserId(connection.user.id)
@@ -100,6 +114,10 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                     this.setMap(data.currentMap.id)
                 }
             },
+            /**
+             * Hide context box when clicked outside it
+             * @param {*} e 
+             */
             clickOutside: function(e) {
                 if(!this.$el.contains(e.target)){
                     window.removeEventListener('click', this.clickOutside)

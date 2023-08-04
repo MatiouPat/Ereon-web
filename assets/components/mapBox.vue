@@ -64,14 +64,26 @@ import { mapActions, mapGetters } from 'vuex';
     export default {
         data() {
             return {
+                /**
+                 * If the maps are displayed
+                 */
                 isDisplayed: false,
+                /**
+                 * If the map parameters box is displayed
+                 */
                 isParametersDisplayed: false,
+                /**
+                 * The map parameters related to the form
+                 */
                 map: {
                     id: 0,
                     name: "",
                     width: 0,
                     height: 0
                 },
+                /**
+                 * The list of connections between this world and the various users
+                 */
                 connections: []
             }
         },
@@ -93,16 +105,26 @@ import { mapActions, mapGetters } from 'vuex';
             ...mapActions('map', [
                 'setMap'
             ]),
+            /**
+             * Display maps
+             */
             display: function () {
                 this.isDisplayed = !this.isDisplayed;
-                console.log(this.isDisplayed)
                 window.addEventListener('click', this.clickOutside)
             },
+            /**
+             * Change current map 
+             * @param {*} mapId 
+             */
             chooseMap: function (mapId) {
                 this.setMap(mapId)
                 this.setCurrentMap(mapId)
                 this.isDisplayed = false;
             },
+            /**
+             * Display map parameters by calling the API
+             * @param {*} mapId 
+             */
             showMapParameter: function (mapId) {
                 this.isParametersDisplayed = true
                 axios.get('/api/maps/' + mapId)
@@ -127,6 +149,9 @@ import { mapActions, mapGetters } from 'vuex';
                         });
                     })
             },
+            /**
+             * Change map settings after form submission
+             */
             submitForm: function() {
                 console.log(this.map, this.connections)
                 let connections = []
@@ -148,6 +173,10 @@ import { mapActions, mapGetters } from 'vuex';
                 this.isParametersDisplayed = false
                 this.isDisplayed = false;
             },
+            /**
+             * Hide context box when clicked outside it
+             * @param {*} e 
+             */
             clickOutside: function(e) {
                 if(!this.$el.contains(e.target)){
                     window.removeEventListener('click', this.clickOutside)

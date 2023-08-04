@@ -18,6 +18,9 @@
             'dice'
         ],
         computed: {
+            /**
+             * Render view for dice calculation
+             */
             calculation() {
                 return '(' + this.dice.brutValue + ')' + this.dice.computation.replace(/d[1-9]\d*/, '')
             }

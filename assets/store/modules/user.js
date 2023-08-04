@@ -1,9 +1,21 @@
 import axios from "axios"
 
 const state = {
+    /**
+     * The logged-in user id
+     */
     userId: 0,
+    /**
+     * The name of the logged-in user
+     */
     username: "",
+    /**
+     * The list of users in the world
+     */
     players: [],
+    /**
+     * The connection between the connected user and the world
+     */
     connection: {
         id: 0,
         isGameMaster: false,
@@ -12,8 +24,17 @@ const state = {
             id: 0
         }
     },
+    /**
+     * The list of users connected to this world except the current user
+     */
     connectedUser: [],
+    /**
+     * The user's chosen world
+     */
     world: null,
+    /**
+     * The list of characters that can be played by the user
+     */
     personages: []
 }
 
