@@ -70,7 +70,7 @@ const actions = {
         })
         setTimeout(() => {
             dispatch("sendIsConnected")
-        }, 5000)
+        }, 10000)
     },
     getAllConnections({commit, getters, dispatch}) {
         let lastConnectionAt = new Date(Date.parse(getters.getConnection.lastConnectionAt) - 18000)
