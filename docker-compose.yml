@@ -11,7 +11,7 @@ services:
       - database
     volumes:
       - ereon:/var/www:rw
-      - ereon-upload:/var/www/public/upload:rw
+      - ereon-uploads:/var/www/public/uploads:rw
       - ./docker/nginx/ereon.conf:/etc/nginx/conf.d/default.conf:rw
     depends_on:
       - ereon-php
