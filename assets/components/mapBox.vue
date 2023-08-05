@@ -135,7 +135,7 @@ import { mapActions, mapGetters } from 'vuex';
                         this.map.width = map.width 
                         this.map.height = map.height 
                     })
-                axios.get('/api/connections/?world.id=' + this.getWorld.id)
+                axios.get('/api/connections?world.id=' + this.getWorld.id)
                     .then(response => {
                         let connections = response.data['hydra:member']
                         this.connections = []
