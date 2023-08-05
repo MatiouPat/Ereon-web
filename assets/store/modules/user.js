@@ -95,7 +95,7 @@ const actions = {
         })
         setTimeout(() => {
             dispatch("sendIsConnected")
-        }, 10000)
+        }, 20000)
     },
     getAllConnections({commit, getters, dispatch}) {
         let lastConnectionAt = new Date(Date.parse(getters.getConnection.lastConnectionAt) - 18000)
@@ -105,7 +105,7 @@ const actions = {
             })
         setTimeout(() => {
             dispatch("getAllConnections")
-        }, 15000)
+        }, 30000)
     },
     setCurrentMap({commit, getters}, currentMapId) {
         commit('setCurrentMap', currentMapId)
