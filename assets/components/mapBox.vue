@@ -140,7 +140,6 @@ import { mapActions, mapGetters } from 'vuex';
                         let connections = response.data['hydra:member']
                         this.connections = []
                         connections.forEach(connection => {
-                            console.log(connection)
                             this.connections.push({
                                 id: connection.id,
                                 username: connection.user.username,
@@ -153,7 +152,6 @@ import { mapActions, mapGetters } from 'vuex';
              * Change map settings after form submission
              */
             submitForm: function() {
-                console.log(this.map, this.connections)
                 let connections = []
                 this.connections.forEach(connection => {
                     if(connection.checked) {

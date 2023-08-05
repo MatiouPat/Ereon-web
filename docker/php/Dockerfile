@@ -9,11 +9,16 @@ RUN apk update && \
         libzip-dev \
         fcgi
 
-RUN docker-php-ext-install \
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/install-php-extensions
+
+RUN install-php-extensions \
         pdo_mysql \
         opcache \
         intl \
-        zip
+        zip \
+        apcu
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 

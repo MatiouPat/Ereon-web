@@ -38,6 +38,7 @@
 
 <script>
 import axios from 'axios';
+import { getTransitionRawChildren } from 'vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 
     export default {
@@ -62,7 +63,8 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                 user: state => state.user
             }),
             ...mapGetters('user', [
-                    'getConnectedUser'
+                    'getConnectedUser',
+                    'getCurrentMapId'
                 ]),
         },
         methods: {
@@ -111,7 +113,10 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                 const updateEs = new EventSource(updateUrl);
                 updateEs.onmessage = e => {
                     let data = JSON.parse(e.data)
-                    this.setMap(data.currentMap.id)
+                    if (data.currentMap.id !== this.getCurrentMapId) {
+                        this.setMap(data.currentMap.id)
+                        this.setConnection(data)
+                    }
                 }
             },
             /**
