@@ -5,8 +5,8 @@ namespace App\EventListener;
 use App\Entity\Token;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Events;
-use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsEntityListener(event: Events::postPersist, method: 'postPersist', entity: Token::class)]
@@ -15,13 +15,13 @@ use Symfony\Component\Serializer\SerializerInterface;
 class TokenListener
 {
 
-    private HubInterface $hub;
+    private MessageBusInterface $bus;
 
     private SerializerInterface $serializer;
 
-    public function __construct(HubInterface $hub, SerializerInterface $serializer)
+    public function __construct(MessageBusInterface $bus, SerializerInterface $serializer)
     {
-        $this->hub = $hub;
+        $this->bus = $bus;
         $this->serializer = $serializer;
     }
 
@@ -34,7 +34,7 @@ class TokenListener
     public function postPersist(Token $token):void
     {
         $update = new Update('https://lescanardsmousquetaires.fr/token/post', $this->serializer->serialize($token, 'json', ['groups' => 'token:read']));
-        $this->hub->publish($update);
+        $this->bus->dispatch($update);
     }
 
     /**
@@ -46,7 +46,7 @@ class TokenListener
     public function postUpdate(Token $token):void
     {
         $update = new Update('https://lescanardsmousquetaires.fr/token/update', $this->serializer->serialize($token, 'json', ['groups' => 'token:read']));
-        $this->hub->publish($update);
+        $this->bus->dispatch($update);
     }
 
     /**
@@ -58,7 +58,7 @@ class TokenListener
     public function preRemove(Token $token):void
     {
         $update = new Update('https://lescanardsmousquetaires.fr/token/remove', $this->serializer->serialize($token, 'json', ['groups' => 'token:read']));
-        $this->hub->publish($update);
+        $this->bus->dispatch($update);
     }
 
 }

@@ -6,8 +6,8 @@ use App\Entity\Dice;
 use App\Service\DiceGenerator;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Events;
-use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsEntityListener(event: Events::prePersist, method: 'prePersist', entity: Dice::class)]
@@ -17,14 +17,14 @@ class DiceListener
 
     private DiceGenerator $diceGenerator;
 
-    private HubInterface $hub;
+    private MessageBusInterface $bus;
 
     private SerializerInterface $serializer;
 
-    public function __construct(DiceGenerator $diceGenerator, HubInterface $hub, SerializerInterface $serializer)
+    public function __construct(DiceGenerator $diceGenerator, MessageBusInterface $bus, SerializerInterface $serializer)
     {
         $this->diceGenerator = $diceGenerator;
-        $this->hub = $hub;
+        $this->bus = $bus;
         $this->serializer = $serializer;
     }
 
@@ -48,7 +48,7 @@ class DiceListener
     public function postPersist(Dice $dice):void
     {
         $update = new Update('https://lescanardsmousquetaires.fr/dice', $this->serializer->serialize($dice, 'json', ['groups' => 'dice:read']));
-        $this->hub->publish($update);
+        $this->bus->dispatch($update);
     }
 
 }
