@@ -32,7 +32,7 @@ class Connection
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups("world:read")]
+    #[Groups(["connection:read", "world:read"])]
     private ?bool $isGameMaster = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
