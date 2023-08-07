@@ -1,14 +1,23 @@
 <template>
     <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu" ref="editor">
-        <div class="editor" id="editor-zone" ref="map" :style="{ width: map.map.width + 'px', height: map.map.height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
-            <Token :id="token.id" v-for="token in map.tokens"></Token>
+        <div class="editor" id="editor-zone" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
+            <!--<canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
+            <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
+            <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>-->
+            <Token :id="token.id" v-for="token in tokens"></Token>
+        </div>
+        <div class="editor-zoom">
+            <span class="editor-zoom-ratio">{{(ratio * 100).toFixed(0)}}</span>
+            <button class="editor-zoom-add-btn">+</button>
+            <input class="editor-zoom-bar" type="range" min="0.1" max="2.3" v-model="ratio" step="0.01">
+            <button class="editor-zoom-minus-btn">-</button>
         </div>
     </div>
 </template>
 
 <script>
 import Token from './token.vue'
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
     export default {
         components: {
@@ -39,12 +48,18 @@ import { mapActions, mapState } from 'vuex';
                 /**
                  * The Y position at which the user begins scrolling in relation to the map
                  */
-                mapY: 0 
+                mapY: 0,
+                /*fog: null,
+                dark: null,
+                main: null*/
             }
         },
-        computed: mapState({
-            map: state => state.map
-        }),
+        computed: {
+            ...mapGetters('map', [
+                'map',
+                'tokens'
+            ])
+        },
         methods: {
             ...mapActions('map', [
                 'addTokenOnMap',
@@ -56,7 +71,6 @@ import { mapActions, mapState } from 'vuex';
              * @param {*} e 
              */
             onMouseDown: function (e) {
-                e.preventDefault();
                 if(e.button === 2) {
                     this.startX = e.screenX - this.$el.offsetLeft;
                     this.startY = e.screenY - this.$el.offsetTop;
@@ -89,7 +103,7 @@ import { mapActions, mapState } from 'vuex';
                     if (this.ratio - e.deltaY * 0.0005 <= 0.1) {
                         this.ratio = 0.1;
                     } else if (this.ratio - e.deltaY * 0.00045 >= 2.3) {
-                        this.ratio = 2.3;
+                        this.ratio = 2.301;
                     } else if (this.ratio >= 0.1 && this.ratio <= 2.3) {
                         this.ratio = this.ratio - e.deltaY * 0.0005;
                     }
@@ -101,9 +115,37 @@ import { mapActions, mapState } from 'vuex';
              */
             onContextMenu: function (e) {
                 e.preventDefault();
-            }
+            },
+            /*draw: function (e) {
+                let pos = {x: e.layerX, y: e.layerY };
+                console.log(this.tokens)
+                let x = pos.x;
+                let y = pos.y;
+
+                this.fog.clearRect(0, 0, this.map.width, this.map.height)
+                this.dark.clearRect(0, 0, this.map.width, this.map.height)
+
+                this.fog.globalAlpha = 1;
+                this.fog.fillStyle = "black";
+                this.fog.fillRect(0, 0, this.map.width, this.map.height);
+                this.fog.globalCompositeOperation = 'destination-out';
+                let fog_gd = this.fog.createRadialGradient(x, y, 150, x, y, 0)
+                fog_gd.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                fog_gd.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+                this.fog.fillStyle = fog_gd
+                this.fog.beginPath();
+                this.fog.arc(x, y, 150, 0, 2*Math.PI);
+                this.fog.closePath()
+                this.fog.fill();
+
+                this.fog.globalCompositeOperation = this.dark.globalCompositeOperation = this.main.globalCompositeOperation
+            }*/
         },
         mounted() {
+            /*this.main = this.$refs.main.getContext("2d");
+            this.fog = this.$refs.fog.getContext("2d");
+            this.dark = this.$refs.fog.getContext("2d");*/
+
             const postUrl = new URL(process.env.MERCURE_PUBLIC_URL);
             postUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/post');
 
@@ -157,6 +199,7 @@ import { mapActions, mapState } from 'vuex';
 
 <style scoped>
     .editor-wrapper {
+        position: relative;
         overflow: scroll;
         height: 100%;
         width: calc(100dvw - 300px);
@@ -185,5 +228,60 @@ import { mapActions, mapState } from 'vuex';
 
     .editor img {
         max-width: 1200px;
+    }
+
+    .editor-zoom {
+        position: fixed;
+        top: 24px;
+        right: 256px;
+        z-index: 4;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .editor-zoom-add-btn, .editor-zoom-minus-btn {
+        padding: 0;
+        width: 28px;
+        height: 28px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #FFF;
+        background-color: #D68836;
+        border: none;
+        border-radius: 0;
+    }
+
+    .editor-zoom-add-btn  {
+        margin-bottom: -12px;
+    }
+
+    .editor-zoom-minus-btn {
+        margin-top: -12px;
+    }
+
+    .editor-zoom-ratio {
+        width: 28px;
+        height: 28px;
+        font-weight: 700;
+        text-align: center;
+        color: #FFF;
+        background-color: #D68836;
+        margin-bottom: 4px;
+    }
+
+    .editor-zoom-bar {
+        display: block;
+        transform: rotate(-90deg);
+        margin: 80px 0;
+        accent-color: #D68836;
+    }
+
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 100;
     }
 </style>
