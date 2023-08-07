@@ -1,6 +1,6 @@
 <template>
-    <div class="editor-wrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu" ref="editor">
-        <div class="editor" id="editor-zone" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')', margin: margin * ratio * 2 + 'px' }">
+    <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
+        <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
             <!--<canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
             <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
             <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>-->
@@ -103,7 +103,7 @@ import { mapActions, mapGetters } from 'vuex';
                     if (this.ratio - e.deltaY * 0.0005 <= 0.1) {
                         this.ratio = 0.1;
                     } else if (this.ratio - e.deltaY * 0.00045 >= 2.3) {
-                        this.ratio = 2.301;
+                        this.ratio = 2.3;
                     } else if (this.ratio >= 0.1 && this.ratio <= 2.3) {
                         this.ratio = this.ratio - e.deltaY * 0.0005;
                     }
@@ -145,6 +145,7 @@ import { mapActions, mapGetters } from 'vuex';
             /*this.main = this.$refs.main.getContext("2d");
             this.fog = this.$refs.fog.getContext("2d");
             this.dark = this.$refs.fog.getContext("2d");*/
+
 
             const postUrl = new URL(process.env.MERCURE_PUBLIC_URL);
             postUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/post');
@@ -193,6 +194,9 @@ import { mapActions, mapGetters } from 'vuex';
                     mercure: true
                 })
             }
+
+            this.$refs.editorWrapper.scrollTop = 2048
+            this.$refs.editorWrapper.scrollLeft = 2048
         }
     }
 </script>
@@ -220,6 +224,7 @@ import { mapActions, mapGetters } from 'vuex';
         display: inline-block;
         background-color: #FFF;
         overflow: hidden;
+        margin: 2048px;
     }
 
     .editor picture {
@@ -232,7 +237,7 @@ import { mapActions, mapGetters } from 'vuex';
 
     .editor-zoom {
         position: fixed;
-        top: 24px;
+        top: 48px;
         right: 256px;
         z-index: 4;
         display: flex;
