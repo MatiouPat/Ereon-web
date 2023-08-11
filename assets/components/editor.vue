@@ -8,9 +8,9 @@
         </div>
         <div class="editor-zoom">
             <span class="editor-zoom-ratio">{{(ratio * 100).toFixed(0)}}</span>
-            <button class="editor-zoom-add-btn">+</button>
+            <button class="editor-zoom-add-btn" @mousedown="zoomIn">+</button>
             <input class="editor-zoom-bar" type="range" min="0.1" max="2.3" v-model="ratio" step="0.01">
-            <button class="editor-zoom-minus-btn">-</button>
+            <button class="editor-zoom-minus-btn" @mousedown="zoomOut">-</button>
         </div>
     </div>
 </template>
@@ -140,6 +140,16 @@ import { mapActions, mapGetters } from 'vuex';
 
                 this.fog.globalCompositeOperation = this.dark.globalCompositeOperation = this.main.globalCompositeOperation
             }*/
+            zoomIn: function () {
+                if (this.ratio < 2.3) {
+                    this.ratio = Number(this.ratio) + 0.01
+                }
+            },
+            zoomOut: function () {
+                if (this.ratio > 0.1) {
+                    this.ratio = Number(this.ratio) - 0.01
+                }
+            }
         },
         mounted() {
             /*this.main = this.$refs.main.getContext("2d");
@@ -257,6 +267,7 @@ import { mapActions, mapGetters } from 'vuex';
         background-color: #D68836;
         border: none;
         border-radius: 0;
+        cursor: pointer;
     }
 
     .editor-zoom-add-btn  {
