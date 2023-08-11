@@ -81,6 +81,9 @@ import { mapActions, mapGetters, mapState } from 'vuex';
             ...mapActions('map', [
                 'setMap'
             ]),
+            ...mapActions('music', [
+                'playMusic'
+            ]),
             /**
              * Display account context box when clicked
              */
@@ -107,6 +110,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                     })
                 this.downloadPersonages()
                 this.isConnected = true
+                this.playMusic()
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
 

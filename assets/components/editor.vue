@@ -238,12 +238,13 @@ import { mapActions, mapGetters } from 'vuex';
     .editor-zoom {
         position: fixed;
         top: 48px;
-        right: 256px;
+        right: 300px;
         z-index: 4;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        width: 80px;
     }
 
     .editor-zoom-add-btn, .editor-zoom-minus-btn {
