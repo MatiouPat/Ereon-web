@@ -12,7 +12,7 @@
         </div>
         <div class="music-informations" v-if="isGameMaster">
             <h2>Musique</h2>
-            <span class="music-name">{{ currentMusic.name }}</span>
+            <span class="music-name">{{ currentMusic.title }}</span>
             <div class="music-timeline">
                 <span>{{ currentMusic.displayedCurrentTime }}</span>
                 <input type="range" min="0" v-model="currentMusic.currentTime" :max="currentMusic.duration" @input="changeCurrentTime">
@@ -20,18 +20,17 @@
             </div>
             <div class="music-controls">
                 <img src="build/images/icons/skip_previous.svg" alt="Previous">
-                <img v-if="!isPlaying" src="build/images/icons/play.svg" alt="Play" @click="playMusic">
-                <img v-if="isPlaying" src="build/images/icons/pause.svg" alt="Pause" @click="pauseMusic">
+                <img v-if="!isPlaying" src="build/images/icons/play.svg" alt="Play" @click="play">
+                <img v-if="isPlaying" src="build/images/icons/pause.svg" alt="Pause" @click="pause">
                 <img src="build/images/icons/skip_next.svg" alt="Next">
             </div>
-            <audio v-if="isPlaying" @play="updateDuration" @volumechange="changeVolume" @timeupdate="updateCurrentTime" ref="musicAudio" src="uploads/musics/01 Bastion.mp3" autoplay loop></audio>
         </div>
         <div class="music-informations isDisable" v-else>
             <h2>Musique</h2>
-            <span class="music-name">{{ currentMusic.name }}</span>
+            <span class="music-name">{{ currentMusic.title }}</span>
             <div class="music-timeline">
                 <span>{{ currentMusic.displayedCurrentTime }}</span>
-                <input type="range" min="0" v-model="currentMusic.currentTime" :max="currentMusic.duration">
+                <input type="range" min="0" v-model="currentMusic.currentTime" disabled :max="currentMusic.duration">
                 <span>{{ currentMusic.displayedDuration }}</span>
             </div>
             <div class="music-controls">
@@ -40,46 +39,79 @@
                 <img v-if="isPlaying" src="build/images/icons/pause.svg" alt="Pause">
                 <img src="build/images/icons/skip_next.svg" alt="Next">
             </div>
-            <audio v-if="isPlaying" @play="updateDuration" @timeupdate="updateCurrentTime" ref="musicAudio" src="uploads/musics/01 Bastion.mp3" autoplay loop></audio>
         </div>
+        <audio @volumechange="changeVolume" @timeupdate="updateCurrentTime" @loadeddata="updateDuration" ref="musicAudio" :src="'uploads/musics/' + currentMusic.link" loop></audio>
+        <table class="music-list" :class="{isDisable: !isGameMaster}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Titre</th>
+                </tr>
+            </thead>
+            <tbody v-if="isGameMaster">
+                <tr @click="changeMusic(index)" v-for="(music, index) in musics">
+                    <td>{{ index+1 }}</td>
+                    <td>{{ music.title }}</td>
+                </tr>
+            </tbody>
+            <tbody v-else>
+                <tr v-for="(music, index) in musics">
+                    <td>{{ index+1 }}</td>
+                    <td>{{ music.title }}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import axios from 'axios';
+import { mapGetters } from 'vuex';
 
   
     export default {
         data() {
             return {
+                isPlaying: false,
                 globalVolume: 1,
                 currentMusic: {
-                    name: "01 Bastion",
+                    title: "Bastion",
+                    link: "01 Bastion.mp3",
                     duration: 0,
                     displayedDuration: "",
                     currentTime: 0,
                     displayedCurrentTime: ""
                 },
+                musics: []
             }
         },
         computed: {
             ...mapGetters('user', [
                 'isGameMaster',
-            ]),
-            ...mapGetters('music', [
-                'isPlaying'
             ])
         },
         methods: {
-            ...mapActions('music', [
-                'playMusic',
-                'pauseMusic'
-            ]),
+            play: function () {
+                this.$refs.musicAudio.play()
+                this.isPlaying = true
+            },
+            pause: function (e) {
+                this.$refs.musicAudio.pause()
+                this.isPlaying = false
+            },
             changeVolume: function () {
                 this.$refs.musicAudio.volume = this.globalVolume
             },
             changeCurrentTime: function () {
                 this.$refs.musicAudio.currentTime = this.currentMusic.currentTime
+            },
+            changeMusic: function (index) {
+                this.currentMusic.link = this.musics[index].link
+                this.currentMusic.title = this.musics[index].title
+                this.$refs.musicAudio.load()
+                this.$refs.musicAudio.addEventListener('canplay', () => {
+                    this.play()
+                }, { once: true})
             },
             updateCurrentTime: function () {
                 this.currentMusic.currentTime = this.$refs.musicAudio.currentTime;
@@ -93,6 +125,15 @@ import { mapActions, mapGetters } from 'vuex';
                 let secondes = Math.floor(this.currentMusic.duration % 60);
                 this.currentMusic.displayedDuration = minutes + ":" + String(secondes).padStart(2, '0');
             }
+        },
+        mounted() {
+            this.emitter.on('playMusic', () => {
+                this.play();
+            })
+            axios.get('/api/music')
+                .then(response => {
+                    this.musics = response.data['hydra:member']
+                })
         }
     }
 </script>
@@ -137,6 +178,27 @@ input[type = range] {
 .music-controls {
     display: flex;
     justify-content: center;
+}
+
+.music-list {
+    width: 100%;
+}
+
+.music-list.isDisable {
+    opacity: 0.5;
+}
+
+.music-list thead {
+    border-bottom: solid 1px #565656;
+}
+
+.music-list :where(th, td) {
+    text-align: left;
+    padding: 8px;
+}
+
+.music-list:not(.isDisable) tbody tr:hover {
+    background-color: #EAEAEA;
 }
 
 </style>

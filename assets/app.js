@@ -12,7 +12,8 @@ import './styles/app.css';
 import './bootstrap';
 import Account from './components/account.vue'
 import { createApp } from 'vue';
-import store from './store'
+import store from './store';
+import { emitter } from './emitter';
 
 let account = createApp({
     components: {
@@ -21,5 +22,6 @@ let account = createApp({
 })
 
 account.use(store)
+account.config.globalProperties.emitter = emitter;
 
 account.mount('#header')
