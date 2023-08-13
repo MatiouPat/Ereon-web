@@ -17,7 +17,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['personage:read']],
     operations: [
         new GetCollection()
-    ]
+    ],
+    mercure: true
 )]
 #[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact'])]
 class Personage

@@ -21,7 +21,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Post(),
         new Patch()
     ],
-    normalizationContext: ['groups' => ['map:read']]
+    normalizationContext: ['groups' => ['map:read']],
+    mercure: true
 )]
 class Map
 {

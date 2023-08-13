@@ -20,7 +20,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['user:read']],
     operations: [
         new GetCollection()
-    ]
+    ],
+    mercure: true
 )]
 #[ApiFilter(BooleanFilter::class, properties: ['connections.isGameMaster'])]
 #[ApiFilter(SearchFilter::class, properties: ['connections.world.id' => 'exact'])]

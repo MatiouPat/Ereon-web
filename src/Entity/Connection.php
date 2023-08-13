@@ -19,7 +19,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new GetCollection(),
         new Patch()
-    ]
+    ],
+    mercure: true
 )]
 #[ApiFilter(DateFilter::class, properties: ['lastConnectionAt'])]
 #[ApiFilter(SearchFilter::class, properties: ['world.id'  => 'exact'])]

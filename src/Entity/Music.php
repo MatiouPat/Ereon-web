@@ -15,7 +15,8 @@ use Doctrine\ORM\Mapping as ORM;
     operations: [
         new GetCollection,
         new Get()
-    ]
+    ],
+    mercure: true
 )]
 class Music
 {

@@ -8,7 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: NumberOfStatRepository::class)]
-#[ApiResource(operations: [])]
+#[ApiResource(
+    operations: [],
+    mercure: true
+)]
 class NumberOfStat
 {
     #[ORM\Id]
