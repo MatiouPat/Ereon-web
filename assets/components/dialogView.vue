@@ -6,13 +6,34 @@
         <div class="textinput">
             <textarea :disabled="isDisabled" :class="{isDisabled: isDisabled}" v-model="computation" @keydown.enter="rollDice"></textarea>
             <div class="dices">
-                <img width="24" height="24" src="/build/images/d100.svg" alt="d100" @click="addDice('d100')">
-                <img width="24" height="24" src="/build/images/d20.svg" alt="d20" @click="addDice('d20')">
-                <img width="24" height="24" src="/build/images/d12.svg" alt="d12" @click="addDice('d12')">
-                <img width="24" height="24" src="/build/images/d8.svg" alt="d8" @click="addDice('d8')">
-                <img width="24" height="24" src="/build/images/d6.svg" alt="d6" @click="addDice('d6')">
-                <img width="24" height="24" src="/build/images/d4.svg" alt="d4" @click="addDice('d4')">
-                <img width="24" height="24" src="/build/images/d2.svg" alt="d2" @click="addDice('d2')">
+                <div class="dice" @click="addDice('d100')">
+                    <img width="24" height="24" src="/build/images/d100.svg" alt="d100">
+                    <span>d100</span>
+                </div>
+                <div class="dice" @click="addDice('d20')">
+                    <img width="24" height="24" src="/build/images/d20.svg" alt="d20">
+                    <span>d20</span>
+                </div>
+                <div class="dice" @click="addDice('d12')">
+                    <img width="24" height="24" src="/build/images/d12.svg" alt="d12">
+                    <span>d12</span>
+                </div>
+                <div class="dice" @click="addDice('d8')">
+                    <img width="24" height="24" src="/build/images/d8.svg" alt="d8">
+                    <span>d8</span>
+                </div>
+                <div class="dice" @click="addDice('d6')">
+                    <img width="24" height="24" src="/build/images/d6.svg" alt="d6">
+                    <span>d6</span>
+                </div>
+                <div class="dice" @click="addDice('d4')">
+                    <img width="24" height="24" src="/build/images/d4.svg" alt="d4">
+                    <span>d4</span>
+                </div>
+                <div class="dice" @click="addDice('d2')">
+                    <img width="24" height="24" src="/build/images/d2.svg" alt="d2">
+                    <span>d2</span>
+                </div>
             </div>
             <span v-if="isDisabled" class="alert alert-danger">Vous n'avez aucun personnage</span>
             <button type="button" @click="rollDice">Envoyer</button>
@@ -123,7 +144,6 @@
         height: 100%;
         resize: none;
         border: solid 1px #565656;
-        border-radius: 8px;
     }
 
     .textinput textarea.isDisabled {
@@ -144,7 +164,19 @@
     .dices {
         display: flex;
         justify-content: space-around;
-        margin: 0 16px;
+        margin: 0 8px;
+    }
+
+    .dice {
+        width: 32px;
+        text-align: center;
+        font-size: .8rem;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .dice img {
+        margin: 0 auto 4px auto;
     }
 
 </style>
