@@ -6,13 +6,13 @@
         <div class="textinput">
             <textarea :disabled="isDisabled" :class="{isDisabled: isDisabled}" v-model="computation" @keydown.enter="rollDice"></textarea>
             <div class="dices">
-                <img width="28" height="28" src="/build/images/d100.svg" alt="d100" @click="addDice('d100')">
-                <img width="28" height="28" src="/build/images/d20.svg" alt="d20" @click="addDice('d20')">
-                <img width="28" height="28" src="/build/images/d12.svg" alt="d12" @click="addDice('d12')">
-                <img width="28" height="28" src="/build/images/d8.svg" alt="d8" @click="addDice('d8')">
-                <img width="28" height="28" src="/build/images/d6.svg" alt="d6" @click="addDice('d6')">
-                <img width="28" height="28" src="/build/images/d4.svg" alt="d4" @click="addDice('d4')">
-                <img width="28" height="28" src="/build/images/d2.svg" alt="d2" @click="addDice('d2')">
+                <img width="24" height="24" src="/build/images/d100.svg" alt="d100" @click="addDice('d100')">
+                <img width="24" height="24" src="/build/images/d20.svg" alt="d20" @click="addDice('d20')">
+                <img width="24" height="24" src="/build/images/d12.svg" alt="d12" @click="addDice('d12')">
+                <img width="24" height="24" src="/build/images/d8.svg" alt="d8" @click="addDice('d8')">
+                <img width="24" height="24" src="/build/images/d6.svg" alt="d6" @click="addDice('d6')">
+                <img width="24" height="24" src="/build/images/d4.svg" alt="d4" @click="addDice('d4')">
+                <img width="24" height="24" src="/build/images/d2.svg" alt="d2" @click="addDice('d2')">
             </div>
             <span v-if="isDisabled" class="alert alert-danger">Vous n'avez aucun personnage</span>
             <button type="button" @click="rollDice">Envoyer</button>
