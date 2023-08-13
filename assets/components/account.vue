@@ -106,7 +106,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                         this.setPlayers(response.data['hydra:member'])
                     })
                 this.downloadPersonages()
-                this.emitter.emit("playMusic")
+                //this.emitter.emit("playMusic")
                 this.isConnected = true
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);

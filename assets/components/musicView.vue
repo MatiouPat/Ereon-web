@@ -23,6 +23,7 @@
                 <img v-if="!isPlaying" src="build/images/icons/play.svg" alt="Play" @click="play">
                 <img v-if="isPlaying" src="build/images/icons/pause.svg" alt="Pause" @click="pause">
                 <img src="build/images/icons/skip_next.svg" alt="Next">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#565656" class="music-controls-loop" :class="{ active: isLooping }"  @click="loop"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
             </div>
         </div>
         <div class="music-informations isDisable" v-else>
@@ -38,9 +39,10 @@
                 <img v-if="!isPlaying" src="build/images/icons/play.svg" alt="Play">
                 <img v-if="isPlaying" src="build/images/icons/pause.svg" alt="Pause">
                 <img src="build/images/icons/skip_next.svg" alt="Next">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#565656" class="music-controls-loop" :class="{ active: isLooping }"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
             </div>
         </div>
-        <audio @volumechange="changeVolume" @timeupdate="updateCurrentTime" @loadeddata="updateDuration" ref="musicAudio" :src="'uploads/musics/' + currentMusic.link" loop></audio>
+        <audio @volumechange="changeVolume" @timeupdate="updateCurrentTime" @loadeddata="updateDuration" ref="musicAudio" :src="'uploads/musics/' + currentMusic.link" :loop="isLooping"></audio>
         <table class="music-list" :class="{isDisable: !isGameMaster}">
             <thead>
                 <tr>
@@ -73,6 +75,7 @@ import { mapGetters } from 'vuex';
         data() {
             return {
                 isPlaying: false,
+                isLooping: false,
                 globalVolume: 1,
                 currentMusic: {
                     title: "Bastion",
@@ -124,6 +127,9 @@ import { mapGetters } from 'vuex';
                 let minutes = Math.floor(this.currentMusic.duration / 60);
                 let secondes = Math.floor(this.currentMusic.duration % 60);
                 this.currentMusic.displayedDuration = minutes + ":" + String(secondes).padStart(2, '0');
+            },
+            loop: function () {
+                this.isLooping = !this.isLooping
             }
         },
         mounted() {
@@ -176,8 +182,23 @@ input[type = range] {
 }
 
 .music-controls {
+    position: relative;
     display: flex;
     justify-content: center;
+}
+
+.music-controls-loop {
+    position: absolute;
+    top: 0;
+    right: 24px;
+    margin-left: 24px;
+    transform: rotate(0);
+    transition: all .4s ease-in-out;
+}
+
+.music-controls-loop.active {
+    fill: #D68836;
+    transform: rotate(360deg);
 }
 
 .music-list {
