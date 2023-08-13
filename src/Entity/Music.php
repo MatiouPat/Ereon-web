@@ -34,9 +34,13 @@ class Music
     #[ORM\ManyToMany(targetEntity: Playlist::class, mappedBy: 'musics')]
     private Collection $playlists;
 
+    #[ORM\OneToMany(mappedBy: 'currentMusic', targetEntity: MusicPlayer::class)]
+    private Collection $musicPlayers;
+
     public function __construct()
     {
         $this->playlists = new ArrayCollection();
+        $this->musicPlayers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -90,6 +94,36 @@ class Music
     {
         if ($this->playlists->removeElement($playlist)) {
             $playlist->removeMusic($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MusicPlayer>
+     */
+    public function getMusicPlayers(): Collection
+    {
+        return $this->musicPlayers;
+    }
+
+    public function addMusicPlayer(MusicPlayer $musicPlayer): self
+    {
+        if (!$this->musicPlayers->contains($musicPlayer)) {
+            $this->musicPlayers->add($musicPlayer);
+            $musicPlayer->setCurrentMusic($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMusicPlayer(MusicPlayer $musicPlayer): self
+    {
+        if ($this->musicPlayers->removeElement($musicPlayer)) {
+            // set the owning side to null (unless already changed)
+            if ($musicPlayer->getCurrentMusic() === $this) {
+                $musicPlayer->setCurrentMusic(null);
+            }
         }
 
         return $this;

@@ -58,11 +58,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Personage::class)]
     private Collection $personages;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?UserParameter $userParameter = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserWorldParameter::class, orphanRemoval: true)]
+    private Collection $userWorldParameters;
+
     public function __construct()
     {
         $this->tokens = new ArrayCollection();
         $this->connections = new ArrayCollection();
         $this->personages = new ArrayCollection();
+        $this->userWorldParameters = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -228,6 +235,53 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($personage->getUser() === $this) {
                 $personage->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getUserParameter(): ?UserParameter
+    {
+        return $this->userParameter;
+    }
+
+    public function setUserParameter(UserParameter $userParameter): self
+    {
+        // set the owning side of the relation if necessary
+        if ($userParameter->getUser() !== $this) {
+            $userParameter->setUser($this);
+        }
+
+        $this->userParameter = $userParameter;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserWorldParameter>
+     */
+    public function getUserWorldParameters(): Collection
+    {
+        return $this->userWorldParameters;
+    }
+
+    public function addUserWorldParameter(UserWorldParameter $userWorldParameter): self
+    {
+        if (!$this->userWorldParameters->contains($userWorldParameter)) {
+            $this->userWorldParameters->add($userWorldParameter);
+            $userWorldParameter->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserWorldParameter(UserWorldParameter $userWorldParameter): self
+    {
+        if ($this->userWorldParameters->removeElement($userWorldParameter)) {
+            // set the owning side to null (unless already changed)
+            if ($userWorldParameter->getUser() === $this) {
+                $userWorldParameter->setUser(null);
             }
         }
 
