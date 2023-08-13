@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Asset;
 use App\Entity\Map;
+use App\Entity\Music;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -49,6 +50,7 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToCrud('Maps', 'fas fa-map-marker-alt', Map::class);
         yield MenuItem::linkToCrud('Assets', 'fas fa-map-marker-alt', Asset::class);
+        yield MenuItem::linkToCrud('Music', 'fas fa-map-marker-alt', Music::class);
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
     }
 }
