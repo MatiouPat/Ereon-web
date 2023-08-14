@@ -15,6 +15,7 @@
         </div>
     </div>
     <div v-else class="worlds-page">
+        <h1>Quel monde ?</h1>
         <div class="world-layout" v-if="!worlds.length">
             <h1>Vous n'avez aucun monde disponible</h1>
             <span>Veuillez contacter un administrateur</span>
@@ -106,6 +107,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                         this.setPlayers(response.data['hydra:member'])
                     })
                 this.downloadPersonages()
+                this.emitter.emit("playMusic")
                 this.isConnected = true
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
@@ -207,11 +209,15 @@ import { mapActions, mapGetters, mapState } from 'vuex';
     }
 
     .worlds-page {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 10;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 128px;
+        gap: 64px;
         background-color: #FFFFFF;
         width: 100dvw;
         height: 100dvh;
@@ -219,7 +225,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
     }
 
     h1 {
-        font-size: 2rem;
+        font-size: 4rem;
         font-weight: 700;
         padding-bottom: 8px;
     }
@@ -231,6 +237,16 @@ import { mapActions, mapGetters, mapState } from 'vuex';
         height: 10dvw;
         max-height: 200px;
         max-width: 200px;
+    }
+
+    .world:hover > picture {
+        outline: solid 4px #D68836;
+        transition: all 40ms ease-in-out;
+    }
+
+    .world:hover > h2 {
+        color: #D68836;
+        transition: all .2s ease-in-out;
     }
 
     .world picture {
@@ -268,6 +284,10 @@ import { mapActions, mapGetters, mapState } from 'vuex';
         color: #FFFFFF;
         background-color: rgba(0, 0, 0, 0.5);
         font-weight: 700;
+    }
+
+    .worlds-page .btn {
+        margin-top: 64px;
     }
 
 </style>

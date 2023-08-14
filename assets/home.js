@@ -4,6 +4,7 @@ import RightSideBox from './components/rightSideBox.vue'
 import MapBox from './components/mapBox.vue'
 import { createApp } from 'vue';
 import store from './store'
+import { emitter } from './emitter';
 
 let editor = createApp({
     components: {
@@ -23,5 +24,6 @@ let dialogBox = createApp({
 })
 
 dialogBox.use(store)
+dialogBox.config.globalProperties.emitter = emitter;
 
 dialogBox.mount('#right-side-box')

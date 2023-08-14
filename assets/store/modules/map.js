@@ -20,6 +20,9 @@ const getters = {
     map: (state) => {
         return state.map
     },
+    tokens: (state) => {
+        return state.tokens
+    },
     getTokenById: (state) => (id) => {
         return state.tokens.find(token => token.id === id)
     },

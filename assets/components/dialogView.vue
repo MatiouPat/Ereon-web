@@ -5,6 +5,36 @@
         </div>
         <div class="textinput">
             <textarea :disabled="isDisabled" :class="{isDisabled: isDisabled}" v-model="computation" @keydown.enter="rollDice"></textarea>
+            <div class="dices">
+                <div class="dice" @click="addDice('d100')">
+                    <img width="24" height="24" src="/build/images/d100.svg" alt="d100">
+                    <span>d100</span>
+                </div>
+                <div class="dice" @click="addDice('d20')">
+                    <img width="24" height="24" src="/build/images/d20.svg" alt="d20">
+                    <span>d20</span>
+                </div>
+                <div class="dice" @click="addDice('d12')">
+                    <img width="24" height="24" src="/build/images/d12.svg" alt="d12">
+                    <span>d12</span>
+                </div>
+                <div class="dice" @click="addDice('d8')">
+                    <img width="24" height="24" src="/build/images/d8.svg" alt="d8">
+                    <span>d8</span>
+                </div>
+                <div class="dice" @click="addDice('d6')">
+                    <img width="24" height="24" src="/build/images/d6.svg" alt="d6">
+                    <span>d6</span>
+                </div>
+                <div class="dice" @click="addDice('d4')">
+                    <img width="24" height="24" src="/build/images/d4.svg" alt="d4">
+                    <span>d4</span>
+                </div>
+                <div class="dice" @click="addDice('d2')">
+                    <img width="24" height="24" src="/build/images/d2.svg" alt="d2">
+                    <span>d2</span>
+                </div>
+            </div>
             <span v-if="isDisabled" class="alert alert-danger">Vous n'avez aucun personnage</span>
             <button type="button" @click="rollDice">Envoyer</button>
         </div>
@@ -56,6 +86,9 @@
                 }).catch(e => {
                     this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - d100+20-4');
                 })
+            },
+            addDice: function (dice) {
+                this.computation = dice
             }
         },
         mounted: function() {
@@ -65,7 +98,6 @@
             const es = new EventSource(u);
             es.onmessage = e => {
                 let data = JSON.parse(e.data)
-                console.log(data)
                 this.messages.push(data);
             }
 
@@ -86,7 +118,7 @@
 <style scoped>
 
     .messages {
-        height: calc(85dvh - 64px);
+        height: calc(80dvh - 64px);
         overflow-y: scroll;
     }
 
@@ -104,7 +136,7 @@
         flex-direction: column;
         justify-content: end;
         gap: 8px;
-        height: calc(15dvh - 16px);
+        height: calc(20dvh - 16px);
     }
 
     .textinput textarea {
@@ -112,7 +144,6 @@
         height: 100%;
         resize: none;
         border: solid 1px #565656;
-        border-radius: 8px;
     }
 
     .textinput textarea.isDisabled {
@@ -128,7 +159,24 @@
         padding: 8px;
         font-weight: 700;
         font-size: 1rem;
-        margin-top: 16px;
+    }
+
+    .dices {
+        display: flex;
+        justify-content: space-around;
+        margin: 0 8px;
+    }
+
+    .dice {
+        width: 32px;
+        text-align: center;
+        font-size: .8rem;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .dice img {
+        margin: 0 auto 4px auto;
     }
 
 </style>
