@@ -21,8 +21,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Post(),
         new Patch(),
         new Delete()
-    ],
-    mercure: true
+    ]
 )]
 class Token
 {

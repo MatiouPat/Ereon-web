@@ -13,8 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource(
     operations: [
         new Get()
-    ],
-    mercure: true
+    ]
 )]
 class Playlist
 {

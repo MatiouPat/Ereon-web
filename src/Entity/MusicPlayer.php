@@ -2,23 +2,38 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use App\Repository\MusicPlayerRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MusicPlayerRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new GetCollection(),
+        new Patch()
+    ],
+    normalizationContext: ['groups' => ['musicPlayer:read']]
+)]
+#[ApiFilter(SearchFilter::class, properties: ['world.id'  => 'exact'])]
 class MusicPlayer
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("musicPlayer:read")]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups("musicPlayer:read")]
     private ?bool $isPlaying = null;
 
     #[ORM\Column]
+    #[Groups("musicPlayer:read")]
     private ?bool $isLooping = null;
 
     #[ORM\OneToOne(inversedBy: 'musicPlayer', cascade: ['persist', 'remove'])]
@@ -26,7 +41,12 @@ class MusicPlayer
     private ?World $world = null;
 
     #[ORM\ManyToOne(inversedBy: 'musicPlayers')]
+    #[Groups("musicPlayer:read")]
     private ?Music $currentMusic = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups("musicPlayer:read")]
+    private ?float $currentTimePlay = null;
 
     public function getId(): ?int
     {
@@ -77,6 +97,18 @@ class MusicPlayer
     public function setCurrentMusic(?Music $currentMusic): self
     {
         $this->currentMusic = $currentMusic;
+
+        return $this;
+    }
+
+    public function getCurrentTimePlay(): ?float
+    {
+        return $this->currentTimePlay;
+    }
+
+    public function setCurrentTimePlay(?float $currentTimePlay): self
+    {
+        $this->currentTimePlay = $currentTimePlay;
 
         return $this;
     }

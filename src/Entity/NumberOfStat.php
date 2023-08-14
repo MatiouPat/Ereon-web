@@ -9,8 +9,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: NumberOfStatRepository::class)]
 #[ApiResource(
-    operations: [],
-    mercure: true
+    operations: []
 )]
 class NumberOfStat
 {

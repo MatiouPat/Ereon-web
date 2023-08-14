@@ -11,8 +11,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: StatRepository::class)]
 #[ApiResource(
-    operations: [],
-    mercure: true
+    operations: []
 )]
 class Stat
 {

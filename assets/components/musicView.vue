@@ -74,6 +74,7 @@ import { mapGetters } from 'vuex';
     export default {
         data() {
             return {
+                musicPlayerId : 0,
                 isPlaying: false,
                 isLooping: false,
                 globalVolume: 1,
@@ -91,22 +92,47 @@ import { mapGetters } from 'vuex';
         computed: {
             ...mapGetters('user', [
                 'isGameMaster',
+                'getWorld'
             ])
         },
         methods: {
             play: function () {
                 this.$refs.musicAudio.play()
                 this.isPlaying = true
+                console.log(this.currentMusic.currentTime)
+                axios.patch('/api/music_players/' + this.musicPlayerId, {
+                    isPlaying: true,
+                    currentTimePlay: this.currentMusic.currentTime
+                }, {
+                    headers: {
+                        'Content-Type': 'application/merge-patch+json'
+                    }
+                })
             },
             pause: function (e) {
                 this.$refs.musicAudio.pause()
                 this.isPlaying = false
+                axios.patch('/api/music_players/' + this.musicPlayerId, {
+                    isPlaying: false,
+                    currentTimePlay: this.currentMusic.currentTime
+                }, {
+                    headers: {
+                        'Content-Type': 'application/merge-patch+json'
+                    }
+                })
             },
             changeVolume: function () {
                 this.$refs.musicAudio.volume = this.globalVolume
             },
             changeCurrentTime: function () {
                 this.$refs.musicAudio.currentTime = this.currentMusic.currentTime
+                axios.patch('/api/music_players/' + this.musicPlayerId, {
+                    currentTimePlay: Number(this.currentMusic.currentTime)
+                }, {
+                    headers: {
+                        'Content-Type': 'application/merge-patch+json'
+                    }
+                })
             },
             changeMusic: function (index) {
                 this.currentMusic.link = this.musics[index].link
@@ -115,6 +141,14 @@ import { mapGetters } from 'vuex';
                 this.$refs.musicAudio.addEventListener('canplay', () => {
                     this.play()
                 }, { once: true})
+                axios.patch('/api/music_players/' + this.musicPlayerId, {
+                    currentMusic: 'api/music/' + this.musics[index].id,
+                    currentTimePlay: 0
+                }, {
+                    headers: {
+                        'Content-Type': 'application/merge-patch+json'
+                    }
+                })
             },
             updateCurrentTime: function () {
                 this.currentMusic.currentTime = this.$refs.musicAudio.currentTime;
@@ -130,16 +164,63 @@ import { mapGetters } from 'vuex';
             },
             loop: function () {
                 this.isLooping = !this.isLooping
+                axios.patch('/api/music_players/' + this.musicPlayerId, {
+                    isLooping: this.isLooping,
+                    currentTimePlay: this.currentMusic.currentTime
+                }, {
+                    headers: {
+                        'Content-Type': 'application/merge-patch+json'
+                    }
+                })
             }
         },
         mounted() {
-            this.emitter.on('playMusic', () => {
-                this.play();
-            })
             axios.get('/api/music')
                 .then(response => {
                     this.musics = response.data['hydra:member']
                 })
+
+            this.emitter.on('playMusic', () => {
+                axios.get('/api/music_players?world.id=' + this.getWorld.id)
+                    .then(response => {
+                        let musicPlayer = response.data['hydra:member'][0]
+                        this.musicPlayerId = musicPlayer.id
+                        console.log(this.musicPlayerId)
+                        this.isPlaying = musicPlayer.isPlaying
+                        this.isLooping = musicPlayer.isLooping
+                        this.currentMusic.title = musicPlayer.currentMusic.title
+                        this.currentMusic.link = musicPlayer.currentMusic.link
+                        if (this.isPlaying) {
+                            this.$refs.musicAudio.load()
+                            this.$refs.musicAudio.currentTime = musicPlayer.currentTimePlay
+                            this.$refs.musicAudio.addEventListener('canplay', () => {
+                                this.$refs.musicAudio.play()
+                            }, { once: true})
+                        }
+
+                        const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+                        updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/musicplayer');
+
+                        const updateEs = new EventSource(updateUrl);
+                        updateEs.onmessage = e => {
+                            let data = JSON.parse(e.data)
+                            let mustReload = this.isPlaying != data.isPlaying || this.currentMusic.link != data.currentMusic.link
+                            this.isPlaying = data.isPlaying
+                            this.isLooping = data.isLooping
+                            this.currentMusic.title = data.currentMusic.title
+                            this.currentMusic.link = data.currentMusic.link
+                            this.$refs.musicAudio.currentTime = data.currentTimePlay
+                            if (this.isPlaying && mustReload) {
+                                this.$refs.musicAudio.load()
+                                this.$refs.musicAudio.addEventListener('canplay', () => {
+                                    this.$refs.musicAudio.play()
+                                }, { once: true})
+                            }else if(!this.isPlaying) {
+                                this.$refs.musicAudio.pause()
+                            }
+                        }
+                    })
+            })
         }
     }
 </script>
