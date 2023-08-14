@@ -98,11 +98,12 @@ const actions = {
         let token = getters.getTokenById(data.id)
         if (!data.mercure) {
             axios.delete('/api/tokens/' + token.id)
+        }else {
+            let index = state.tokens.findIndex(object => {
+                return object.id === data.id;
+            })
+            commit('removeToken', index)
         }
-        let index = state.tokens.findIndex(object => {
-            return object.id === data.id;
-        })
-        commit('removeToken', index)
     },
     /**
      * Update token information on the map

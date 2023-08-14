@@ -75,6 +75,7 @@ import { mapGetters } from 'vuex';
         data() {
             return {
                 musicPlayerId : 0,
+                userWorldParametersId : 0,
                 isPlaying: false,
                 isLooping: false,
                 globalVolume: 1,
@@ -92,7 +93,8 @@ import { mapGetters } from 'vuex';
         computed: {
             ...mapGetters('user', [
                 'isGameMaster',
-                'getWorld'
+                'getWorld',
+                'getUserId'
             ])
         },
         methods: {
@@ -123,6 +125,13 @@ import { mapGetters } from 'vuex';
             },
             changeVolume: function () {
                 this.$refs.musicAudio.volume = this.globalVolume
+                axios.patch('/api/user_world_parameters/' + this.userWorldParametersId, {
+                    musicVolume: Number(this.globalVolume) * 100
+                }, {
+                    headers: {
+                        'Content-Type': 'application/merge-patch+json'
+                    }
+                })
             },
             changeCurrentTime: function () {
                 this.$refs.musicAudio.currentTime = this.currentMusic.currentTime
@@ -185,7 +194,6 @@ import { mapGetters } from 'vuex';
                     .then(response => {
                         let musicPlayer = response.data['hydra:member'][0]
                         this.musicPlayerId = musicPlayer.id
-                        console.log(this.musicPlayerId)
                         this.isPlaying = musicPlayer.isPlaying
                         this.isLooping = musicPlayer.isLooping
                         this.currentMusic.title = musicPlayer.currentMusic.title
@@ -219,6 +227,12 @@ import { mapGetters } from 'vuex';
                                 this.$refs.musicAudio.pause()
                             }
                         }
+                    })
+                axios.get('/api/user_world_parameters?user.id=' + this.getUserId + '&world.id=' + this.getWorld.id)
+                    .then(response => {
+                        let userWorldParameter = response.data['hydra:member'][0];
+                        this.userWorldParametersId = userWorldParameter.id
+                        this.globalVolume = userWorldParameter.musicVolume / 100
                     })
             })
         }

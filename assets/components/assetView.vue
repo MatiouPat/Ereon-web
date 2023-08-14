@@ -29,7 +29,7 @@ import { mapActions } from 'vuex';
              * @param {*} e 
              */
             addToken: function(e) {
-                if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor-zone'))) {
+                if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor'))) {
                     this.addTokenOnMap({
                         id: e.target.alt,
                         mercure: false
@@ -49,6 +49,7 @@ import { mapActions } from 'vuex';
 <style scoped>
     .assets-box {
         display: flex;
+        flex-wrap: wrap;
         gap: 8px;
     }
 </style>
