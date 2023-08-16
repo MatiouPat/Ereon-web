@@ -189,7 +189,7 @@ import { mapGetters } from 'vuex';
                     this.musics = response.data['hydra:member']
                 })
 
-            this.emitter.on('playMusic', () => {
+            this.emitter.on('isDownload', () => {
                 axios.get('/api/music_players?world.id=' + this.getWorld.id)
                     .then(response => {
                         let musicPlayer = response.data['hydra:member'][0]

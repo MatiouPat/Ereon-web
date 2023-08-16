@@ -14,6 +14,7 @@ let editor = createApp({
 })
 
 editor.use(store)
+editor.config.globalProperties.emitter = emitter;
 
 editor.mount('#editor')
 

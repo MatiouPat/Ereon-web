@@ -110,6 +110,9 @@ import { mapActions, mapGetters } from 'vuex';
         props: [
             'id'
         ],
+        emits: [
+            'isMoving'
+        ],
         computed: {
             ...mapGetters('map', [
                 'map',
@@ -210,6 +213,7 @@ import { mapActions, mapGetters } from 'vuex';
                 let left = this.token.left
                 let top = this.token.top
                 e.preventDefault();
+                this.$emit('isMoving')
                 if (e.screenX - this.startX > -this.token.width/2 && e.screenX - this.startX < this.map.width - this.token.width/2) {
                     left += e.screenX - this.$refs.token.offsetLeft - this.startX
                 }

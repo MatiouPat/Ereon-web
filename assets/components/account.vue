@@ -105,9 +105,9 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                 axios.get('/api/users?connections.isGameMaster=false&connections.world.id=' + world.id)
                     .then(response => {
                         this.setPlayers(response.data['hydra:member'])
+                        this.emitter.emit("isDownload")
                     })
                 this.downloadPersonages()
-                this.emitter.emit("playMusic")
                 this.isConnected = true
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);

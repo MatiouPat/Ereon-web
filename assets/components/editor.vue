@@ -1,10 +1,10 @@
 <template>
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
-            <!--<canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
+            <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
             <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
-            <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>-->
-            <Token :id="token.id" v-for="token in tokens"></Token>
+            <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
+            <Token :id="token.id" @is-moving="draw" v-for="token in tokens"></Token>
         </div>
         <div class="editor-zoom">
             <span class="editor-zoom-ratio">{{(ratio * 100).toFixed(0)}}</span>
@@ -116,30 +116,32 @@ import { mapActions, mapGetters } from 'vuex';
             onContextMenu: function (e) {
                 e.preventDefault();
             },
-            /*draw: function (e) {
-                let pos = {x: e.layerX, y: e.layerY };
-                console.log(this.tokens)
-                let x = pos.x;
-                let y = pos.y;
+            draw: function () {
+                //let pos = {x: e.layerX, y: e.layerY };
+                console.log(this.tokens[0].top)
+                /*let x = pos.x;
+                let y = pos.y;*/
+                let x = this.tokens[0].left
+                let y = this.tokens[0].top
 
                 this.fog.clearRect(0, 0, this.map.width, this.map.height)
                 this.dark.clearRect(0, 0, this.map.width, this.map.height)
 
                 this.fog.globalAlpha = 1;
-                this.fog.fillStyle = "black";
+                this.fog.fillStyle = 'black';
                 this.fog.fillRect(0, 0, this.map.width, this.map.height);
                 this.fog.globalCompositeOperation = 'destination-out';
-                let fog_gd = this.fog.createRadialGradient(x, y, 150, x, y, 0)
-                fog_gd.addColorStop(0, 'rgba(0, 0, 0, 0)');
-                fog_gd.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+                let fog_gd = this.fog.createRadialGradient(x, y, 600, x, y, 0)
+                fog_gd.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                fog_gd.addColorStop(1, 'rgba(255, 255, 255, 1)');
                 this.fog.fillStyle = fog_gd
                 this.fog.beginPath();
-                this.fog.arc(x, y, 150, 0, 2*Math.PI);
+                this.fog.arc(x, y, 400, 0, 2*Math.PI);
                 this.fog.closePath()
                 this.fog.fill();
 
                 this.fog.globalCompositeOperation = this.dark.globalCompositeOperation = this.main.globalCompositeOperation
-            }*/
+            },
             zoomIn: function () {
                 if (this.ratio < 2.3) {
                     this.ratio = Number(this.ratio) + 0.01
@@ -152,9 +154,9 @@ import { mapActions, mapGetters } from 'vuex';
             }
         },
         mounted() {
-            /*this.main = this.$refs.main.getContext("2d");
+            this.main = this.$refs.main.getContext("2d");
             this.fog = this.$refs.fog.getContext("2d");
-            this.dark = this.$refs.fog.getContext("2d");*/
+            this.dark = this.$refs.fog.getContext("2d");
 
 
             const postUrl = new URL(process.env.MERCURE_PUBLIC_URL);
@@ -207,6 +209,10 @@ import { mapActions, mapGetters } from 'vuex';
 
             this.$refs.editorWrapper.scrollTop = 2048
             this.$refs.editorWrapper.scrollLeft = 2048
+
+            this.emitter.on('isDownload', () => {
+                this.draw()
+            })
         }
     }
 </script>
@@ -299,6 +305,6 @@ import { mapActions, mapGetters } from 'vuex';
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 100;
+        z-index: 10;
     }
 </style>
