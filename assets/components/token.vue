@@ -118,7 +118,8 @@ import { mapActions, mapGetters } from 'vuex';
                 'map',
                 'getTokenById',
                 'canControlledBy',
-                'getIndexOfUser'
+                'getIndexOfUser',
+                'getRatio'
             ]),
             ...mapGetters('user', [
                 'getUserId',
@@ -130,7 +131,7 @@ import { mapActions, mapGetters } from 'vuex';
              */
             token() {
                 return this.getTokenById(this.id)
-            },
+            }
         },
         methods: {
             ...mapActions('map', [
@@ -186,8 +187,8 @@ import { mapActions, mapGetters } from 'vuex';
                     e.preventDefault();
                     if(e.button === 0) {
                         this.isResizing = true;
-                        this.startX = e.screenX - this.$refs.token.offsetLeft;
-                        this.startY = e.screenY - this.$refs.token.offsetTop;
+                        this.startX = (e.screenX / this.getRatio) - this.$refs.token.offsetLeft
+                        this.startY = (e.screenY / this.getRatio) - this.$refs.token.offsetTop
                         document.addEventListener('keydown', this.removeToken)
                         document.addEventListener('mousemove', this.onMove)
                         document.addEventListener('mouseup', () => {
@@ -214,18 +215,18 @@ import { mapActions, mapGetters } from 'vuex';
                 let top = this.token.top
                 e.preventDefault();
                 this.$emit('isMoving')
-                if (e.screenX - this.startX > -this.token.width/2 && e.screenX - this.startX < this.map.width - this.token.width/2) {
-                    left += e.screenX - this.$refs.token.offsetLeft - this.startX
+                if ((e.screenX / this.getRatio) - this.startX > -this.token.width/2 && (e.screenX / this.getRatio) - this.startX < this.map.width - this.token.width/2) {
+                    left = (e.screenX / this.getRatio) - this.startX
                 }
-                if (e.screenY - this.startY > -this.token.height/2 && e.screenY - this.startY < this.map.height - this.token.height/2) {
-                    top += e.screenY - this.$refs.token.offsetTop - this.startY
+                if ((e.screenY / this.getRatio) - this.startY > -this.token.height/2 && (e.screenY / this.getRatio) - this.startY < this.map.height - this.token.height/2) {
+                    top = (e.screenY / this.getRatio) - this.startY
                 }
                 this.updateToken({
                     id: this.token.id,
                     width: this.token.width,
                     height: this.token.height,
-                    left: left,
-                    top: top,
+                    left: Math.floor(left),
+                    top: Math.floor(top),
                     zIndex: this.token.zIndex
                 })
             },

@@ -9,7 +9,7 @@
         <div class="editor-zoom">
             <span class="editor-zoom-ratio">{{(ratio * 100).toFixed(0)}}</span>
             <button class="editor-zoom-add-btn" @mousedown="zoomIn">+</button>
-            <input class="editor-zoom-bar" type="range" min="0.1" max="2.3" v-model="ratio" step="0.01">
+            <input class="editor-zoom-bar" type="range" min="0.1" max="2.3" v-model="ratio" step="0.01" @change="updateRatio">
             <button class="editor-zoom-minus-btn" @mousedown="zoomOut">-</button>
         </div>
     </div>
@@ -49,22 +49,24 @@ import { mapActions, mapGetters } from 'vuex';
                  * The Y position at which the user begins scrolling in relation to the map
                  */
                 mapY: 0,
-                /*fog: null,
+                fog: null,
                 dark: null,
-                main: null*/
+                main: null
             }
         },
         computed: {
             ...mapGetters('map', [
                 'map',
-                'tokens'
+                'tokens',
+                'getRatio'
             ])
         },
         methods: {
             ...mapActions('map', [
                 'addTokenOnMap',
                 'updateToken',
-                'removeTokenOnMap'
+                'removeTokenOnMap',
+                'setRatio'
             ]),
             /**
              * Starts scrolling the map after right-clicking
@@ -145,12 +147,17 @@ import { mapActions, mapGetters } from 'vuex';
             zoomIn: function () {
                 if (this.ratio < 2.3) {
                     this.ratio = Number(this.ratio) + 0.01
+                    this.updateRatio()
                 }
             },
             zoomOut: function () {
                 if (this.ratio > 0.1) {
                     this.ratio = Number(this.ratio) - 0.01
+                    this.updateRatio()
                 }
+            },
+            updateRatio: function () {
+                this.setRatio(this.ratio)
             }
         },
         mounted() {
