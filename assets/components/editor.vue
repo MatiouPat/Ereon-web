@@ -119,10 +119,6 @@ import { mapActions, mapGetters } from 'vuex';
                 e.preventDefault();
             },
             draw: function () {
-                //let pos = {x: e.layerX, y: e.layerY };
-                console.log(this.tokens[0].top)
-                /*let x = pos.x;
-                let y = pos.y;*/
                 let x = this.tokens[0].left
                 let y = this.tokens[0].top
 
