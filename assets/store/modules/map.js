@@ -8,7 +8,8 @@ const state = {
         id: null,
         name: '',
         width: null,
-        height: null
+        height: null,
+        hasDynamicLight: false
     },
     /**
      * The list of tokens present on the current map
@@ -166,6 +167,7 @@ const mutations = {
         state.map.name = map.name
         state.map.width = map.width
         state.map.height = map.height
+        state.map.hasDynamicLight = map.hasDynamicLight
         /*Tokens*/
         state.tokens = []
         map.tokens.forEach(token => {

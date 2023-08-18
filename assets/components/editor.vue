@@ -4,7 +4,12 @@
             <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
             <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
             <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
-            <Token :id="token.id" @is-moving="draw" :key="token.id" v-for="token in tokens"></Token>
+            <div v-if="map.hasDynamicLight">
+                <Token :id="token.id" @is-moving="draw" :key="token.id" v-for="token in tokens"></Token>
+            </div>
+            <div v-else>
+                <Token :id="token.id" :key="token.id" v-for="token in tokens"></Token>
+            </div>
         </div>
         <div class="editor-zoom">
             <span class="editor-zoom-ratio">{{(ratio * 100).toFixed(0)}}</span>
@@ -216,7 +221,9 @@ import { mapActions, mapGetters } from 'vuex';
             (this.$refs.editorWrapper as HTMLElement).scrollLeft = 2048;
 
             this.emitter.on('isDownload', () => {
-                this.draw()
+                if (this.map.hasDynamicLight) {
+                    this.draw()
+                }
             })
         }
     })

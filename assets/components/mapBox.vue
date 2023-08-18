@@ -29,6 +29,12 @@
                             </div>
                             <div class="row">
                                 <div class="field">
+                                    <label>Dynamic light</label>
+                                    <input v-model="map.hasDynamicLight" type="checkbox">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="field">
                                     <label>Width</label>
                                     <input v-model="map.width" type="number">
                                 </div>
@@ -81,7 +87,8 @@ import { Connection } from '../interfaces/connection';
                     id: 0,
                     name: "",
                     width: 0,
-                    height: 0
+                    height: 0,
+                    hasDynamicLight: false
                 },
                 /**
                  * The list of connections between this world and the various users
@@ -140,6 +147,7 @@ import { Connection } from '../interfaces/connection';
                         this.map.name = map.name 
                         this.map.width = map.width 
                         this.map.height = map.height 
+                        this.map.hasDynamicLight = map.hasDynamicLight
                     })
                 axios.get('/api/connections?world.id=' + this.getWorld.id)
                     .then(response => {
@@ -168,6 +176,7 @@ import { Connection } from '../interfaces/connection';
                     name: this.map.name,
                     width: this.map.width,
                     height: this.map.height,
+                    hasDynamicLight: this.map.hasDynamicLight,
                     connections: connections
                 }, {
                     headers: {

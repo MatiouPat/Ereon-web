@@ -43,6 +43,10 @@ class Map
     #[Groups("map:read")]
     private ?int $height = null;
 
+    #[ORM\Column]
+    #[Groups("map:read")]
+    private ?bool $hasDynamicLight = null;
+
     #[ORM\OneToMany(mappedBy: 'map', targetEntity: Token::class, orphanRemoval: true)]
     #[Groups("map:read")]
     private Collection $tokens;
@@ -98,6 +102,18 @@ class Map
     public function setHeight(int $height): self
     {
         $this->height = $height;
+
+        return $this;
+    }
+
+    public function isHasDynamicLight(): ?bool
+    {
+        return $this->hasDynamicLight;
+    }
+
+    public function setHasDynamicLight(bool $hasDynamicLight): self
+    {
+        $this->hasDynamicLight = $hasDynamicLight;
 
         return $this;
     }

@@ -4,6 +4,7 @@ export interface Map {
   name?: string;
   width?: number;
   height?: number;
+  hasDynamicLight?: boolean;
   tokens?: any;
   connections?: any;
 }
