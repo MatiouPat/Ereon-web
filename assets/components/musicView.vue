@@ -51,13 +51,13 @@
                 </tr>
             </thead>
             <tbody v-if="isGameMaster">
-                <tr @click="changeMusic(index)" v-for="(music, index) in musics">
+                <tr @click="changeMusic(index)" v-for="(music, index) in musics" :key="music.id">
                     <td>{{ index+1 }}</td>
                     <td>{{ music.title }}</td>
                 </tr>
             </tbody>
             <tbody v-else>
-                <tr v-for="(music, index) in musics">
+                <tr v-for="(music, index) in musics" :key="music.id">
                     <td>{{ index+1 }}</td>
                     <td>{{ music.title }}</td>
                 </tr>
@@ -66,19 +66,21 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from 'axios';
+import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
+import { Music } from '../interfaces/music';
 
   
-    export default {
+    export default defineComponent({
         data() {
             return {
-                musicPlayerId : 0,
-                userWorldParametersId : 0,
-                isPlaying: false,
-                isLooping: false,
-                globalVolume: 1,
+                musicPlayerId : 0 as number,
+                userWorldParametersId : 0 as number,
+                isPlaying: false as boolean,
+                isLooping: false as boolean,
+                globalVolume: 1 as number,
                 currentMusic: {
                     title: "Bastion",
                     link: "01 Bastion.mp3",
@@ -87,7 +89,7 @@ import { mapGetters } from 'vuex';
                     currentTime: 0,
                     displayedCurrentTime: ""
                 },
-                musics: []
+                musics: [] as Music[]
             }
         },
         computed: {
@@ -236,7 +238,7 @@ import { mapGetters } from 'vuex';
                     })
             })
         }
-    }
+    })
 </script>
 
 <style scoped>

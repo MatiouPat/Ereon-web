@@ -50,7 +50,7 @@
                         </div>
                         <div class="form-part" v-if="getPlayers.length">
                             <h3>Contrôle</h3>
-                            <div v-for="player in getPlayers">
+                            <div v-for="player in getPlayers" :key="player.id">
                                 <label>{{ player.username }}</label>
                                 <input type="checkbox" :value="player.id" :checked="canControlledBy(player.id, token.id)" @change="addTokenPlayer">
                             </div>
@@ -77,34 +77,35 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 
-    export default {
+    export default defineComponent({
         data() {
             return {
                 /**
                  * The token being resized
                  */
-                resizer: null,
+                resizer: null as HTMLElement,
                 /**
                  * If you need to display resizers to resize the token
                  */
-                isResizing: false,
+                isResizing: false as boolean,
                 /**
                  * If you need to display the context box
                  */
-                isContexting: false,
+                isContexting: false as boolean,
                 /**
                  * If you need to display token parameters
                  */
-                isPropertiesContexting: false,
-                startX: 0,
-                startY: 0,
-                startWidth: 0,
-                startHeight: 0,
-                startMouseX: 0,
-                startMouseY: 0
+                isPropertiesContexting: false as boolean,
+                startX: 0 as number,
+                startY: 0 as number,
+                startWidth: 0 as number,
+                startHeight: 0 as number,
+                startMouseX: 0 as number,
+                startMouseY: 0 as number
             }
         },
         props: [
@@ -393,7 +394,7 @@ import { mapActions, mapGetters } from 'vuex';
                 this.isPropertiesContexting = false
             }
         }
-    }
+    })
 </script>
 
 <style scoped>

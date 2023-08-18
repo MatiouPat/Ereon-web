@@ -17,13 +17,14 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import DialogView from './dialogView.vue'
 import AssetView from './assetView.vue'
 import MusicView from './musicView.vue'
 import { mapGetters } from 'vuex'
+import { defineComponent } from 'vue'
 
-    export default {
+    export default defineComponent({
         components: {
             DialogView,
             MusicView,
@@ -59,7 +60,7 @@ import { mapGetters } from 'vuex'
                 this.pageIndex = index
             }
         }
-    }
+    })
 </script>
 
 <style scoped>

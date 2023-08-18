@@ -8,6 +8,8 @@
         "core-js": "^3.23.0",
         "file-loader": "^6.2.0",
         "regenerator-runtime": "^0.13.9",
+        "ts-loader": "^9.4.4",
+        "typescript": "^5.1.6",
         "vue": "^3.3.4",
         "vue-loader": "^17.2.2",
         "webpack": "^5.74.0",

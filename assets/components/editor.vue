@@ -4,7 +4,7 @@
             <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
             <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
             <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
-            <Token :id="token.id" @is-moving="draw" v-for="token in tokens"></Token>
+            <Token :id="token.id" @is-moving="draw" :key="token.id" v-for="token in tokens"></Token>
         </div>
         <div class="editor-zoom">
             <span class="editor-zoom-ratio">{{(ratio * 100).toFixed(0)}}</span>
@@ -15,11 +15,12 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import Token from './token.vue'
 import { mapActions, mapGetters } from 'vuex';
 
-    export default {
+    export default defineComponent({
         components: {
             Token
         },
@@ -28,30 +29,30 @@ import { mapActions, mapGetters } from 'vuex';
                 /**
                  * The zoom in on the map
                  */
-                ratio: 1,
+                ratio: 1 as number,
                 /**
                  * The margin around the map
                  */
-                margin: 200,
+                margin: 200 as number,
                 /**
                  * The X position where the user begins scrolling
                  */
-                startX: 0,
+                startX: 0 as number,
                 /**
                  * The Y position where the user begins scrolling
                  */
-                startY: 0,
+                startY: 0 as number,
                 /**
                  * The X position at which the user begins scrolling in relation to the map
                  */
-                mapX: 0,
+                mapX: 0 as number,
                 /**
                  * The Y position at which the user begins scrolling in relation to the map
                  */
-                mapY: 0,
-                fog: null,
-                dark: null,
-                main: null
+                mapY: 0 as number,
+                fog: null as CanvasRenderingContext2D,
+                dark: null as CanvasRenderingContext2D,
+                main: null as CanvasRenderingContext2D
             }
         },
         computed: {
@@ -217,7 +218,7 @@ import { mapActions, mapGetters } from 'vuex';
                 this.draw()
             })
         }
-    }
+    })
 </script>
 
 <style scoped>

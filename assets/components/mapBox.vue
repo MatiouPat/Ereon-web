@@ -1,7 +1,7 @@
 <template>
     <div class="map-box" v-if="isGameMaster" :class="{isDisplayed: isDisplayed}">
         <div class="maps">
-            <div class="map" @click="chooseMap(map.id)" v-for="map in maps" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
+            <div class="map" @click="chooseMap(map.id)" v-for="map in maps" :key="map.id" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
                 <span>{{ map.name }}</span>
                 <ul class="map-actions">
                     <li><img @click.stop="showMapParameter(map.id)" src="build/images/settings.svg" alt="Paramètres" width="16" height="16"></li>
@@ -40,7 +40,7 @@
                         </div>
                         <div class="form-part" v-if="connections.length">
                             <h3>Sur map</h3>
-                            <div v-for="connection in connections">
+                            <div v-for="connection in connections" :key="connection.id">
                                 <label>{{ connection.username }}</label>
                                 <input type="checkbox" v-model="connection.checked" :checked="connection.checked">
                             </div>
@@ -57,21 +57,23 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from 'axios';
+import { defineComponent } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
+import { Connection } from '../interfaces/connection';
 
-    export default {
+    export default defineComponent({
         data() {
             return {
                 /**
                  * If the maps are displayed
                  */
-                isDisplayed: false,
+                isDisplayed: false as boolean,
                 /**
                  * If the map parameters box is displayed
                  */
-                isParametersDisplayed: false,
+                isParametersDisplayed: false as boolean,
                 /**
                  * The map parameters related to the form
                  */
@@ -84,7 +86,11 @@ import { mapActions, mapGetters } from 'vuex';
                 /**
                  * The list of connections between this world and the various users
                  */
-                connections: []
+                connections: [] as {
+                    id: number
+                    username: string
+                    checked: boolean 
+                }[]
             }
         },
         props: [
@@ -182,7 +188,7 @@ import { mapActions, mapGetters } from 'vuex';
                 }
             }
         }
-    }
+    })
 </script>
 
 <style scoped>

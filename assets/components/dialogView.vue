@@ -1,7 +1,7 @@
 <template>
     <div class="dialog-box">
         <div class="messages" ref="messages">
-            <DialogMessage v-for="message in messages" :key="message.id" :dice="message"></DialogMessage>
+            <DialogMessage v-for="(message, index) in messages" :key="index" :dice="message"></DialogMessage>
         </div>
         <div class="textinput">
             <textarea :disabled="isDisabled" :class="{isDisabled: isDisabled}" v-model="computation" @keydown.enter="rollDice"></textarea>
@@ -41,12 +41,13 @@
     </div>
 </template>
 
-<script>
-    import axios from 'axios';
-    import DialogMessage from './dialogMessage.vue'
-    import { mapGetters } from 'vuex';
+<script lang="ts">
+import axios from 'axios';
+import { mapGetters } from 'vuex';
+import { defineComponent } from 'vue';
+import DialogMessage from './dialogMessage.vue';
 
-    export default {
+    export default defineComponent({
         components: {
             DialogMessage
         },
@@ -55,11 +56,11 @@
                 /**
                  * The list of all messages
                  */
-                messages: [],
+                messages: [] as [],
                 /**
                  * The dice roll requested by the user mapped to the textarea
                  */
-                computation: ''
+                computation: "" as string
             }
         },
         computed: {
@@ -111,8 +112,8 @@
         },
         updated() {
             this.$refs.messages.scrollTop = this.$refs.messages.scrollTopMax
-        },
-    }
+        }
+    })
 </script>
 
 <style scoped>
