@@ -30,10 +30,10 @@ import { Asset } from '../interfaces/asset';
              * Add a token with the selected asset to the current map 
              * @param {*} e 
              */
-            addToken: function(e) {
-                if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor'))) {
+            addToken: function(e: DragEvent) {
+                if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor')!)) {
                     this.addTokenOnMap({
-                        id: e.target.alt,
+                        id: (e.target as HTMLImageElement).alt,
                         mercure: false
                     })
                 }

@@ -21,6 +21,8 @@ let account = createApp({
     }
 })
 
+
+account.provide("$store", store);
 account.use(store)
 account.provide('emitter', emitter);
 

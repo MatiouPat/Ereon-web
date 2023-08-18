@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import Token from './token.vue'
 import { mapActions, mapGetters } from 'vuex';
 
@@ -26,6 +26,7 @@ import { mapActions, mapGetters } from 'vuex';
         },
         data() {
             return {
+                emitter: inject('emitter') as any,
                 /**
                  * The zoom in on the map
                  */
@@ -50,9 +51,9 @@ import { mapActions, mapGetters } from 'vuex';
                  * The Y position at which the user begins scrolling in relation to the map
                  */
                 mapY: 0 as number,
-                fog: null as CanvasRenderingContext2D,
-                dark: null as CanvasRenderingContext2D,
-                main: null as CanvasRenderingContext2D
+                fog: null as CanvasRenderingContext2D | null,
+                dark: null as CanvasRenderingContext2D | null,
+                main: null as CanvasRenderingContext2D | null
             }
         },
         computed: {
@@ -73,7 +74,7 @@ import { mapActions, mapGetters } from 'vuex';
              * Starts scrolling the map after right-clicking
              * @param {*} e 
              */
-            onMouseDown: function (e) {
+            onMouseDown: function (e: MouseEvent) {
                 if(e.button === 2) {
                     this.startX = e.screenX - this.$el.offsetLeft;
                     this.startY = e.screenY - this.$el.offsetTop;
@@ -86,7 +87,7 @@ import { mapActions, mapGetters } from 'vuex';
              * Calculating scrolling position during movement
              * @param {*} e 
              */
-            onMouseMove: function (e) {
+            onMouseMove: function (e: MouseEvent) {
                 this.$el.scrollLeft = this.mapX - (e.screenX - this.$el.offsetLeft - this.startX)
                 this.$el.scrollTop = this.mapY - (e.screenY - this.$el.offsetTop - this.startY)
             },
@@ -100,7 +101,7 @@ import { mapActions, mapGetters } from 'vuex';
              * Calculate zoom using mouse wheel
              * @param {*} e 
              */
-            onWheel: function (e) {
+            onWheel: function (e: WheelEvent) {
                 e.preventDefault();
                 if(e.ctrlKey == true){
                     if (this.ratio - e.deltaY * 0.0005 <= 0.1) {
@@ -116,30 +117,30 @@ import { mapActions, mapGetters } from 'vuex';
              * Avoid right-click context menus
              * @param {*} e 
              */
-            onContextMenu: function (e) {
+            onContextMenu: function (e: MouseEvent) {
                 e.preventDefault();
             },
             draw: function () {
                 let x = this.tokens[0].left
                 let y = this.tokens[0].top
 
-                this.fog.clearRect(0, 0, this.map.width, this.map.height)
-                this.dark.clearRect(0, 0, this.map.width, this.map.height)
+                this.fog!.clearRect(0, 0, this.map.width, this.map.height)
+                this.dark!.clearRect(0, 0, this.map.width, this.map.height)
 
-                this.fog.globalAlpha = 1;
-                this.fog.fillStyle = 'black';
-                this.fog.fillRect(0, 0, this.map.width, this.map.height);
-                this.fog.globalCompositeOperation = 'destination-out';
-                let fog_gd = this.fog.createRadialGradient(x, y, 600, x, y, 0)
+                this.fog!.globalAlpha = 1;
+                this.fog!.fillStyle = 'black';
+                this.fog!.fillRect(0, 0, this.map.width, this.map.height);
+                this.fog!.globalCompositeOperation = 'destination-out';
+                let fog_gd = this.fog!.createRadialGradient(x, y, 600, x, y, 0)
                 fog_gd.addColorStop(0, 'rgba(255, 255, 255, 0)');
                 fog_gd.addColorStop(1, 'rgba(255, 255, 255, 1)');
-                this.fog.fillStyle = fog_gd
-                this.fog.beginPath();
-                this.fog.arc(x, y, 400, 0, 2*Math.PI);
-                this.fog.closePath()
-                this.fog.fill();
+                this.fog!.fillStyle = fog_gd
+                this.fog!.beginPath();
+                this.fog!.arc(x, y, 400, 0, 2*Math.PI);
+                this.fog!.closePath()
+                this.fog!.fill();
 
-                this.fog.globalCompositeOperation = this.dark.globalCompositeOperation = this.main.globalCompositeOperation
+                this.fog!.globalCompositeOperation = this.dark!.globalCompositeOperation = this.main!.globalCompositeOperation
             },
             zoomIn: function () {
                 if (this.ratio < 2.3) {
@@ -158,12 +159,12 @@ import { mapActions, mapGetters } from 'vuex';
             }
         },
         mounted() {
-            this.main = this.$refs.main.getContext("2d");
-            this.fog = this.$refs.fog.getContext("2d");
-            this.dark = this.$refs.fog.getContext("2d");
+            this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
+            this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
+            this.dark = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
 
 
-            const postUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            const postUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
             postUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/post');
 
             const postEs = new EventSource(postUrl);
@@ -182,7 +183,7 @@ import { mapActions, mapGetters } from 'vuex';
                 })
             }
 
-            const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
             updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/update');
 
             const updateEs = new EventSource(updateUrl);
@@ -199,7 +200,7 @@ import { mapActions, mapGetters } from 'vuex';
                 })
             }
 
-            const deleteUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            const deleteUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
             deleteUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/remove');
 
             const deleteEs = new EventSource(deleteUrl);
@@ -211,8 +212,8 @@ import { mapActions, mapGetters } from 'vuex';
                 })
             }
 
-            this.$refs.editorWrapper.scrollTop = 2048
-            this.$refs.editorWrapper.scrollLeft = 2048
+            (this.$refs.editorWrapper as HTMLElement).scrollTop = 2048;
+            (this.$refs.editorWrapper as HTMLElement).scrollLeft = 2048;
 
             this.emitter.on('isDownload', () => {
                 this.draw()

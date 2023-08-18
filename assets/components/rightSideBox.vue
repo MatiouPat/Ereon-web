@@ -43,7 +43,7 @@ import { defineComponent } from 'vue'
                 /**
                  * The index to choose the component to display
                  */
-                pageIndex: 0
+                pageIndex: 0 as number
             }
         },
         computed: {
@@ -56,7 +56,7 @@ import { defineComponent } from 'vue'
              * Change the component to display
              * @param {*} index 
              */
-            choose: function(index) {
+            choose: function(index: number) {
                 this.pageIndex = index
             }
         }

@@ -122,7 +122,7 @@ import { Connection } from '../interfaces/connection';
              * Change current map 
              * @param {*} mapId 
              */
-            chooseMap: function (mapId) {
+            chooseMap: function (mapId: number) {
                 this.setMap(mapId)
                 this.setCurrentMap(mapId)
                 this.isDisplayed = false;
@@ -131,7 +131,7 @@ import { Connection } from '../interfaces/connection';
              * Display map parameters by calling the API
              * @param {*} mapId 
              */
-            showMapParameter: function (mapId) {
+            showMapParameter: function (mapId: number) {
                 this.isParametersDisplayed = true
                 axios.get('/api/maps/' + mapId)
                     .then(response => {
@@ -145,7 +145,7 @@ import { Connection } from '../interfaces/connection';
                     .then(response => {
                         let connections = response.data['hydra:member']
                         this.connections = []
-                        connections.forEach(connection => {
+                        connections.forEach((connection: Connection) => {
                             this.connections.push({
                                 id: connection.id,
                                 username: connection.user.username,
@@ -158,7 +158,7 @@ import { Connection } from '../interfaces/connection';
              * Change map settings after form submission
              */
             submitForm: function() {
-                let connections = []
+                let connections: string[] = []
                 this.connections.forEach(connection => {
                     if(connection.checked) {
                         connections.push('/api/connections/' + connection.id)
@@ -181,7 +181,7 @@ import { Connection } from '../interfaces/connection';
              * Hide context box when clicked outside it
              * @param {*} e 
              */
-            clickOutside: function(e) {
+            clickOutside: function(e: MouseEvent) {
                 if(!this.$el.contains(e.target)){
                     window.removeEventListener('click', this.clickOutside)
                     this.isDisplayed = false;

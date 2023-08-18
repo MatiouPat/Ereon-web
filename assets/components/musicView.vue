@@ -68,7 +68,7 @@
 
 <script lang="ts">
 import axios from 'axios';
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { mapGetters } from 'vuex';
 import { Music } from '../interfaces/music';
 
@@ -76,18 +76,19 @@ import { Music } from '../interfaces/music';
     export default defineComponent({
         data() {
             return {
+                emitter: inject('emitter') as any,
                 musicPlayerId : 0 as number,
                 userWorldParametersId : 0 as number,
                 isPlaying: false as boolean,
                 isLooping: false as boolean,
                 globalVolume: 1 as number,
                 currentMusic: {
-                    title: "Bastion",
-                    link: "01 Bastion.mp3",
-                    duration: 0,
-                    displayedDuration: "",
-                    currentTime: 0,
-                    displayedCurrentTime: ""
+                    title: "" as string | undefined,
+                    link: "" as string | undefined,
+                    duration: 0 as number,
+                    displayedDuration: "" as string,
+                    currentTime: 0 as number,
+                    displayedCurrentTime: "" as string
                 },
                 musics: [] as Music[]
             }
@@ -101,7 +102,7 @@ import { Music } from '../interfaces/music';
         },
         methods: {
             play: function () {
-                this.$refs.musicAudio.play()
+                (this.$refs.musicAudio as HTMLAudioElement).play()
                 this.isPlaying = true
                 console.log(this.currentMusic.currentTime)
                 axios.patch('/api/music_players/' + this.musicPlayerId, {
@@ -113,8 +114,8 @@ import { Music } from '../interfaces/music';
                     }
                 })
             },
-            pause: function (e) {
-                this.$refs.musicAudio.pause()
+            pause: function () {
+                (this.$refs.musicAudio as HTMLAudioElement).pause()
                 this.isPlaying = false
                 axios.patch('/api/music_players/' + this.musicPlayerId, {
                     isPlaying: false,
@@ -126,7 +127,7 @@ import { Music } from '../interfaces/music';
                 })
             },
             changeVolume: function () {
-                this.$refs.musicAudio.volume = this.globalVolume
+                (this.$refs.musicAudio as HTMLAudioElement).volume = this.globalVolume
                 axios.patch('/api/user_world_parameters/' + this.userWorldParametersId, {
                     musicVolume: Number(this.globalVolume) * 100
                 }, {
@@ -136,7 +137,7 @@ import { Music } from '../interfaces/music';
                 })
             },
             changeCurrentTime: function () {
-                this.$refs.musicAudio.currentTime = this.currentMusic.currentTime
+                (this.$refs.musicAudio as HTMLAudioElement).currentTime = this.currentMusic.currentTime
                 axios.patch('/api/music_players/' + this.musicPlayerId, {
                     currentTimePlay: Number(this.currentMusic.currentTime)
                 }, {
@@ -145,11 +146,11 @@ import { Music } from '../interfaces/music';
                     }
                 })
             },
-            changeMusic: function (index) {
-                this.currentMusic.link = this.musics[index].link
-                this.currentMusic.title = this.musics[index].title
-                this.$refs.musicAudio.load()
-                this.$refs.musicAudio.addEventListener('canplay', () => {
+            changeMusic: function (index: number) {
+                this.currentMusic.link = this.musics[index].link;
+                this.currentMusic.title = this.musics[index].title;
+                (this.$refs.musicAudio as HTMLAudioElement).load();
+                (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
                     this.play()
                 }, { once: true})
                 axios.patch('/api/music_players/' + this.musicPlayerId, {
@@ -162,13 +163,13 @@ import { Music } from '../interfaces/music';
                 })
             },
             updateCurrentTime: function () {
-                this.currentMusic.currentTime = this.$refs.musicAudio.currentTime;
+                this.currentMusic.currentTime =(this.$refs.musicAudio as HTMLAudioElement).currentTime;
                 let minutes = Math.floor(this.currentMusic.currentTime / 60);
                 let secondes = Math.floor(this.currentMusic.currentTime % 60);
                 this.currentMusic.displayedCurrentTime = minutes + ":" + String(secondes).padStart(2, '0');
             },
             updateDuration: function () {
-                this.currentMusic.duration = this.$refs.musicAudio.duration;
+                this.currentMusic.duration = (this.$refs.musicAudio as HTMLAudioElement).duration;
                 let minutes = Math.floor(this.currentMusic.duration / 60);
                 let secondes = Math.floor(this.currentMusic.duration % 60);
                 this.currentMusic.displayedDuration = minutes + ":" + String(secondes).padStart(2, '0');
@@ -201,14 +202,14 @@ import { Music } from '../interfaces/music';
                         this.currentMusic.title = musicPlayer.currentMusic.title
                         this.currentMusic.link = musicPlayer.currentMusic.link
                         if (this.isPlaying) {
-                            this.$refs.musicAudio.load()
-                            this.$refs.musicAudio.currentTime = musicPlayer.currentTimePlay
-                            this.$refs.musicAudio.addEventListener('canplay', () => {
-                                this.$refs.musicAudio.play()
+                            (this.$refs.musicAudio as HTMLAudioElement).load();
+                            (this.$refs.musicAudio as HTMLAudioElement).currentTime = musicPlayer.currentTimePlay
+                            (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
+                                (this.$refs.musicAudio as HTMLAudioElement).play()
                             }, { once: true})
                         }
 
-                        const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+                        const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
                         updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/musicplayer');
 
                         const updateEs = new EventSource(updateUrl);
@@ -219,14 +220,14 @@ import { Music } from '../interfaces/music';
                             this.isLooping = data.isLooping
                             this.currentMusic.title = data.currentMusic.title
                             this.currentMusic.link = data.currentMusic.link
-                            this.$refs.musicAudio.currentTime = data.currentTimePlay
+                            (this.$refs.musicAudio as HTMLAudioElement).currentTime = data.currentTimePlay
                             if (this.isPlaying && mustReload) {
-                                this.$refs.musicAudio.load()
-                                this.$refs.musicAudio.addEventListener('canplay', () => {
-                                    this.$refs.musicAudio.play()
+                                (this.$refs.musicAudio as HTMLAudioElement).load();
+                                (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
+                                    (this.$refs.musicAudio as HTMLAudioElement).play()
                                 }, { once: true})
                             }else if(!this.isPlaying) {
-                                this.$refs.musicAudio.pause()
+                                (this.$refs.musicAudio as HTMLAudioElement).pause()
                             }
                         }
                     })

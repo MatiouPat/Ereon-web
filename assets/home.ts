@@ -13,8 +13,10 @@ let editor = createApp({
     }
 })
 
+
+editor.provide("$store", store);
 editor.use(store)
-editor.config.globalProperties.emitter = emitter;
+editor.provide('emitter', emitter);
 
 editor.mount('#editor')
 
@@ -24,7 +26,8 @@ let dialogBox = createApp({
     }
 })
 
+dialogBox.provide("$store", store);
 dialogBox.use(store)
-dialogBox.config.globalProperties.emitter = emitter;
+dialogBox.provide('emitter', emitter);
 
 dialogBox.mount('#right-side-box')

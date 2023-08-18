@@ -46,6 +46,7 @@ import axios from 'axios';
 import { mapGetters } from 'vuex';
 import { defineComponent } from 'vue';
 import DialogMessage from './dialogMessage.vue';
+import { Dice } from '../interfaces/dice';
 
     export default defineComponent({
         components: {
@@ -56,7 +57,7 @@ import DialogMessage from './dialogMessage.vue';
                 /**
                  * The list of all messages
                  */
-                messages: [] as [],
+                messages: [] as any[],
                 /**
                  * The dice roll requested by the user mapped to the textarea
                  */
@@ -88,12 +89,12 @@ import DialogMessage from './dialogMessage.vue';
                     this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - d100+20-4');
                 })
             },
-            addDice: function (dice) {
+            addDice: function (dice: string) {
                 this.computation = dice
             }
         },
         mounted: function() {
-            const u = new URL(process.env.MERCURE_PUBLIC_URL);
+            const u = new URL(process.env.MERCURE_PUBLIC_URL!);
             u.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/dice');
 
             const es = new EventSource(u);
@@ -105,13 +106,10 @@ import DialogMessage from './dialogMessage.vue';
             axios.get('/api/dices')
                 .then(response => {
                     let dices = response.data['hydra:member']
-                    dices.forEach(dice => {
+                    dices.forEach((dice : Dice) => {
                         this.messages.push(dice)
                     });
                 }) 
-        },
-        updated() {
-            this.$refs.messages.scrollTop = this.$refs.messages.scrollTopMax
         }
     })
 </script>
