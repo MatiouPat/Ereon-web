@@ -42,7 +42,8 @@
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#565656" class="music-controls-loop" :class="{ active: isLooping }"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
             </div>
         </div>
-        <audio @volumechange="changeVolume" @timeupdate="updateCurrentTime" @loadeddata="updateDuration" ref="musicAudio" :src="'uploads/musics/' + currentMusic.link" :loop="isLooping"></audio>
+        <audio v-if="currentMusic.link" @volumechange="changeVolume" @timeupdate="updateCurrentTime" @loadeddata="updateDuration" ref="musicAudio" :src="'uploads/musics/' + currentMusic.link" :loop="isLooping"></audio>
+        <audio v-else @volumechange="changeVolume" @timeupdate="updateCurrentTime" @loadeddata="updateDuration" ref="musicAudio" :loop="isLooping"></audio>
         <table class="music-list" :class="{isDisable: !isGameMaster}">
             <thead>
                 <tr>
@@ -102,9 +103,8 @@ import { Music } from '../interfaces/music';
         },
         methods: {
             play: function () {
-                (this.$refs.musicAudio as HTMLAudioElement).play()
-                this.isPlaying = true
-                console.log(this.currentMusic.currentTime)
+                (this.$refs.musicAudio as HTMLAudioElement).play();
+                this.isPlaying = true;
                 axios.patch('/api/music_players/' + this.musicPlayerId, {
                     isPlaying: true,
                     currentTimePlay: this.currentMusic.currentTime
@@ -112,11 +112,11 @@ import { Music } from '../interfaces/music';
                     headers: {
                         'Content-Type': 'application/merge-patch+json'
                     }
-                })
+                });
             },
             pause: function () {
-                (this.$refs.musicAudio as HTMLAudioElement).pause()
-                this.isPlaying = false
+                (this.$refs.musicAudio as HTMLAudioElement).pause();
+                this.isPlaying = false;
                 axios.patch('/api/music_players/' + this.musicPlayerId, {
                     isPlaying: false,
                     currentTimePlay: this.currentMusic.currentTime
@@ -124,43 +124,44 @@ import { Music } from '../interfaces/music';
                     headers: {
                         'Content-Type': 'application/merge-patch+json'
                     }
-                })
+                });
             },
             changeVolume: function () {
-                (this.$refs.musicAudio as HTMLAudioElement).volume = this.globalVolume
+                (this.$refs.musicAudio as HTMLAudioElement).volume = this.globalVolume;
                 axios.patch('/api/user_world_parameters/' + this.userWorldParametersId, {
-                    musicVolume: Number(this.globalVolume) * 100
+                    musicVolume: Number((this.globalVolume * 100).toPrecision(2))
                 }, {
                     headers: {
                         'Content-Type': 'application/merge-patch+json'
                     }
-                })
+                });
             },
             changeCurrentTime: function () {
-                (this.$refs.musicAudio as HTMLAudioElement).currentTime = this.currentMusic.currentTime
+                (this.$refs.musicAudio as HTMLAudioElement).currentTime = this.currentMusic.currentTime;
                 axios.patch('/api/music_players/' + this.musicPlayerId, {
                     currentTimePlay: Number(this.currentMusic.currentTime)
                 }, {
                     headers: {
                         'Content-Type': 'application/merge-patch+json'
                     }
-                })
+                });
             },
             changeMusic: function (index: number) {
                 this.currentMusic.link = this.musics[index].link;
                 this.currentMusic.title = this.musics[index].title;
+                this.currentMusic.currentTime = 0;
                 (this.$refs.musicAudio as HTMLAudioElement).load();
                 (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
-                    this.play()
-                }, { once: true})
+                    this.play();
+                }, { once: true});
                 axios.patch('/api/music_players/' + this.musicPlayerId, {
                     currentMusic: 'api/music/' + this.musics[index].id,
-                    currentTimePlay: 0
+                    currentTimePlay: this.currentMusic.currentTime
                 }, {
                     headers: {
                         'Content-Type': 'application/merge-patch+json'
                     }
-                })
+                });
             },
             updateCurrentTime: function () {
                 this.currentMusic.currentTime =(this.$refs.musicAudio as HTMLAudioElement).currentTime;
@@ -175,38 +176,37 @@ import { Music } from '../interfaces/music';
                 this.currentMusic.displayedDuration = minutes + ":" + String(secondes).padStart(2, '0');
             },
             loop: function () {
-                this.isLooping = !this.isLooping
+                this.isLooping = !this.isLooping;
                 axios.patch('/api/music_players/' + this.musicPlayerId, {
-                    isLooping: this.isLooping,
-                    currentTimePlay: this.currentMusic.currentTime
+                    isLooping: this.isLooping
                 }, {
                     headers: {
                         'Content-Type': 'application/merge-patch+json'
                     }
-                })
+                });
             }
         },
         mounted() {
             axios.get('/api/music')
                 .then(response => {
                     this.musics = response.data['hydra:member']
-                })
+                });
 
             this.emitter.on('isDownload', () => {
                 axios.get('/api/music_players?world.id=' + this.getWorld.id)
                     .then(response => {
-                        let musicPlayer = response.data['hydra:member'][0]
-                        this.musicPlayerId = musicPlayer.id
-                        this.isPlaying = musicPlayer.isPlaying
-                        this.isLooping = musicPlayer.isLooping
-                        this.currentMusic.title = musicPlayer.currentMusic.title
-                        this.currentMusic.link = musicPlayer.currentMusic.link
+                        let musicPlayer = response.data['hydra:member'][0];
+                        this.musicPlayerId = musicPlayer.id;
+                        this.isPlaying = musicPlayer.isPlaying;
+                        this.isLooping = musicPlayer.isLooping;
+                        this.currentMusic.title = musicPlayer.currentMusic.title;
+                        this.currentMusic.link = musicPlayer.currentMusic.link;
                         if (this.isPlaying) {
                             (this.$refs.musicAudio as HTMLAudioElement).load();
-                            (this.$refs.musicAudio as HTMLAudioElement).currentTime = musicPlayer.currentTimePlay
+                            (this.$refs.musicAudio as HTMLAudioElement).currentTime = musicPlayer.currentTimePlay;
                             (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
-                                (this.$refs.musicAudio as HTMLAudioElement).play()
-                            }, { once: true})
+                                (this.$refs.musicAudio as HTMLAudioElement).play();
+                            }, { once: true});
                         }
 
                         const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
@@ -214,29 +214,29 @@ import { Music } from '../interfaces/music';
 
                         const updateEs = new EventSource(updateUrl);
                         updateEs.onmessage = e => {
-                            let data = JSON.parse(e.data)
-                            let mustReload = this.isPlaying != data.isPlaying || this.currentMusic.link != data.currentMusic.link
-                            this.isPlaying = data.isPlaying
-                            this.isLooping = data.isLooping
-                            this.currentMusic.title = data.currentMusic.title
-                            this.currentMusic.link = data.currentMusic.link
-                            (this.$refs.musicAudio as HTMLAudioElement).currentTime = data.currentTimePlay
+                            let data = JSON.parse(e.data);
+                            let mustReload = this.isPlaying != data.isPlaying || this.currentMusic.link != data.currentMusic.link;
+                            this.isPlaying = data.isPlaying;
+                            this.isLooping = data.isLooping;
+                            this.currentMusic.title = data.currentMusic.title;
+                            this.currentMusic.link = data.currentMusic.link;
+                            (this.$refs.musicAudio as HTMLAudioElement).currentTime = data.currentTimePlay;
                             if (this.isPlaying && mustReload) {
                                 (this.$refs.musicAudio as HTMLAudioElement).load();
                                 (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
-                                    (this.$refs.musicAudio as HTMLAudioElement).play()
-                                }, { once: true})
+                                    (this.$refs.musicAudio as HTMLAudioElement).play();
+                                }, { once: true});
                             }else if(!this.isPlaying) {
-                                (this.$refs.musicAudio as HTMLAudioElement).pause()
+                                (this.$refs.musicAudio as HTMLAudioElement).pause();
                             }
                         }
-                    })
+                    });
                 axios.get('/api/user_world_parameters?user.id=' + this.getUserId + '&world.id=' + this.getWorld.id)
                     .then(response => {
                         let userWorldParameter = response.data['hydra:member'][0];
-                        this.userWorldParametersId = userWorldParameter.id
-                        this.globalVolume = userWorldParameter.musicVolume / 100
-                    })
+                        this.userWorldParametersId = userWorldParameter.id;
+                        this.globalVolume = userWorldParameter.musicVolume / 100;
+                    });
             })
         }
     })
