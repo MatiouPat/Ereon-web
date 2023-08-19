@@ -2,7 +2,7 @@
     <div class="assets-box">
         <picture v-for="asset in assets" @dragend="addToken" :key="asset.id">
             <source type="image/webp" :srcset="'/uploads/images/asset/' + asset.compressedImage">
-            <img :src="'/uploads/images/asset/' + asset.image" alt="" width="64" height="64">
+            <img :src="'/uploads/images/asset/' + asset.image" :alt="asset.id.toString()" width="64" height="64">
         </picture>
     </div>
 </template>
