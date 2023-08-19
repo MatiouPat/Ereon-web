@@ -1,10 +1,10 @@
 <template>
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
-            <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
-            <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
-            <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
             <div v-if="map.hasDynamicLight">
+                <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
+                <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
+                <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
                 <Token :id="token.id" @is-moving="draw" :key="token.id" v-for="token in tokens"></Token>
             </div>
             <div v-else>
@@ -164,9 +164,11 @@ import { mapActions, mapGetters } from 'vuex';
             }
         },
         mounted() {
-            this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
-            this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
-            this.dark = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
+            if (this.map.hasDynamicLight) {
+                this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
+                this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
+                this.dark = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
+            }
 
 
             const postUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
