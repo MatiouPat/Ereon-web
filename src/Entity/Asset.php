@@ -14,7 +14,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations: [
         new GetCollection()
-    ]
+    ],
+    paginationEnabled: false
 )]
 class Asset
 {
