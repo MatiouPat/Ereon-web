@@ -8,12 +8,14 @@ const state = {
         id: null,
         name: '',
         width: null,
-        height: null
+        height: null,
+        hasDynamicLight: false
     },
     /**
      * The list of tokens present on the current map
      */
-    tokens: []
+    tokens: [],
+    ratio: 1
 }
 
 const getters = {
@@ -31,6 +33,9 @@ const getters = {
     },
     getIndexOfUser: (state) => (user, tokenId) => {
         return state.tokens.find(token => token.id === tokenId).users.indexOf(user)
+    },
+    getRatio: (state) => {
+        return state.ratio
     }
 }
 
@@ -149,6 +154,9 @@ const actions = {
                 'Content-Type': 'application/merge-patch+json'
             }
         })
+    },
+    setRatio({commit}, data) {
+        commit('setRatio', data)
     }
 }
 
@@ -159,6 +167,7 @@ const mutations = {
         state.map.name = map.name
         state.map.width = map.width
         state.map.height = map.height
+        state.map.hasDynamicLight = map.hasDynamicLight
         /*Tokens*/
         state.tokens = []
         map.tokens.forEach(token => {
@@ -218,6 +227,9 @@ const mutations = {
     },
     changeZIndex(state, data) {
         token.zIndex = data.zIndex
+    },
+    setRatio(state, data) {
+        state.ratio = data
     }
 }
 

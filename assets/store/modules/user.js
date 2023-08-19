@@ -45,6 +45,9 @@ const getters = {
     getUserId: (state) => {
         return state.userId
     },
+    getUsername: (state) => {
+        return state.username
+    },
     getPlayers: (state) => {
         return state.players
     },

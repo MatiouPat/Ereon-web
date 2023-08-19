@@ -12,8 +12,10 @@
     </div>
 </template>
 
-<script>
-    export default {
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+    export default defineComponent({
         props: [
             'dice'
         ],
@@ -25,7 +27,7 @@
                 return '(' + this.dice.brutValue + ')' + this.dice.computation.replace(/d[1-9]\d*/, '')
             }
         }
-    }
+    })
 </script>
 
 <style scoped>

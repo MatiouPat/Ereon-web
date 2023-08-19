@@ -6,7 +6,7 @@
  */
 
 // any CSS you import will output into a single css file (app.css in this case)
-import './styles/app.css';
+import './styles/main.css';
 
 // start the Stimulus application
 import './bootstrap';
@@ -21,7 +21,9 @@ let account = createApp({
     }
 })
 
+
+account.provide("$store", store);
 account.use(store)
-account.config.globalProperties.emitter = emitter;
+account.provide('emitter', emitter);
 
 account.mount('#header')

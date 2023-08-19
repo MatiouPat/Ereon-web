@@ -1,7 +1,7 @@
 <template>
     <div class="dialog-box">
         <div class="messages" ref="messages">
-            <DialogMessage v-for="message in messages" :key="message.id" :dice="message"></DialogMessage>
+            <DialogMessage v-for="(message, index) in messages" :key="index" :dice="message"></DialogMessage>
         </div>
         <div class="textinput">
             <textarea :disabled="isDisabled" :class="{isDisabled: isDisabled}" v-model="computation" @keydown.enter="rollDice"></textarea>
@@ -41,12 +41,14 @@
     </div>
 </template>
 
-<script>
-    import axios from 'axios';
-    import DialogMessage from './dialogMessage.vue'
-    import { mapGetters } from 'vuex';
+<script lang="ts">
+import axios from 'axios';
+import { mapGetters } from 'vuex';
+import { defineComponent } from 'vue';
+import DialogMessage from './dialogMessage.vue';
+import { Dice } from '../interfaces/dice';
 
-    export default {
+    export default defineComponent({
         components: {
             DialogMessage
         },
@@ -55,11 +57,11 @@
                 /**
                  * The list of all messages
                  */
-                messages: [],
+                messages: [] as any[],
                 /**
                  * The dice roll requested by the user mapped to the textarea
                  */
-                computation: ''
+                computation: "" as string
             }
         },
         computed: {
@@ -87,12 +89,12 @@
                     this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - d100+20-4');
                 })
             },
-            addDice: function (dice) {
+            addDice: function (dice: string) {
                 this.computation = dice
             }
         },
         mounted: function() {
-            const u = new URL(process.env.MERCURE_PUBLIC_URL);
+            const u = new URL(process.env.MERCURE_PUBLIC_URL!);
             u.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/dice');
 
             const es = new EventSource(u);
@@ -104,15 +106,12 @@
             axios.get('/api/dices')
                 .then(response => {
                     let dices = response.data['hydra:member']
-                    dices.forEach(dice => {
+                    dices.forEach((dice : Dice) => {
                         this.messages.push(dice)
                     });
                 }) 
-        },
-        updated() {
-            this.$refs.messages.scrollTop = this.$refs.messages.scrollTopMax
-        },
-    }
+        }
+    })
 </script>
 
 <style scoped>

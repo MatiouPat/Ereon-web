@@ -1,23 +1,25 @@
 <template>
     <div class="assets-box">
-        <picture v-for="asset in assets" @dragend="addToken">
+        <picture v-for="asset in assets" @dragend="addToken" :key="asset.id">
             <source type="image/webp" :srcset="'/uploads/images/asset/' + asset.compressedImage">
-            <img :src="'/uploads/images/asset/' + asset.image" :alt="asset.id" width="64" height="64">
+            <img :src="'/uploads/images/asset/' + asset.image" alt="" width="64" height="64">
         </picture>
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from 'axios';
+import { defineComponent } from 'vue';
 import { mapActions } from 'vuex';
+import { Asset } from '../interfaces/asset';
 
-    export default {
+    export default defineComponent({
         data() {
             return {
                 /**
                  * The list of all assets
                  */
-                assets: []
+                assets: [] as Asset[]
             }
         },
         methods: {
@@ -28,10 +30,10 @@ import { mapActions } from 'vuex';
              * Add a token with the selected asset to the current map 
              * @param {*} e 
              */
-            addToken: function(e) {
-                if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor'))) {
+            addToken: function(e: DragEvent) {
+                if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor')!)) {
                     this.addTokenOnMap({
-                        id: e.target.alt,
+                        id: (e.target as HTMLImageElement).alt,
                         mercure: false
                     })
                 }
@@ -43,7 +45,7 @@ import { mapActions } from 'vuex';
                     this.assets = response.data['hydra:member']
                 })
         }
-    }
+    })
 </script>
 
 <style scoped>

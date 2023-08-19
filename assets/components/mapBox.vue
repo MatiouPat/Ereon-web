@@ -1,7 +1,7 @@
 <template>
     <div class="map-box" v-if="isGameMaster" :class="{isDisplayed: isDisplayed}">
         <div class="maps">
-            <div class="map" @click="chooseMap(map.id)" v-for="map in maps" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
+            <div class="map" @click="chooseMap(map.id)" v-for="map in maps" :key="map.id" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
                 <span>{{ map.name }}</span>
                 <ul class="map-actions">
                     <li><img @click.stop="showMapParameter(map.id)" src="build/images/settings.svg" alt="Paramètres" width="16" height="16"></li>
@@ -29,6 +29,12 @@
                             </div>
                             <div class="row">
                                 <div class="field">
+                                    <label>Dynamic light</label>
+                                    <input v-model="map.hasDynamicLight" type="checkbox">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="field">
                                     <label>Width</label>
                                     <input v-model="map.width" type="number">
                                 </div>
@@ -40,7 +46,7 @@
                         </div>
                         <div class="form-part" v-if="connections.length">
                             <h3>Sur map</h3>
-                            <div v-for="connection in connections">
+                            <div v-for="connection in connections" :key="connection.id">
                                 <label>{{ connection.username }}</label>
                                 <input type="checkbox" v-model="connection.checked" :checked="connection.checked">
                             </div>
@@ -57,21 +63,23 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from 'axios';
+import { defineComponent } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
+import { Connection } from '../interfaces/connection';
 
-    export default {
+    export default defineComponent({
         data() {
             return {
                 /**
                  * If the maps are displayed
                  */
-                isDisplayed: false,
+                isDisplayed: false as boolean,
                 /**
                  * If the map parameters box is displayed
                  */
-                isParametersDisplayed: false,
+                isParametersDisplayed: false as boolean,
                 /**
                  * The map parameters related to the form
                  */
@@ -79,12 +87,17 @@ import { mapActions, mapGetters } from 'vuex';
                     id: 0,
                     name: "",
                     width: 0,
-                    height: 0
+                    height: 0,
+                    hasDynamicLight: false
                 },
                 /**
                  * The list of connections between this world and the various users
                  */
-                connections: []
+                connections: [] as {
+                    id: number
+                    username: string
+                    checked: boolean 
+                }[]
             }
         },
         props: [
@@ -116,7 +129,7 @@ import { mapActions, mapGetters } from 'vuex';
              * Change current map 
              * @param {*} mapId 
              */
-            chooseMap: function (mapId) {
+            chooseMap: function (mapId: number) {
                 this.setMap(mapId)
                 this.setCurrentMap(mapId)
                 this.isDisplayed = false;
@@ -125,7 +138,7 @@ import { mapActions, mapGetters } from 'vuex';
              * Display map parameters by calling the API
              * @param {*} mapId 
              */
-            showMapParameter: function (mapId) {
+            showMapParameter: function (mapId: number) {
                 this.isParametersDisplayed = true
                 axios.get('/api/maps/' + mapId)
                     .then(response => {
@@ -134,12 +147,13 @@ import { mapActions, mapGetters } from 'vuex';
                         this.map.name = map.name 
                         this.map.width = map.width 
                         this.map.height = map.height 
+                        this.map.hasDynamicLight = map.hasDynamicLight
                     })
                 axios.get('/api/connections?world.id=' + this.getWorld.id)
                     .then(response => {
                         let connections = response.data['hydra:member']
                         this.connections = []
-                        connections.forEach(connection => {
+                        connections.forEach((connection: Connection) => {
                             this.connections.push({
                                 id: connection.id,
                                 username: connection.user.username,
@@ -152,7 +166,7 @@ import { mapActions, mapGetters } from 'vuex';
              * Change map settings after form submission
              */
             submitForm: function() {
-                let connections = []
+                let connections: string[] = []
                 this.connections.forEach(connection => {
                     if(connection.checked) {
                         connections.push('/api/connections/' + connection.id)
@@ -162,6 +176,7 @@ import { mapActions, mapGetters } from 'vuex';
                     name: this.map.name,
                     width: this.map.width,
                     height: this.map.height,
+                    hasDynamicLight: this.map.hasDynamicLight,
                     connections: connections
                 }, {
                     headers: {
@@ -175,14 +190,14 @@ import { mapActions, mapGetters } from 'vuex';
              * Hide context box when clicked outside it
              * @param {*} e 
              */
-            clickOutside: function(e) {
+            clickOutside: function(e: MouseEvent) {
                 if(!this.$el.contains(e.target)){
                     window.removeEventListener('click', this.clickOutside)
                     this.isDisplayed = false;
                 }
             }
         }
-    }
+    })
 </script>
 
 <style scoped>

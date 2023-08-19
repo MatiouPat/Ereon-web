@@ -1,76 +1,85 @@
 <template>
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
-            <!--<canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
+            <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
             <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
-            <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>-->
-            <Token :id="token.id" v-for="token in tokens"></Token>
+            <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
+            <div v-if="map.hasDynamicLight">
+                <Token :id="token.id" @is-moving="draw" :key="token.id" v-for="token in tokens"></Token>
+            </div>
+            <div v-else>
+                <Token :id="token.id" :key="token.id" v-for="token in tokens"></Token>
+            </div>
         </div>
         <div class="editor-zoom">
             <span class="editor-zoom-ratio">{{(ratio * 100).toFixed(0)}}</span>
             <button class="editor-zoom-add-btn" @mousedown="zoomIn">+</button>
-            <input class="editor-zoom-bar" type="range" min="0.1" max="2.3" v-model="ratio" step="0.01">
+            <input class="editor-zoom-bar" type="range" min="0.1" max="2.3" v-model="ratio" step="0.01" @change="updateRatio">
             <button class="editor-zoom-minus-btn" @mousedown="zoomOut">-</button>
         </div>
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, inject } from 'vue';
 import Token from './token.vue'
 import { mapActions, mapGetters } from 'vuex';
 
-    export default {
+    export default defineComponent({
         components: {
             Token
         },
         data() {
             return {
+                emitter: inject('emitter') as any,
                 /**
                  * The zoom in on the map
                  */
-                ratio: 1,
+                ratio: 1 as number,
                 /**
                  * The margin around the map
                  */
-                margin: 200,
+                margin: 200 as number,
                 /**
                  * The X position where the user begins scrolling
                  */
-                startX: 0,
+                startX: 0 as number,
                 /**
                  * The Y position where the user begins scrolling
                  */
-                startY: 0,
+                startY: 0 as number,
                 /**
                  * The X position at which the user begins scrolling in relation to the map
                  */
-                mapX: 0,
+                mapX: 0 as number,
                 /**
                  * The Y position at which the user begins scrolling in relation to the map
                  */
-                mapY: 0,
-                /*fog: null,
-                dark: null,
-                main: null*/
+                mapY: 0 as number,
+                fog: null as CanvasRenderingContext2D | null,
+                dark: null as CanvasRenderingContext2D | null,
+                main: null as CanvasRenderingContext2D | null
             }
         },
         computed: {
             ...mapGetters('map', [
                 'map',
-                'tokens'
+                'tokens',
+                'getRatio'
             ])
         },
         methods: {
             ...mapActions('map', [
                 'addTokenOnMap',
                 'updateToken',
-                'removeTokenOnMap'
+                'removeTokenOnMap',
+                'setRatio'
             ]),
             /**
              * Starts scrolling the map after right-clicking
              * @param {*} e 
              */
-            onMouseDown: function (e) {
+            onMouseDown: function (e: MouseEvent) {
                 if(e.button === 2) {
                     this.startX = e.screenX - this.$el.offsetLeft;
                     this.startY = e.screenY - this.$el.offsetTop;
@@ -83,7 +92,7 @@ import { mapActions, mapGetters } from 'vuex';
              * Calculating scrolling position during movement
              * @param {*} e 
              */
-            onMouseMove: function (e) {
+            onMouseMove: function (e: MouseEvent) {
                 this.$el.scrollLeft = this.mapX - (e.screenX - this.$el.offsetLeft - this.startX)
                 this.$el.scrollTop = this.mapY - (e.screenY - this.$el.offsetTop - this.startY)
             },
@@ -97,7 +106,7 @@ import { mapActions, mapGetters } from 'vuex';
              * Calculate zoom using mouse wheel
              * @param {*} e 
              */
-            onWheel: function (e) {
+            onWheel: function (e: WheelEvent) {
                 e.preventDefault();
                 if(e.ctrlKey == true){
                     if (this.ratio - e.deltaY * 0.0005 <= 0.1) {
@@ -113,51 +122,54 @@ import { mapActions, mapGetters } from 'vuex';
              * Avoid right-click context menus
              * @param {*} e 
              */
-            onContextMenu: function (e) {
+            onContextMenu: function (e: MouseEvent) {
                 e.preventDefault();
             },
-            /*draw: function (e) {
-                let pos = {x: e.layerX, y: e.layerY };
-                console.log(this.tokens)
-                let x = pos.x;
-                let y = pos.y;
+            draw: function () {
+                let x = this.tokens[0].left
+                let y = this.tokens[0].top
 
-                this.fog.clearRect(0, 0, this.map.width, this.map.height)
-                this.dark.clearRect(0, 0, this.map.width, this.map.height)
+                this.fog!.clearRect(0, 0, this.map.width, this.map.height)
+                this.dark!.clearRect(0, 0, this.map.width, this.map.height)
 
-                this.fog.globalAlpha = 1;
-                this.fog.fillStyle = "black";
-                this.fog.fillRect(0, 0, this.map.width, this.map.height);
-                this.fog.globalCompositeOperation = 'destination-out';
-                let fog_gd = this.fog.createRadialGradient(x, y, 150, x, y, 0)
-                fog_gd.addColorStop(0, 'rgba(0, 0, 0, 0)');
-                fog_gd.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
-                this.fog.fillStyle = fog_gd
-                this.fog.beginPath();
-                this.fog.arc(x, y, 150, 0, 2*Math.PI);
-                this.fog.closePath()
-                this.fog.fill();
+                this.fog!.globalAlpha = 1;
+                this.fog!.fillStyle = 'black';
+                this.fog!.fillRect(0, 0, this.map.width, this.map.height);
+                this.fog!.globalCompositeOperation = 'destination-out';
+                let fog_gd = this.fog!.createRadialGradient(x, y, 600, x, y, 0)
+                fog_gd.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                fog_gd.addColorStop(1, 'rgba(255, 255, 255, 1)');
+                this.fog!.fillStyle = fog_gd
+                this.fog!.beginPath();
+                this.fog!.arc(x, y, 400, 0, 2*Math.PI);
+                this.fog!.closePath()
+                this.fog!.fill();
 
-                this.fog.globalCompositeOperation = this.dark.globalCompositeOperation = this.main.globalCompositeOperation
-            }*/
+                this.fog!.globalCompositeOperation = this.dark!.globalCompositeOperation = this.main!.globalCompositeOperation
+            },
             zoomIn: function () {
                 if (this.ratio < 2.3) {
                     this.ratio = Number(this.ratio) + 0.01
+                    this.updateRatio()
                 }
             },
             zoomOut: function () {
                 if (this.ratio > 0.1) {
                     this.ratio = Number(this.ratio) - 0.01
+                    this.updateRatio()
                 }
+            },
+            updateRatio: function () {
+                this.setRatio(this.ratio)
             }
         },
         mounted() {
-            /*this.main = this.$refs.main.getContext("2d");
-            this.fog = this.$refs.fog.getContext("2d");
-            this.dark = this.$refs.fog.getContext("2d");*/
+            this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
+            this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
+            this.dark = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
 
 
-            const postUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            const postUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
             postUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/post');
 
             const postEs = new EventSource(postUrl);
@@ -176,7 +188,7 @@ import { mapActions, mapGetters } from 'vuex';
                 })
             }
 
-            const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
             updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/update');
 
             const updateEs = new EventSource(updateUrl);
@@ -193,7 +205,7 @@ import { mapActions, mapGetters } from 'vuex';
                 })
             }
 
-            const deleteUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+            const deleteUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
             deleteUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/remove');
 
             const deleteEs = new EventSource(deleteUrl);
@@ -205,10 +217,16 @@ import { mapActions, mapGetters } from 'vuex';
                 })
             }
 
-            this.$refs.editorWrapper.scrollTop = 2048
-            this.$refs.editorWrapper.scrollLeft = 2048
+            (this.$refs.editorWrapper as HTMLElement).scrollTop = 2048;
+            (this.$refs.editorWrapper as HTMLElement).scrollLeft = 2048;
+
+            this.emitter.on('isDownload', () => {
+                if (this.map.hasDynamicLight) {
+                    this.draw()
+                }
+            })
         }
-    }
+    })
 </script>
 
 <style scoped>
@@ -299,6 +317,6 @@ import { mapActions, mapGetters } from 'vuex';
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 100;
+        z-index: 10;
     }
 </style>

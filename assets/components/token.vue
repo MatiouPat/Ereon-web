@@ -50,7 +50,7 @@
                         </div>
                         <div class="form-part" v-if="getPlayers.length">
                             <h3>Contrôle</h3>
-                            <div v-for="player in getPlayers">
+                            <div v-for="player in getPlayers" :key="player.id">
                                 <label>{{ player.username }}</label>
                                 <input type="checkbox" :value="player.id" :checked="canControlledBy(player.id, token.id)" @change="addTokenPlayer">
                             </div>
@@ -77,45 +77,52 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, inject, InputHTMLAttributes } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
+import { User } from '../interfaces/user';
 
-    export default {
+    export default defineComponent({
         data() {
             return {
+                $store: inject('store') as any,
                 /**
                  * The token being resized
                  */
-                resizer: null,
+                resizer: undefined as HTMLElement | undefined,
                 /**
                  * If you need to display resizers to resize the token
                  */
-                isResizing: false,
+                isResizing: false as boolean,
                 /**
                  * If you need to display the context box
                  */
-                isContexting: false,
+                isContexting: false as boolean,
                 /**
                  * If you need to display token parameters
                  */
-                isPropertiesContexting: false,
-                startX: 0,
-                startY: 0,
-                startWidth: 0,
-                startHeight: 0,
-                startMouseX: 0,
-                startMouseY: 0
+                isPropertiesContexting: false as boolean,
+                startX: 0 as number,
+                startY: 0 as number,
+                startWidth: 0 as number,
+                startHeight: 0 as number,
+                startMouseX: 0 as number,
+                startMouseY: 0 as number
             }
         },
         props: [
             'id'
+        ],
+        emits: [
+            'isMoving'
         ],
         computed: {
             ...mapGetters('map', [
                 'map',
                 'getTokenById',
                 'canControlledBy',
-                'getIndexOfUser'
+                'getIndexOfUser',
+                'getRatio'
             ]),
             ...mapGetters('user', [
                 'getUserId',
@@ -127,7 +134,7 @@ import { mapActions, mapGetters } from 'vuex';
              */
             token() {
                 return this.getTokenById(this.id)
-            },
+            }
         },
         methods: {
             ...mapActions('map', [
@@ -140,7 +147,7 @@ import { mapActions, mapGetters } from 'vuex';
              * Show contextual box
              * @param {*} e 
              */
-            showActions: function (e) {
+            showActions: function (e: MouseEvent) {
                 e.preventDefault()
                 this.isContexting = true;
             },
@@ -178,13 +185,13 @@ import { mapActions, mapGetters } from 'vuex';
              * Start moving the token on the map by left-clicking on it
              * @param {*} e 
              */
-            move: function (e) {
+            move: function (e: MouseEvent) {
                 if(this.isGameMaster || this.canControlledBy(this.getUserId, this.id)) {
                     e.preventDefault();
                     if(e.button === 0) {
                         this.isResizing = true;
-                        this.startX = e.screenX - this.$refs.token.offsetLeft;
-                        this.startY = e.screenY - this.$refs.token.offsetTop;
+                        this.startX = (e.screenX / this.getRatio) - (this.$refs.token as HTMLElement).offsetLeft
+                        this.startY = (e.screenY / this.getRatio) - (this.$refs.token as HTMLElement).offsetTop
                         document.addEventListener('keydown', this.removeToken)
                         document.addEventListener('mousemove', this.onMove)
                         document.addEventListener('mouseup', () => {
@@ -206,22 +213,23 @@ import { mapActions, mapGetters } from 'vuex';
              * Moving the token on the map
              * @param {*} e 
              */
-            onMove: function(e) {
+            onMove: function(e: MouseEvent) {
                 let left = this.token.left
                 let top = this.token.top
                 e.preventDefault();
-                if (e.screenX - this.startX > -this.token.width/2 && e.screenX - this.startX < this.map.width - this.token.width/2) {
-                    left += e.screenX - this.$refs.token.offsetLeft - this.startX
+                this.$emit('isMoving')
+                if ((e.screenX / this.getRatio) - this.startX > -this.token.width/2 && (e.screenX / this.getRatio) - this.startX < this.map.width - this.token.width/2) {
+                    left = (e.screenX / this.getRatio) - this.startX
                 }
-                if (e.screenY - this.startY > -this.token.height/2 && e.screenY - this.startY < this.map.height - this.token.height/2) {
-                    top += e.screenY - this.$refs.token.offsetTop - this.startY
+                if ((e.screenY / this.getRatio) - this.startY > -this.token.height/2 && (e.screenY / this.getRatio) - this.startY < this.map.height - this.token.height/2) {
+                    top = (e.screenY / this.getRatio) - this.startY
                 }
                 this.updateToken({
                     id: this.token.id,
                     width: this.token.width,
                     height: this.token.height,
-                    left: left,
-                    top: top,
+                    left: Math.floor(left),
+                    top: Math.floor(top),
                     zIndex: this.token.zIndex
                 })
             },
@@ -229,9 +237,9 @@ import { mapActions, mapGetters } from 'vuex';
              * Start token resizing after clicking on a resizer
              * @param {*} e 
              */
-            resize: function(e) {
+            resize: function(e: MouseEvent) {
                 e.preventDefault()
-                this.resizer = e.target
+                this.resizer = e.target as HTMLElement
                 this.startWidth = this.token.width;
                 this.startHeight = this.token.height;
                 this.startX = this.token.left;
@@ -255,36 +263,36 @@ import { mapActions, mapGetters } from 'vuex';
              * Resize token
              * @param {*} e 
              */
-            onResize: function(e) {
+            onResize: function(e: MouseEvent) {
                 let width = this.startWidth
                 let height = this.startHeight
                 let top = this.startY
                 let left = this.startX
-                if (this.resizer.classList.contains('bottom-right')) {
+                if (this.resizer!.classList.contains('bottom-right')) {
                     let diff = (this.startWidth + (e.pageX - this.startMouseX)) - this.startWidth
                     width = this.startWidth + (e.pageX - this.startMouseX)
                     height = this.startHeight + diff
-                }else if (this.resizer.classList.contains('middle-right')) {
+                }else if (this.resizer!.classList.contains('middle-right')) {
                     width =  this.startWidth + (e.pageX - this.startMouseX)
-                }else if (this.resizer.classList.contains('bottom-middle')) {
+                }else if (this.resizer!.classList.contains('bottom-middle')) {
                     height = this.startHeight + (e.pageY - this.startMouseY)
-                }else if (this.resizer.classList.contains('top-right')) {
+                }else if (this.resizer!.classList.contains('top-right')) {
                     let diffScale = (this.startWidth + (e.pageX - this.startMouseX)) - this.startWidth
                     width = this.startWidth + (e.pageX - this.startMouseX)
                     height = this.startHeight + diffScale; 
                     top = this.startX - (e.pageX - this.startMouseX);
-                }else if (this.resizer.classList.contains('bottom-left')) {
+                }else if (this.resizer!.classList.contains('bottom-left')) {
                     let diffScale = (this.startWidth - (e.pageX - this.startMouseX)) - this.startWidth
                     width = this.startWidth - (e.pageX - this.startMouseX)
                     height = this.startHeight + diffScale; 
                     left = this.startX + (e.pageX - this.startMouseX)
-                }else if (this.resizer.classList.contains('middle-left')) {
+                }else if (this.resizer!.classList.contains('middle-left')) {
                     width = this.startWidth - (e.pageX - this.startMouseX)
                     left = this.startX + (e.pageX - this.startMouseX)
-                }else if (this.resizer.classList.contains('top-middle')) {
+                }else if (this.resizer!.classList.contains('top-middle')) {
                     height = this.startHeight - (e.pageY - this.startMouseY); 
                     top = this.startY + (e.pageY - this.startMouseY);
-                }else if (this.resizer.classList.contains('top-left')) {
+                }else if (this.resizer!.classList.contains('top-left')) {
                     let diffScale = (this.startWidth - (e.pageX - this.startMouseX)) - this.startWidth
                     width = this.startWidth - (e.pageX - this.startMouseX)
                     height = this.startHeight + diffScale; 
@@ -305,7 +313,7 @@ import { mapActions, mapGetters } from 'vuex';
              * 
              * @param {*} e 
              */
-            removeToken: function(e) {
+            removeToken: function(e: KeyboardEvent) {
                 if (e.key === "Delete") {
                     this.isResizing = false;
                     this.isContexting = false;
@@ -317,7 +325,7 @@ import { mapActions, mapGetters } from 'vuex';
              * Hide context box when clicked outside it
              * @param {*} e 
              */
-            clickOutside: function(e) {
+            clickOutside: function(e: MouseEvent) {
                 if(!this.$el.contains(e.target)){
                     window.removeEventListener('click', this.clickOutside)
                     this.isResizing = false;
@@ -325,46 +333,46 @@ import { mapActions, mapGetters } from 'vuex';
                     document.removeEventListener('keydown', this.removeToken)
                 }
             },
-            setTokenWidth: function(e) {
+            setTokenWidth: function(e: Event) {
                 this.$store.commit('map/setTokenWidth', {
                     token: this.token,
-                    width: e.target.value
+                    width: (e.target as InputHTMLAttributes).value
                 })
             },
-            setTokenHeight: function(e) {
+            setTokenHeight: function(e: Event) {
                 this.$store.commit('map/setTokenHeight', {
                     token: this.token,
-                    height: e.target.value
+                    height: (e.target as InputHTMLAttributes).value
                 })
             },
-            setTokenTop: function(e) {
+            setTokenTop: function(e: Event) {
                 this.$store.commit('map/setTokenTop', {
                     token: this.token,
-                    top: e.target.value
+                    top: (e.target as InputHTMLAttributes).value
                 })
             },
-            setTokenLeft: function(e) {
+            setTokenLeft: function(e: Event) {
                 this.$store.commit('map/setTokenLeft', {
                     token: this.token,
-                    left: e.target.value
+                    left: (e.target as InputHTMLAttributes).value
                 })
             },
-            setTokenZIndex: function(e) {
+            setTokenZIndex: function(e: Event) {
                 this.$store.commit('map/setTokenZIndex', {
                     token: this.token,
-                    zIndex: e.target.value
+                    zIndex: (e.target as InputHTMLAttributes).value
                 })
             },
-            addTokenPlayer: function(e) {
-                if(e.target.checked) {
+            addTokenPlayer: function(e: Event) {
+                if((e.target! as InputHTMLAttributes).checked) {
                     this.$store.commit('map/addTokenPlayer', {
                         token: this.token,
-                        user: { id: e.target.value }
+                        user: { id: (e.target! as InputHTMLAttributes).value }
                     })
                 }else {
                     this.$store.commit('map/removeTokenPlayer', {
                         token: this.token,
-                        user: { id: this.getIndexOfUser({ id: e.target.value}, this.id) }
+                        user: { id: this.getIndexOfUser({ id: (e.target! as InputHTMLAttributes).value}, this.id) }
                     })
                 }
             },
@@ -372,9 +380,9 @@ import { mapActions, mapGetters } from 'vuex';
              * Change token settings after form submission
              */
             submitForm: function() {
-                let users = []
-                this.token.users.forEach(user => {
-                    users.push('api/users/' + user.id)
+                let users: string[] = []
+                this.token.users.forEach((user: User) => {
+                    users.push('api/users/' + user.id.toString())
                 });
                 this.finishUpdateToken({
                     id: Number(this.token.id),
@@ -388,7 +396,7 @@ import { mapActions, mapGetters } from 'vuex';
                 this.isPropertiesContexting = false
             }
         }
-    }
+    })
 </script>
 
 <style scoped>

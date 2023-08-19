@@ -2,12 +2,12 @@
     <div v-if="isConnected" class="header">
         <div class="header-title-box" @click="viewAccount">
             <img class="account-picture" src="build/images/logo/icon_120.png" alt="Ereon" width="120" height="120">
-            <span class="account-username">{{ user.username }}</span>
+            <span class="account-username">{{ getUsername }}</span>
         </div>
         <ul class="account-actions" v-if="isVisible">
             <li><a href="/logout" style="font-weight: 700; color: red;">Se déconnecter</a></li>
         </ul>
-        <div class="connectedUsers" v-for="connectedUser in getConnectedUser">
+        <div class="connectedUsers" v-for="connectedUser in getConnectedUser" :key="connectedUser.id">
             <div class="header-title-box" @click="viewAccount">
                 <img class="other-user-picture" src="build/images/logo/icon_120.png" alt="Ereon" width="80" height="80">
                 <span class="account-username">{{ connectedUser.username }}</span>
@@ -20,8 +20,8 @@
             <h1>Vous n'avez aucun monde disponible</h1>
             <span>Veuillez contacter un administrateur</span>
         </div>
-        <div class="world-layout" v-else v-for="world in worlds">
-            <div v-for="connection in world.connections">
+        <div class="world-layout" v-else v-for="world in worlds" :key="world.id">
+            <div v-for="connection in world.connections" :key="connection.id">
                 <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world)">
                     <picture>
                         <source>
@@ -37,22 +37,25 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from 'axios';
-import { getTransitionRawChildren } from 'vue';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { defineComponent, inject } from 'vue';
+import { mapActions, mapGetters } from 'vuex';
+import { Connection } from '../interfaces/connection';
+import { World } from '../interfaces/world';
 
-    export default {
+    export default defineComponent({
         data() {
             return {
                 /**
                  * If the account context box is visible
                  */
-                isVisible: false,
+                isVisible: false as boolean,
                 /**
                  * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
                  */
-                isConnected: false
+                isConnected: false as boolean,
+                emitter: inject('emitter') as any
             }
         },
         props: [
@@ -60,13 +63,11 @@ import { mapActions, mapGetters, mapState } from 'vuex';
             'worlds'
         ],
         computed: {
-            ...mapState({
-                user: state => state.user
-            }),
             ...mapGetters('user', [
-                    'getConnectedUser',
-                    'getCurrentMapId'
-                ]),
+                'getConnectedUser',
+                'getCurrentMapId',
+                'getUsername'
+            ]),
         },
         methods: {
             ...mapActions('user', [
@@ -91,10 +92,10 @@ import { mapActions, mapGetters, mapState } from 'vuex';
             },
             /**
              * Loading information after choosing a world
-             * @param {*} connection The connection between player and world
-             * @param {*} world The selected world
+             * @param connection The connection between player and world
+             * @param world The selected world
              */
-            chooseWorld: function(connection, world) {
+            chooseWorld: function(connection: Connection, world: World) {
                 this.setMap(connection.currentMap.id)
                 this.setUserId(connection.user.id)
                 this.setUserName(connection.user.username)
@@ -105,11 +106,11 @@ import { mapActions, mapGetters, mapState } from 'vuex';
                 axios.get('/api/users?connections.isGameMaster=false&connections.world.id=' + world.id)
                     .then(response => {
                         this.setPlayers(response.data['hydra:member'])
+                        this.emitter.emit("isDownload")
                     })
                 this.downloadPersonages()
-                this.emitter.emit("playMusic")
                 this.isConnected = true
-                const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL);
+                const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
 
                 const updateEs = new EventSource(updateUrl);
@@ -125,14 +126,14 @@ import { mapActions, mapGetters, mapState } from 'vuex';
              * Hide context box when clicked outside it
              * @param {*} e 
              */
-            clickOutside: function(e) {
+            clickOutside: function(e: any) {
                 if(!this.$el.contains(e.target)){
                     window.removeEventListener('click', this.clickOutside)
                     this.isVisible = false;
                 }
             }
         }
-    }
+    })
 </script>
 
 <style scoped>
