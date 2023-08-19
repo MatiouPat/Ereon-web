@@ -20,7 +20,8 @@ use Symfony\Component\Validator\Constraints\Regex;
     operations: [
         new GetCollection(),
         new Post()
-    ]
+    ],
+    paginationEnabled: false
 )]
 class Dice
 {
