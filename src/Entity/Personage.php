@@ -19,7 +19,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new GetCollection()
     ]
 )]
-#[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact'])]
+#[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact', 'user.discordIdentifier' => 'exact'])]
 class Personage
 {
     #[ORM\Id]
