@@ -68,6 +68,7 @@ import axios from 'axios';
 import { defineComponent } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { Connection } from '../interfaces/connection';
+import { Map } from '../interfaces/map';
 
     export default defineComponent({
         data() {
@@ -90,6 +91,7 @@ import { Connection } from '../interfaces/connection';
                     height: 0,
                     hasDynamicLight: false
                 },
+                maps: [] as Map[],
                 /**
                  * The list of connections between this world and the various users
                  */
@@ -100,9 +102,6 @@ import { Connection } from '../interfaces/connection';
                 }[]
             }
         },
-        props: [
-            'maps'
-        ],
         computed: {
             ...mapGetters('user', [
                 'isGameMaster',
@@ -196,6 +195,16 @@ import { Connection } from '../interfaces/connection';
                     this.isDisplayed = false;
                 }
             }
+        },
+        mounted() {
+            axios({
+                method: 'GET',
+                url: '/api/maps'
+            })
+            .then(res => res.data['hydra:member'])
+            .then(res => {
+                this.maps = res
+            })
         }
     })
 </script>

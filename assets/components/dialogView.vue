@@ -119,6 +119,7 @@ import { Dice } from '../interfaces/dice';
     .messages {
         height: calc(80dvh - 64px);
         overflow-y: scroll;
+        margin-bottom: 16px;
     }
 
     .messages::-webkit-scrollbar {
