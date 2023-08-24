@@ -1,19 +1,28 @@
 <template>
-    <div v-if="isConnected" class="header">
-        <div class="header-title-box" @click="viewAccount">
-            <img class="account-picture" src="build/images/logo/icon_120.png" alt="Ereon" width="120" height="120">
-            <span class="account-username">{{ getUsername }}</span>
-        </div>
-        <ul class="account-actions" v-if="isVisible">
-            <li><a href="/logout" style="font-weight: 700; color: red;">Se déconnecter</a></li>
-        </ul>
-        <div class="connectedUsers" v-for="connectedUser in getConnectedUser" :key="connectedUser.id">
-            <div class="header-title-box" @click="viewAccount">
-                <img class="other-user-picture" src="build/images/logo/icon_120.png" alt="Ereon" width="80" height="80">
+    <header v-if="isConnected" class="header">
+        <nav class="navigation">
+            <ul>
+                <li title="Paramètres"><img src="build/images/icons/settings.svg" width="24" height="24" alt="Paramètres"></li>
+                <li title="Se déconnecter"><a href="/logout"><img src="build/images/icons/logout.svg" width="24" height="24" alt="Se déconnecter"></a></li>
+            </ul>
+        </nav>
+        <div class="connected-users" v-for="connectedUser in getConnectedUser" :key="connectedUser.id">
+            <div class="header-title-box">
+                <img class="account-picture" src="build/images/logo/icon_120.png" alt="Ereon" width="64" height="64">
                 <span class="account-username">{{ connectedUser.username }}</span>
             </div>
         </div>
-    </div>
+        <Teleport to="#content">
+            <div class="parameters-wrapper" v-if="onParameters">
+                <div class="parameters">
+                    <div class="parameters-header">
+                        <h2>Paramètres</h2>
+                        <img @click="onParameters = false" src="build/images/icons/close.svg" alt="Fermer">
+                    </div>
+                </div>
+            </div>
+        </Teleport>
+    </header>
     <div v-else class="worlds-page">
         <h1>Quel monde ?</h1>
         <div class="world-layout" v-if="!worlds.length">
@@ -47,15 +56,12 @@ import { World } from '../interfaces/world';
     export default defineComponent({
         data() {
             return {
-                /**
-                 * If the account context box is visible
-                 */
-                isVisible: false as boolean,
+                emitter: inject('emitter') as any,
                 /**
                  * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
                  */
                 isConnected: false as boolean,
-                emitter: inject('emitter') as any
+                onParameters: false as boolean
             }
         },
         props: [
@@ -83,13 +89,6 @@ import { World } from '../interfaces/world';
             ...mapActions('map', [
                 'setMap'
             ]),
-            /**
-             * Display account context box when clicked
-             */
-            viewAccount: function() {
-                this.isVisible = !this.isVisible
-                window.addEventListener('click', this.clickOutside)
-            },
             /**
              * Loading information after choosing a world
              * @param connection The connection between player and world
@@ -121,17 +120,10 @@ import { World } from '../interfaces/world';
                         this.setConnection(data)
                     }
                 }
-            },
-            /**
-             * Hide context box when clicked outside it
-             * @param {*} e 
-             */
-            clickOutside: function(e: any) {
-                if(!this.$el.contains(e.target)){
-                    window.removeEventListener('click', this.clickOutside)
-                    this.isVisible = false;
-                }
             }
+        },
+        mounted() {
+
         }
     })
 </script>
@@ -139,13 +131,30 @@ import { World } from '../interfaces/world';
 <style scoped>
 
     .header {
-        position: absolute;
-        bottom: 16px;
-        left: 16px;
-        z-index: 2;
+        min-width: 48px;
+        width: 48px;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        z-index: 1;
+    }
+
+    .navigation {
+        height: 100%;
+    }
+
+    .navigation ul {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        height: 100%;
         gap: 16px;
+        padding: 16px 0;
+
+    }
+
+    .navigation img {
+        display: block;
+        margin: 0 auto;
     }
 
     .header-title-box {
@@ -160,53 +169,65 @@ import { World } from '../interfaces/world';
         box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     }
 
-    .account-picture {
+    .connected-users {
         position: absolute;
-        bottom: 16px;
-        left: calc(50% - 60px);
-        z-index: 1;
+        bottom: 8px;
+        left: 56px;
+        display: flex;
     }
 
     .account-username {
         z-index: 2;
         padding: 8px;
-        min-width: 120px;
+        min-width: 96px;
         background-color: rgba(0, 0, 0, 0.8);
         color: #FFFFFF;
         text-align: center;
+        font-size: .8rem;
     }
 
-    .account-actions {
-        position: absolute;
-        bottom: 60px;
-        left: 96px;
-        width: 160px;
-        z-index: 3;
-        background-color: #FFFFFF;
-    }
-
-    .other-user-picture {
+    .account-picture {
         position: absolute;
         bottom: 16px;
-        left: calc(50% - 40px);
+        left: calc(50% - 32px);
         z-index: 1;
-    }
-
-    .account-actions::after {
-        content: "";
-        position: absolute;
-        top: 8px;
-        left: -8px;
-        display : inline-block;
-        height : 0;
-        width : 0;
-        border-top : 8px solid transparent;
-        border-right : 8px solid #FFFFFF;
-        border-bottom : 8px solid transparent;
     }
 
     .account-actions li {
         padding: 8px;
+    }
+
+    .parameters-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100dvw;
+        height: 100dvh;
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .parameters {
+        display: block;
+        min-width: 256px;
+        min-height: 256px;
+        background-color: #FFFFFF;
+    }
+
+    .parameters-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border-bottom: solid 1px #565656;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        font-weight: 400;
     }
 
     .worlds-page {
