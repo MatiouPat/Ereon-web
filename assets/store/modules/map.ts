@@ -1,21 +1,18 @@
 import axios from "axios"
+import { Token } from "../../entity/token"
+import { User } from "../../entity/user"
+import { Map } from "../../entity/map"
 
 const state = {
     /**
      * The current map
      */
-    map: {
-        id: null,
-        name: '',
-        width: null,
-        height: null,
-        hasDynamicLight: false
-    },
+    map: {} as Map,
     /**
      * The list of tokens present on the current map
      */
-    tokens: [],
-    ratio: 1
+    tokens: [] as Token[],
+    ratio: 1 as number
 }
 
 const getters = {
@@ -104,7 +101,7 @@ const actions = {
         if (!data.mercure) {
             axios.delete('/api/tokens/' + token.id)
         }else {
-            let index = state.tokens.findIndex(object => {
+            let index = state.tokens.findIndex((object: Token) => {
                 return object.id === data.id;
             })
             commit('removeToken', index)
@@ -171,8 +168,8 @@ const mutations = {
         /*Tokens*/
         state.tokens = []
         map.tokens.forEach(token => {
-            let users = []
-            token.users.forEach(user => {
+            let users = [] as User[];
+            token.users.forEach((user: User) => {
                 users.push({
                     id: user.id
                 })
@@ -226,7 +223,7 @@ const mutations = {
         data.token.users.splice(data.user, 1)
     },
     changeZIndex(state, data) {
-        token.zIndex = data.zIndex
+        data.token.zIndex = data.zIndex
     },
     setRatio(state, data) {
         state.ratio = data
