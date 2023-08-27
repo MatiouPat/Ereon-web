@@ -80,7 +80,7 @@
 <script lang="ts">
 import { defineComponent, inject, InputHTMLAttributes } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
-import { User } from '../interfaces/user';
+import { User } from '../entity/user';
 
     export default defineComponent({
         data() {

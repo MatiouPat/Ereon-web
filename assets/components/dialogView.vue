@@ -42,11 +42,11 @@
 </template>
 
 <script lang="ts">
-import axios from 'axios';
 import { mapGetters } from 'vuex';
 import { defineComponent } from 'vue';
 import DialogMessage from './dialogMessage.vue';
-import { Dice } from '../interfaces/dice';
+import { Dice } from '../entity/dice';
+import { DiceRepository } from '../repository/diceRepository';
 
     export default defineComponent({
         components: {
@@ -54,6 +54,7 @@ import { Dice } from '../interfaces/dice';
         },
         data() {
             return {
+                diceRepository: new DiceRepository as DiceRepository,
                 /**
                  * The list of all messages
                  */
@@ -80,14 +81,10 @@ import { Dice } from '../interfaces/dice';
              * Call the API to roll a die
              */
             rollDice: function () {
-                let computation = this.computation;
-                this.computation = '';
-                axios.post('/api/dices', {
-                    computation: computation,
-                    personage: '/api/personages/' + this.getPersonages[0].id
-                }).catch(e => {
+                this.diceRepository.createDice(this.getPersonages[0]['@id'], this.computation).catch(e => {
                     this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - d100+20-4');
                 })
+                this.computation = '';
             },
             addDice: function (dice: string) {
                 this.computation = dice
@@ -103,13 +100,11 @@ import { Dice } from '../interfaces/dice';
                 this.messages.push(data);
             }
 
-            axios.get('/api/dices')
-                .then(response => {
-                    let dices = response.data['hydra:member']
-                    dices.forEach((dice : Dice) => {
-                        this.messages.push(dice)
-                    });
-                }) 
+            this.diceRepository.findAllDices().then(res => {
+                res.forEach((dice: Dice) => {
+                    this.messages.push(dice)
+                });
+            })
         }
     })
 </script>

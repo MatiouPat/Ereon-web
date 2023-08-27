@@ -71,13 +71,17 @@
 import axios from 'axios';
 import { defineComponent, inject } from 'vue';
 import { mapGetters } from 'vuex';
-import { Music } from '../interfaces/music';
+import { Music } from '../entity/music';
+import { MusicRepository } from '../repository/musicRepository';
+import { MusicPlayerRepository } from '../repository/musicplayerRepository';
 
   
     export default defineComponent({
         data() {
             return {
                 emitter: inject('emitter') as any,
+                musicRepository: new MusicRepository as MusicRepository,
+                musicPlayerRepository: new MusicPlayerRepository as MusicPlayerRepository,
                 musicPlayerId : 0 as number,
                 userWorldParametersId : 0 as number,
                 isPlaying: false as boolean,
@@ -187,50 +191,47 @@ import { Music } from '../interfaces/music';
             }
         },
         mounted() {
-            axios.get('/api/music')
-                .then(response => {
-                    this.musics = response.data['hydra:member']
-                });
+            this.musicRepository.findAllMusics().then(res => {
+                this.musics = res
+            });
 
             this.emitter.on('isDownload', () => {
-                axios.get('/api/music_players?world.id=' + this.getWorld.id)
-                    .then(response => {
-                        let musicPlayer = response.data['hydra:member'][0];
-                        this.musicPlayerId = musicPlayer.id;
-                        this.isPlaying = musicPlayer.isPlaying;
-                        this.isLooping = musicPlayer.isLooping;
-                        this.currentMusic.title = musicPlayer.currentMusic.title;
-                        this.currentMusic.link = musicPlayer.currentMusic.link;
-                        if (this.isPlaying) {
+                this.musicPlayerRepository.findMusicPlayerByWorld(this.getWorld.id).then(res => {
+                    this.musicPlayerId = res.id;
+                    this.isPlaying = res.isPlaying!;
+                    this.isLooping = res.isLooping!;
+                    this.currentMusic.title = res.currentMusic!.title;
+                    this.currentMusic.link = res.currentMusic!.link;
+                    if (this.isPlaying) {
+                        (this.$refs.musicAudio as HTMLAudioElement).load();
+                        (this.$refs.musicAudio as HTMLAudioElement).currentTime = res.currentTimePlay!;
+                        (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
+                            (this.$refs.musicAudio as HTMLAudioElement).play();
+                        }, { once: true});
+                    }
+
+                    const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
+                    updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/musicplayer');
+
+                    const updateEs = new EventSource(updateUrl);
+                    updateEs.onmessage = e => {
+                        let data = JSON.parse(e.data);
+                        let mustReload = this.isPlaying != data.isPlaying || this.currentMusic.link != data.currentMusic.link;
+                        this.isPlaying = data.isPlaying;
+                        this.isLooping = data.isLooping;
+                        this.currentMusic.title = data.currentMusic.title;
+                        this.currentMusic.link = data.currentMusic.link;
+                        (this.$refs.musicAudio as HTMLAudioElement).currentTime = data.currentTimePlay;
+                        if (this.isPlaying && mustReload) {
                             (this.$refs.musicAudio as HTMLAudioElement).load();
-                            (this.$refs.musicAudio as HTMLAudioElement).currentTime = musicPlayer.currentTimePlay;
                             (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
                                 (this.$refs.musicAudio as HTMLAudioElement).play();
                             }, { once: true});
+                        }else if(!this.isPlaying) {
+                            (this.$refs.musicAudio as HTMLAudioElement).pause();
                         }
-
-                        const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
-                        updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/musicplayer');
-
-                        const updateEs = new EventSource(updateUrl);
-                        updateEs.onmessage = e => {
-                            let data = JSON.parse(e.data);
-                            let mustReload = this.isPlaying != data.isPlaying || this.currentMusic.link != data.currentMusic.link;
-                            this.isPlaying = data.isPlaying;
-                            this.isLooping = data.isLooping;
-                            this.currentMusic.title = data.currentMusic.title;
-                            this.currentMusic.link = data.currentMusic.link;
-                            (this.$refs.musicAudio as HTMLAudioElement).currentTime = data.currentTimePlay;
-                            if (this.isPlaying && mustReload) {
-                                (this.$refs.musicAudio as HTMLAudioElement).load();
-                                (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
-                                    (this.$refs.musicAudio as HTMLAudioElement).play();
-                                }, { once: true});
-                            }else if(!this.isPlaying) {
-                                (this.$refs.musicAudio as HTMLAudioElement).pause();
-                            }
-                        }
-                    });
+                    }
+                })
                 axios.get('/api/user_world_parameters?user.id=' + this.getUserId + '&world.id=' + this.getWorld.id)
                     .then(response => {
                         let userWorldParameter = response.data['hydra:member'][0];

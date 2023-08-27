@@ -8,14 +8,15 @@
 </template>
 
 <script lang="ts">
-import axios from 'axios';
 import { defineComponent } from 'vue';
 import { mapActions } from 'vuex';
-import { Asset } from '../interfaces/asset';
+import { Asset } from '../entity/asset';
+import { AssetRepository } from '../repository/assetRepository';
 
     export default defineComponent({
         data() {
             return {
+                assetRepository: new AssetRepository as AssetRepository,
                 /**
                  * The list of all assets
                  */
@@ -40,10 +41,9 @@ import { Asset } from '../interfaces/asset';
             }
         },
         mounted: function() {
-            axios.get('/api/assets')
-                .then(response => {
-                    this.assets = response.data['hydra:member']
-                })
+            this.assetRepository.findAllAssets().then(res => {
+                this.assets = res;
+            })
         }
     })
 </script>

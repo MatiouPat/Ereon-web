@@ -47,16 +47,17 @@
 </template>
 
 <script lang="ts">
-import axios from 'axios';
 import { defineComponent, inject } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
-import { Connection } from '../interfaces/connection';
-import { World } from '../interfaces/world';
+import { Connection } from '../entity/connection';
+import { World } from '../entity/world';
+import { UserRepository } from '../repository/userRepository';
 
     export default defineComponent({
         data() {
             return {
                 emitter: inject('emitter') as any,
+                userRepository: new UserRepository as UserRepository,
                 /**
                  * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
                  */
@@ -102,11 +103,10 @@ import { World } from '../interfaces/world';
                 this.setWorld(world)
                 this.sendIsConnected()
                 this.getAllConnections()
-                axios.get('/api/users?connections.isGameMaster=false&connections.world.id=' + world.id)
-                    .then(response => {
-                        this.setPlayers(response.data['hydra:member'])
-                        this.emitter.emit("isDownload")
-                    })
+                this.userRepository.findUserByWorldAndWhereIsNotGameMaster(world.id).then(res => {
+                    this.setPlayers(res)
+                    this.emitter.emit("isDownload")
+                })
                 this.downloadPersonages()
                 this.isConnected = true
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
@@ -121,9 +121,6 @@ import { World } from '../interfaces/world';
                     }
                 }
             }
-        },
-        mounted() {
-
         }
     })
 </script>
