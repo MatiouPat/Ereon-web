@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\Stat;
+use App\Entity\Skill;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Stat>
+ * @extends ServiceEntityRepository<Skill>
  *
- * @method Stat|null find($id, $lockMode = null, $lockVersion = null)
- * @method Stat|null findOneBy(array $criteria, array $orderBy = null)
- * @method Stat[]    findAll()
- * @method Stat[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Skill|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Skill|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Skill[]    findAll()
+ * @method Skill[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class StatRepository extends ServiceEntityRepository
+class SkillRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Stat::class);
+        parent::__construct($registry, Skill::class);
     }
 
-    public function save(Stat $entity, bool $flush = false): void
+    public function save(Skill $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class StatRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Stat $entity, bool $flush = false): void
+    public function remove(Skill $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class StatRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return Stat[] Returns an array of Stat objects
+//     * @return Skill[] Returns an array of Skill objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class StatRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Stat
+//    public function findOneBySomeField($value): ?Skill
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')

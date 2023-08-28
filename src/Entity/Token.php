@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\Range;
 
 #[ORM\Entity(repositoryClass: TokenRepository::class)]
 #[ApiResource(
@@ -51,6 +52,15 @@ class Token
     #[ORM\Column]
     #[Groups(["map:read", "token:read"])]
     private ?int $zIndex = null;
+
+    #[ORM\Column]
+    #[Range(
+        min: 1,
+        max: 3,
+        notInRangeMessage: 'You must be 1(Token) 2(Map) and 3(GM) layer'
+    )]
+    #[Groups(["map:read", "token:read"])]
+    private ?int $layer = null;
 
     #[ORM\ManyToOne(inversedBy: 'tokens')]
     #[Groups(["map:read", "token:read"])]
@@ -130,6 +140,18 @@ class Token
     public function setZIndex(int $zIndex): self
     {
         $this->zIndex = $zIndex;
+
+        return $this;
+    }
+
+    public function getLayer(): ?int
+    {
+        return $this->layer;
+    }
+
+    public function setLayer(int $layer): self
+    {
+        $this->layer = $layer;
 
         return $this;
     }

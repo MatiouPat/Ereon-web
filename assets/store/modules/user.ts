@@ -75,10 +75,10 @@ const actions = {
     setPlayers({commit}, players) {
         commit('setPlayers', players);
     },
-    setConnection({commit}, connection) {
+    setConnection({commit}, connection: Connection) {
         commit('setConnection', connection);
     },
-    setWorld({commit}, world) {
+    setWorld({commit}, world: World) {
         commit('setWorld', world);
     },
     setLastConnectionAt({commit}, lastConnectionAt) {
@@ -135,13 +135,10 @@ const mutations = {
     setPlayers(state, players) {
         state.players = players
     },
-    setConnection(state, connection) {
-        state.connection.id = connection.id
-        state.connection.isGameMaster = connection.isGameMaster
-        state.connection.lastConnectionAt = connection.lastConnectionAt
-        state.connection.currentMap.id = connection.currentMap.id
+    setConnection(state, connection: Connection) {
+        state.connection = connection
     },
-    setWorld(state, world) {
+    setWorld(state, world: World) {
         state.world = world
     },
     setLastConnectionAt(state, lastConnectionAt) {
