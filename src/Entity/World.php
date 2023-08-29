@@ -37,12 +37,24 @@ class World
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: UserWorldParameter::class, orphanRemoval: true)]
     private Collection $userWorldParameters;
 
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Attribute::class, orphanRemoval: true)]
+    private Collection $attributes;
+
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Skill::class, orphanRemoval: true)]
+    private Collection $skills;
+
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Point::class, orphanRemoval: true)]
+    private Collection $points;
+
     public function __construct()
     {
         $this->connections = new ArrayCollection();
         $this->personages = new ArrayCollection();
         $this->maps = new ArrayCollection();
         $this->userWorldParameters = new ArrayCollection();
+        $this->attributes = new ArrayCollection();
+        $this->skills = new ArrayCollection();
+        $this->points = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -198,6 +210,96 @@ class World
             // set the owning side to null (unless already changed)
             if ($userWorldParameter->getWorld() === $this) {
                 $userWorldParameter->setWorld(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Attribute>
+     */
+    public function getAttributes(): Collection
+    {
+        return $this->attributes;
+    }
+
+    public function addAttribute(Attribute $attribute): self
+    {
+        if (!$this->attributes->contains($attribute)) {
+            $this->attributes->add($attribute);
+            $attribute->setWorld($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAttribute(Attribute $attribute): self
+    {
+        if ($this->attributes->removeElement($attribute)) {
+            // set the owning side to null (unless already changed)
+            if ($attribute->getWorld() === $this) {
+                $attribute->setWorld(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Skill>
+     */
+    public function getSkills(): Collection
+    {
+        return $this->skills;
+    }
+
+    public function addSkill(Skill $skill): self
+    {
+        if (!$this->skills->contains($skill)) {
+            $this->skills->add($skill);
+            $skill->setWorld($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSkill(Skill $skill): self
+    {
+        if ($this->skills->removeElement($skill)) {
+            // set the owning side to null (unless already changed)
+            if ($skill->getWorld() === $this) {
+                $skill->setWorld(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Point>
+     */
+    public function getPoints(): Collection
+    {
+        return $this->points;
+    }
+
+    public function addPoint(Point $point): self
+    {
+        if (!$this->points->contains($point)) {
+            $this->points->add($point);
+            $point->setWorld($this);
+        }
+
+        return $this;
+    }
+
+    public function removePoint(Point $point): self
+    {
+        if ($this->points->removeElement($point)) {
+            // set the owning side to null (unless already changed)
+            if ($point->getWorld() === $this) {
+                $point->setWorld(null);
             }
         }
 

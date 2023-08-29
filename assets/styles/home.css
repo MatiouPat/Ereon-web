@@ -4,14 +4,16 @@ body {
 
 main {
     position: relative;
-    width: calc(100% - 300px);
+    width: calc(100% - 348px);
     height: 100%;
 }
 
-aside {
+.right-side-box {
+    min-width: 300px;
     width: 300px;
     height: 100%;
     background-color: #FFF;
     z-index: 1;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 

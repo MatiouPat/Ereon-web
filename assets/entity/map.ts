@@ -1,3 +1,5 @@
+import { Connection } from "./connection";
+
 export interface Map {
   "@id"?: string;
   id: number;
@@ -6,5 +8,5 @@ export interface Map {
   height?: number;
   hasDynamicLight?: boolean;
   tokens?: any;
-  connections?: any;
+  connections?: Connection;
 }

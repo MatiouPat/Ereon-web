@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isGameMaster" class="token" ref="token" :style="{top: token.top + 'px', left: token.left + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown="move" @contextmenu="showActions">
+    <div v-if="isGameMaster && token.layer == getLayer" class="token" ref="token" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown.prevent="move" @contextmenu="showActions">
         <div class="resizers" :class="{isResizing: isResizing}">
             <div class="resizer top-left" @mousedown.stop="resize"></div>
             <div class="resizer top-middle" @mousedown.stop="resize"></div>
@@ -34,11 +34,11 @@
                             <div class="row">
                                 <div class="field">
                                     <label>Top</label>
-                                    <input :value="token.top" type="number" @input="setTokenTop">
+                                    <input :value="token.topPosition" type="number" @input="setTokenTop">
                                 </div>
                                 <div class="field">
                                     <label>Left</label>
-                                    <input :value="token.left" type="number" @input="setTokenLeft">
+                                    <input :value="token.leftPosition" type="number" @input="setTokenLeft">
                                 </div>
                             </div>
                             <div class="row">
@@ -65,14 +65,20 @@
             </div>
         </Teleport>
         <picture>
-            <source type="image/webp" :srcset="'/uploads/images/asset/' + token.compressedImage">
-            <img :src="'/uploads/images/asset/' + token.image" alt="Map">
+            <source type="image/webp" :srcset="'/uploads/images/asset/' + token.asset.compressedImage">
+            <img :src="'/uploads/images/asset/' + token.asset.image" alt="Map">
         </picture>
     </div>
-    <div v-else class="token" ref="token" :style="{top: token.top + 'px', left: token.left + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown="move">
+    <div v-else-if="!isGameMaster && canControlledBy(getUserId, id)" class="token" ref="token" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown.prevent="move">
         <picture>
-            <source type="image/webp" :srcset="'/uploads/images/asset/' + token.compressedImage">
-            <img :src="'/uploads/images/asset/' + token.image" alt="Map">
+            <source type="image/webp" :srcset="'/uploads/images/asset/' + token.asset.compressedImage">
+            <img :src="'/uploads/images/asset/' + token.asset.image" alt="Map">
+        </picture>
+    </div>
+    <div v-else class="token" ref="token" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}">
+        <picture>
+            <source type="image/webp" :srcset="'/uploads/images/asset/' + token.asset.compressedImage">
+            <img :src="'/uploads/images/asset/' + token.asset.image" alt="Map">
         </picture>
     </div>
 </template>
@@ -80,7 +86,8 @@
 <script lang="ts">
 import { defineComponent, inject, InputHTMLAttributes } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
-import { User } from '../interfaces/user';
+import { Token } from '../entity/token';
+import { User } from '../entity/user';
 
     export default defineComponent({
         data() {
@@ -113,16 +120,14 @@ import { User } from '../interfaces/user';
         props: [
             'id'
         ],
-        emits: [
-            'isMoving'
-        ],
         computed: {
             ...mapGetters('map', [
                 'map',
                 'getTokenById',
                 'canControlledBy',
                 'getIndexOfUser',
-                'getRatio'
+                'getRatio',
+                'getLayer'
             ]),
             ...mapGetters('user', [
                 'getUserId',
@@ -132,7 +137,7 @@ import { User } from '../interfaces/user';
             /**
              * The token to display
              */
-            token() {
+            token(): Token {
                 return this.getTokenById(this.id)
             }
         },
@@ -148,7 +153,6 @@ import { User } from '../interfaces/user';
              * @param {*} e 
              */
             showActions: function (e: MouseEvent) {
-                e.preventDefault()
                 this.isContexting = true;
             },
             /**
@@ -157,7 +161,7 @@ import { User } from '../interfaces/user';
             upZIndex: function () {
                 this.changeZIndex({
                     id: this.token.id,
-                    zIndex: this.token.zIndex + 1
+                    zIndex: this.token.zIndex! + 1
                 })
                 this.isResizing = false;
                 this.isContexting = false;
@@ -168,7 +172,7 @@ import { User } from '../interfaces/user';
             downZIndex: function () {
                 this.changeZIndex({
                     id: this.token.id,
-                    zIndex: this.token.zIndex - 1
+                    zIndex: this.token.zIndex! - 1
                 })
                 this.isResizing = false;
                 this.isContexting = false;
@@ -186,26 +190,18 @@ import { User } from '../interfaces/user';
              * @param {*} e 
              */
             move: function (e: MouseEvent) {
-                if(this.isGameMaster || this.canControlledBy(this.getUserId, this.id)) {
-                    e.preventDefault();
-                    if(e.button === 0) {
-                        this.isResizing = true;
-                        this.startX = (e.screenX / this.getRatio) - (this.$refs.token as HTMLElement).offsetLeft
-                        this.startY = (e.screenY / this.getRatio) - (this.$refs.token as HTMLElement).offsetTop
-                        document.addEventListener('keydown', this.removeToken)
-                        document.addEventListener('mousemove', this.onMove)
-                        document.addEventListener('mouseup', () => {
-                            this.finishUpdateToken({
-                                id: this.token.id,
-                                width: this.token.width,
-                                height: this.token.height,
-                                left: this.token.left,
-                                top: this.token.top,
-                                zIndex: this.token.zIndex
-                            })
-                            document.removeEventListener('mousemove', this.onMove)
-                        }, { once: true })
-                    }
+                if(e.button === 0) {
+                    this.isResizing = true;
+                    this.startX = (e.screenX / this.getRatio) - (this.$refs.token as HTMLElement).offsetLeft
+                    this.startY = (e.screenY / this.getRatio) - (this.$refs.token as HTMLElement).offsetTop
+                    document.addEventListener('keydown', this.removeToken)
+                    document.addEventListener('mousemove', this.onMove)
+                    document.addEventListener('mouseup', () => {
+                        document.removeEventListener('mousemove', this.onMove)
+                        this.finishUpdateToken(this.token)
+                    }, {once: true})
+                }
+                if (this.isResizing || this.isContexting) {
                     window.addEventListener('mousedown', this.clickOutside)
                 }
             },
@@ -214,48 +210,34 @@ import { User } from '../interfaces/user';
              * @param {*} e 
              */
             onMove: function(e: MouseEvent) {
-                let left = this.token.left
-                let top = this.token.top
-                e.preventDefault();
-                this.$emit('isMoving')
-                if ((e.screenX / this.getRatio) - this.startX > -this.token.width/2 && (e.screenX / this.getRatio) - this.startX < this.map.width - this.token.width/2) {
+                let left = this.token.leftPosition
+                let top = this.token.topPosition
+                if ((e.screenX / this.getRatio) - this.startX > -this.token.width!/2 && (e.screenX / this.getRatio) - this.startX < this.map.width - this.token.width!/2) {
                     left = (e.screenX / this.getRatio) - this.startX
                 }
-                if ((e.screenY / this.getRatio) - this.startY > -this.token.height/2 && (e.screenY / this.getRatio) - this.startY < this.map.height - this.token.height/2) {
+                if ((e.screenY / this.getRatio) - this.startY > -this.token.height!/2 && (e.screenY / this.getRatio) - this.startY < this.map.height - this.token.height!/2) {
                     top = (e.screenY / this.getRatio) - this.startY
                 }
-                this.updateToken({
-                    id: this.token.id,
-                    width: this.token.width,
-                    height: this.token.height,
-                    left: Math.floor(left),
-                    top: Math.floor(top),
-                    zIndex: this.token.zIndex
-                })
+                let token = this.token;
+                token.leftPosition = Math.floor(left!);
+                token.topPosition = Math.floor(top!);
+                this.updateToken(token);
             },
             /**
              * Start token resizing after clicking on a resizer
              * @param {*} e 
              */
             resize: function(e: MouseEvent) {
-                e.preventDefault()
                 this.resizer = e.target as HTMLElement
-                this.startWidth = this.token.width;
-                this.startHeight = this.token.height;
-                this.startX = this.token.left;
-                this.startY = this.token.top;
+                this.startWidth = this.token.width!;
+                this.startHeight = this.token.height!;
+                this.startX = this.token.leftPosition!;
+                this.startY = this.token.topPosition!;
                 this.startMouseX = e.pageX;
                 this.startMouseY = e.pageY;
                 document.addEventListener('mousemove', this.onResize)
                 document.addEventListener('mouseup', () => {
-                    this.finishUpdateToken({
-                        id: this.token.id,
-                        width: this.token.width,
-                        height: this.token.height,
-                        left: this.token.left,
-                        top: this.token.top,
-                        zIndex: this.token.zIndex
-                    })
+                    this.finishUpdateToken(this.token)
                     document.removeEventListener('mousemove', this.onResize)
                 }, { once: true })
             },
@@ -300,14 +282,12 @@ import { User } from '../interfaces/user';
                     left = this.startX + (e.pageX - this.startMouseX)
                     top = this.startY + diffPosition;
                 }
-                this.updateToken({
-                    id: this.token.id,
-                    width: width,
-                    height: height,
-                    left: left,
-                    top: top,
-                    zIndex: this.token.zIndex
-                })
+                let token = this.token;
+                token.topPosition = top;
+                token.leftPosition = left;
+                token.width = width;
+                token.height = height;
+                this.updateToken(token)
             },
             /**
              * 
@@ -348,13 +328,13 @@ import { User } from '../interfaces/user';
             setTokenTop: function(e: Event) {
                 this.$store.commit('map/setTokenTop', {
                     token: this.token,
-                    top: (e.target as InputHTMLAttributes).value
+                    topPosition: (e.target as InputHTMLAttributes).value
                 })
             },
             setTokenLeft: function(e: Event) {
                 this.$store.commit('map/setTokenLeft', {
                     token: this.token,
-                    left: (e.target as InputHTMLAttributes).value
+                    leftPosition: (e.target as InputHTMLAttributes).value
                 })
             },
             setTokenZIndex: function(e: Event) {
@@ -388,20 +368,39 @@ import { User } from '../interfaces/user';
                     id: Number(this.token.id),
                     width: Number(this.token.width),
                     height: Number(this.token.height),
-                    left: Number(this.token.left),
-                    top: Number(this.token.top),
+                    leftPosition: Number(this.token.leftPosition),
+                    topPosition: Number(this.token.topPosition),
                     zIndex: Number(this.token.zIndex),
                     users: users
                 })
                 this.isPropertiesContexting = false
             }
-        }
+        },
+        mounted() {
+            const url = new URL(process.env.MERCURE_PUBLIC_URL!);
+            url.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/tokens/' + this.id);
+            const updateEs = new EventSource(url);
+            updateEs.onmessage = e => {
+                if (e.data != "") {
+                    this.updateToken(JSON.parse(e.data))
+                } else {
+                    this.removeTokenOnMap({
+                        id: this.id,
+                        mercure: true
+                    })
+                }
+            }
+            updateEs.onerror = err => {
+                console.error(err)
+            }
+        },
     })
 </script>
 
 <style scoped>
     .token {
         position: absolute;
+        cursor: pointer;
     }
 
     .resizers{

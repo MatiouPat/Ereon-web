@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\NumberOfStat;
+use App\Entity\NumberOfSkill;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<NumberOfStat>
+ * @extends ServiceEntityRepository<NumberOfSkill>
  *
- * @method NumberOfStat|null find($id, $lockMode = null, $lockVersion = null)
- * @method NumberOfStat|null findOneBy(array $criteria, array $orderBy = null)
- * @method NumberOfStat[]    findAll()
- * @method NumberOfStat[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method NumberOfSkill|null find($id, $lockMode = null, $lockVersion = null)
+ * @method NumberOfSkill|null findOneBy(array $criteria, array $orderBy = null)
+ * @method NumberOfSkill[]    findAll()
+ * @method NumberOfSkill[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class NumberOfStatRepository extends ServiceEntityRepository
+class NumberOfSkillRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, NumberOfStat::class);
+        parent::__construct($registry, NumberOfSkill::class);
     }
 
-    public function save(NumberOfStat $entity, bool $flush = false): void
+    public function save(NumberOfSkill $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class NumberOfStatRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(NumberOfStat $entity, bool $flush = false): void
+    public function remove(NumberOfSkill $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class NumberOfStatRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return NumberOfStat[] Returns an array of NumberOfStat objects
+//     * @return NumberOfSkill[] Returns an array of NumberOfSkill objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class NumberOfStatRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?NumberOfStat
+//    public function findOneBySomeField($value): ?NumberOfSkill
 //    {
 //        return $this->createQueryBuilder('n')
 //            ->andWhere('n.exampleField = :val')

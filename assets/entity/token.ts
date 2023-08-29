@@ -6,6 +6,7 @@ export interface Token {
   topPosition?: number;
   leftPosition?: number;
   zIndex?: number;
+  layer?: number;
   asset?: any;
   users?: any;
 }

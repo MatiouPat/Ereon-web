@@ -64,14 +64,18 @@
 </template>
 
 <script lang="ts">
-import axios from 'axios';
 import { defineComponent } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
-import { Connection } from '../interfaces/connection';
+import { Connection } from '../entity/connection';
+import { Map } from '../entity/map';
+import { ConnectionRepository } from '../repository/connectionRepository';
+import { MapRepository } from '../repository/mapRepository';
 
     export default defineComponent({
         data() {
             return {
+                mapRepository: new MapRepository as MapRepository,
+                connectionRepository: new ConnectionRepository as ConnectionRepository,
                 /**
                  * If the maps are displayed
                  */
@@ -83,13 +87,8 @@ import { Connection } from '../interfaces/connection';
                 /**
                  * The map parameters related to the form
                  */
-                map: {
-                    id: 0,
-                    name: "",
-                    width: 0,
-                    height: 0,
-                    hasDynamicLight: false
-                },
+                map: {} as Map,
+                maps: [] as Map[],
                 /**
                  * The list of connections between this world and the various users
                  */
@@ -100,9 +99,6 @@ import { Connection } from '../interfaces/connection';
                 }[]
             }
         },
-        props: [
-            'maps'
-        ],
         computed: {
             ...mapGetters('user', [
                 'isGameMaster',
@@ -140,27 +136,19 @@ import { Connection } from '../interfaces/connection';
              */
             showMapParameter: function (mapId: number) {
                 this.isParametersDisplayed = true
-                axios.get('/api/maps/' + mapId)
-                    .then(response => {
-                        let map = response.data
-                        this.map.id = map.id 
-                        this.map.name = map.name 
-                        this.map.width = map.width 
-                        this.map.height = map.height 
-                        this.map.hasDynamicLight = map.hasDynamicLight
-                    })
-                axios.get('/api/connections?world.id=' + this.getWorld.id)
-                    .then(response => {
-                        let connections = response.data['hydra:member']
-                        this.connections = []
-                        connections.forEach((connection: Connection) => {
-                            this.connections.push({
-                                id: connection.id,
-                                username: connection.user.username,
-                                checked: this.map.id == connection.currentMap.id
-                            })
-                        });
-                    })
+                this.mapRepository?.findMapById(mapId).then(res => {
+                    this.map = res
+                });
+                this.connectionRepository.findConnectionByWorld(this.getWorld.id).then(res => {
+                    this.connections = []
+                    res.forEach((connection: Connection) => {
+                        this.connections.push({
+                            id: connection.id,
+                            username: connection.user.username,
+                            checked: this.map?.id == connection.currentMap.id
+                        })
+                    });
+                })
             },
             /**
              * Change map settings after form submission
@@ -172,17 +160,7 @@ import { Connection } from '../interfaces/connection';
                         connections.push('/api/connections/' + connection.id)
                     }
                 });
-                axios.patch('/api/maps/' + this.map.id, {
-                    name: this.map.name,
-                    width: this.map.width,
-                    height: this.map.height,
-                    hasDynamicLight: this.map.hasDynamicLight,
-                    connections: connections
-                }, {
-                    headers: {
-                        'Content-Type': 'application/merge-patch+json'
-                    }
-                })
+                this.mapRepository.updateMapPartially(this.map, connections)
                 this.isParametersDisplayed = false
                 this.isDisplayed = false;
             },
@@ -196,6 +174,11 @@ import { Connection } from '../interfaces/connection';
                     this.isDisplayed = false;
                 }
             }
+        },
+        mounted() {
+            this.mapRepository.findAllMaps().then(res => {
+                this.maps = res
+            })
         }
     })
 </script>

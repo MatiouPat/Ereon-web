@@ -5,10 +5,10 @@
                 <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
                 <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
                 <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
-                <Token :id="token.id" @is-moving="draw" :key="token.id" v-for="token in tokens"></Token>
+                <Token :id="token.id" @is-moving="draw" :key="token.id" v-for="token in map.tokens"></Token>
             </div>
             <div v-else>
-                <Token :id="token.id" :key="token.id" v-for="token in tokens"></Token>
+                <Token :id="token.id" :key="token.id" v-for="token in map.tokens"></Token>
             </div>
         </div>
         <div class="editor-zoom">
@@ -64,7 +64,6 @@ import { mapActions, mapGetters } from 'vuex';
         computed: {
             ...mapGetters('map', [
                 'map',
-                'tokens',
                 'getRatio'
             ])
         },
@@ -126,8 +125,8 @@ import { mapActions, mapGetters } from 'vuex';
                 e.preventDefault();
             },
             draw: function () {
-                let x = this.tokens[0].left
-                let y = this.tokens[0].top
+                let x = this.map.tokens[0].left
+                let y = this.map.tokens[0].top
 
                 this.fog!.clearRect(0, 0, this.map.width, this.map.height)
                 this.dark!.clearRect(0, 0, this.map.width, this.map.height)
@@ -170,52 +169,15 @@ import { mapActions, mapGetters } from 'vuex';
                 this.dark = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
             }
 
+            const url = new URL(process.env.MERCURE_PUBLIC_URL!);
+            url.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/tokens');
 
-            const postUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
-            postUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/post');
-
-            const postEs = new EventSource(postUrl);
+            const postEs = new EventSource(url);
             postEs.onmessage = e => {
                 let data = JSON.parse(e.data)
                 this.addTokenOnMap({
-                    id: data.id,
-                    width: data.width,
-                    height: data.height,
-                    top: data.topPosition,
-                    left: data.leftPosition,
-                    zIndex: data.zIndex,
-                    image: data.asset.image,
-                    compressedImage: data.asset.compressedImage,
-                    mercure: true
-                })
-            }
-
-            const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
-            updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/update');
-
-            const updateEs = new EventSource(updateUrl);
-            updateEs.onmessage = e => {
-                let data = JSON.parse(e.data)
-                this.updateToken({
-                    id: data.id,
-                    width: data.width,
-                    height: data.height,
-                    top: data.topPosition,
-                    left: data.leftPosition,
-                    zIndex: data.zIndex,
-                    users: data.users
-                })
-            }
-
-            const deleteUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
-            deleteUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/token/remove');
-
-            const deleteEs = new EventSource(deleteUrl);
-            deleteEs.onmessage = e => {
-                let data = JSON.parse(e.data)
-                this.removeTokenOnMap({
-                    id: data.id,
-                    mercure: true
+                    mercure: true,
+                    data: data
                 })
             }
 

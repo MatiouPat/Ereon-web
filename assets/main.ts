@@ -26,4 +26,4 @@ account.provide("$store", store);
 account.use(store)
 account.provide('emitter', emitter);
 
-account.mount('#header')
+account.mount('#content')

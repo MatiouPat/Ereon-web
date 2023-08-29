@@ -35,10 +35,8 @@
         {% endblock %}
     </head>
     <body>
-        <div class="content">
-            <header class="header" id="header">
-                <account :connected-user="{{ app.user|serialize('json', { groups: 'user:read'}) }}" :worlds={{ worlds }}></account>
-            </header>
+        <div class="content" id="content">
+            <account :connected-user="{{ app.user|serialize('json', { groups: 'user:read'}) }}" :worlds={{ worlds }}></account>
             {% block body %}{% endblock %}
         </div>
     </body>

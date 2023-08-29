@@ -2,33 +2,29 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use App\Repository\NumberOfStatRepository;
+use App\Repository\NumberOfSkillRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: NumberOfStatRepository::class)]
-#[ApiResource(
-    operations: []
-)]
-class NumberOfStat
+#[ORM\Entity(repositoryClass: NumberOfSkillRepository::class)]
+class NumberOfSkill
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("person:read")]
+    #[Groups(["personage:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups("person:read")]
+    #[Groups(["personage:read"])]
     private ?int $value = null;
 
-    #[ORM\ManyToOne(inversedBy: 'numberOfStats')]
+    #[ORM\ManyToOne(inversedBy: 'numberOfSkills')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups("person:read")]
-    private ?Stat $stat = null;
+    #[Groups(["personage:read"])]
+    private ?Skill $skill = null;
 
-    #[ORM\ManyToOne(inversedBy: 'numberOfStats')]
+    #[ORM\ManyToOne(inversedBy: 'numberOfSkills')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Personage $personage = null;
 
@@ -49,14 +45,14 @@ class NumberOfStat
         return $this;
     }
 
-    public function getStat(): ?Stat
+    public function getSkill(): ?Skill
     {
-        return $this->stat;
+        return $this->skill;
     }
 
-    public function setStat(?Stat $stat): self
+    public function setSkill(?Skill $skill): self
     {
-        $this->stat = $stat;
+        $this->skill = $skill;
 
         return $this;
     }

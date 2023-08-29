@@ -14,7 +14,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[AsEntityListener(event: Events::preRemove, method: 'preRemove', entity: Token::class)]
 class TokenListener
 {
-
     private MessageBusInterface $bus;
 
     private SerializerInterface $serializer;
@@ -33,7 +32,7 @@ class TokenListener
      */
     public function postPersist(Token $token):void
     {
-        $update = new Update('https://lescanardsmousquetaires.fr/token/post', $this->serializer->serialize($token, 'json', ['groups' => 'token:read']));
+        $update = new Update('https://lescanardsmousquetaires.fr/tokens', $this->serializer->serialize($token, 'jsonld', ['groups' => 'token:read']));
         $this->bus->dispatch($update);
     }
 
@@ -45,7 +44,7 @@ class TokenListener
      */
     public function postUpdate(Token $token):void
     {
-        $update = new Update('https://lescanardsmousquetaires.fr/token/update', $this->serializer->serialize($token, 'json', ['groups' => 'token:read']));
+        $update = new Update('https://lescanardsmousquetaires.fr/tokens/' . $token->getId(), $this->serializer->serialize($token, 'jsonld', ['groups' => 'token:read']));
         $this->bus->dispatch($update);
     }
 
@@ -57,7 +56,7 @@ class TokenListener
      */
     public function preRemove(Token $token):void
     {
-        $update = new Update('https://lescanardsmousquetaires.fr/token/remove', $this->serializer->serialize($token, 'json', ['groups' => 'token:read']));
+        $update = new Update('https://lescanardsmousquetaires.fr/tokens/' . $token->getId());
         $this->bus->dispatch($update);
     }
 

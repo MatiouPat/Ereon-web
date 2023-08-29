@@ -16,6 +16,9 @@ class UserParameter
     #[ORM\Column]
     private ?bool $isDarkTheme = null;
 
+    #[ORM\Column]
+    private ?int $globalVolume = null;
+
     #[ORM\OneToOne(inversedBy: 'userParameter', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
@@ -33,6 +36,18 @@ class UserParameter
     public function setIsDarkTheme(bool $isDarkTheme): self
     {
         $this->isDarkTheme = $isDarkTheme;
+
+        return $this;
+    }
+
+    public function getGlobalVolume(): ?int
+    {
+        return $this->globalVolume;
+    }
+
+    public function setGlobalVolume(int $globalVolume): self
+    {
+        $this->globalVolume = $globalVolume;
 
         return $this;
     }

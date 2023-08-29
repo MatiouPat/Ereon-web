@@ -1,41 +1,38 @@
 import axios from "axios"
+import { World } from "../../entity/world"
+import { User } from "../../entity/user"
+import { Personage } from "../../entity/personage"
+import { Connection } from "../../entity/connection"
 
 const state = {
     /**
      * The logged-in user id
      */
-    userId: 0,
+    userId: 0 as number,
     /**
      * The name of the logged-in user
      */
-    username: "",
+    username: "" as string,
     /**
      * The list of users in the world
      */
-    players: [],
+    players: [] as User[],
     /**
      * The connection between the connected user and the world
      */
-    connection: {
-        id: 0,
-        isGameMaster: false,
-        lastConnectionAt: new Date(),
-        currentMap : {
-            id: 0
-        }
-    },
+    connection: {} as Connection,
     /**
      * The list of users connected to this world except the current user
      */
-    connectedUser: [],
+    connectedUser: [] as User[],
     /**
      * The user's chosen world
      */
-    world: null,
+    world: {} as World,
     /**
      * The list of characters that can be played by the user
      */
-    personages: []
+    personages: [] as Personage[]
 }
 
 const getters = {
@@ -70,22 +67,22 @@ const getters = {
 
 const actions = {
     setUserId({commit}, userId) {
-        commit('setUserId', userId)
+        commit('setUserId', userId);
     },
     setUserName({commit}, username) {
-        commit('setUserName', username)
+        commit('setUserName', username);
     },
     setPlayers({commit}, players) {
-        commit('setPlayers', players)
+        commit('setPlayers', players);
     },
-    setConnection({commit}, connection) {
-        commit('setConnection', connection)
+    setConnection({commit}, connection: Connection) {
+        commit('setConnection', connection);
     },
-    setWorld({commit}, world) {
-        commit('setWorld', world)
+    setWorld({commit}, world: World) {
+        commit('setWorld', world);
     },
-    setLastConnectionAt(lastConnectionAt) {
-        commit('setLastConnectionAt', lastConnectionAt)
+    setLastConnectionAt({commit}, lastConnectionAt) {
+        commit('setLastConnectionAt', lastConnectionAt);
     },
     sendIsConnected({commit, getters, dispatch}) {
         commit('setLastConnectionAt', new Date())
@@ -138,13 +135,10 @@ const mutations = {
     setPlayers(state, players) {
         state.players = players
     },
-    setConnection(state, connection) {
-        state.connection.id = connection.id
-        state.connection.isGameMaster = connection.isGameMaster
-        state.connection.lastConnectionAt = connection.lastConnectionAt
-        state.connection.currentMap.id = connection.currentMap.id
+    setConnection(state, connection: Connection) {
+        state.connection = connection
     },
-    setWorld(state, world) {
+    setWorld(state, world: World) {
         state.world = world
     },
     setLastConnectionAt(state, lastConnectionAt) {
