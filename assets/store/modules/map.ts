@@ -7,31 +7,31 @@ const state = {
     /**
      * The current map
      */
-    map: {} as Map,
-    /**
-     * The list of tokens present on the current map
-     */
-    tokens: [] as Token[],
-    ratio: 1 as number
+    map: {
+        width: 0,
+        height: 0
+    } as Map,
+    ratio: 1 as number,
+    layer: 1 as number
 }
 
 const getters = {
-    map: (state) => {
+    map: (state: any) => {
         return state.map
     },
-    tokens: (state) => {
-        return state.tokens
+    getLayer: (state: any) => {
+        return state.layer
     },
-    getTokenById: (state) => (id) => {
-        return state.tokens.find(token => token.id === id)
+    getTokenById: (state: any) => (tokenId: number) => {
+        return state.map.tokens.find((token: Token) => token.id === tokenId)
     },
-    canControlledBy: (state) => (userId, tokenId) => {
-        return (state.tokens.find(token => token.id === tokenId && token.users.find(user => user.id == userId)) != null) ? true : false
+    canControlledBy: (state: any) => (userId: number, tokenId: number) => {
+        return (state.map.tokens.find((token: Token) => token.id === tokenId && token.users?.find((user: User) => user.id == userId)) != null) ? true : false
     },
-    getIndexOfUser: (state) => (user, tokenId) => {
-        return state.tokens.find(token => token.id === tokenId).users.indexOf(user)
+    getIndexOfUser: (state: any) => (user: User, tokenId: number) => {
+        return state.map.tokens.find((token: Token) => token.id === tokenId).users.indexOf(user)
     },
-    getRatio: (state) => {
+    getRatio: (state: any) => {
         return state.ratio
     }
 }
@@ -39,97 +39,75 @@ const getters = {
 const actions = {
     /**
      * Define current map
-     * @param {*} param0 
-     * @param {*} map 
      */
-    setMap({commit}, map) {
+    setMap: async function({commit}, map: Map): Promise<void>
+    {
         axios.get('api/maps/' + map).then((e) => {
             commit('setMap', e.data)
         })
     },
     /**
      * Add a token to the map
-     * @param {*} param0 
-     * @param {*} data 
      */
-    addTokenOnMap({commit, getters}, data) {
-        if (!data.mercure) {
+    addTokenOnMap: async function({commit, getters}, {mercure, data}: {mercure: boolean, data: Token | string}): Promise<void>
+    {
+        if (!mercure) {
             axios.post('api/tokens', {
                 "width": 64,
                 "height": 64,
                 'topPosition': 0,
                 "leftPosition": 0,
                 "zIndex": 0,
-                "map": "/api/maps/" + getters.map.id,
-                "asset": "/api/assets/" + data.id
-            }).then(response => {
-                let token = response.data
-                commit('addToken', {
-                    id: token.id,
-                    width: token.width,
-                    height: token.height,
-                    top: token.topPosition,
-                    left: token.leftPosition,
-                    zIndex: token.zIndex,
-                    image: token.asset.image,
-                    compressedImage: token.asset.compressedImage,
-                    users: token.users
-                })
+                "layer": getters.getLayer,
+                "map": getters.map['@id'],
+                "asset": "/api/assets/" + data
             })
         } else {
-            commit('addToken', {
-                id: data.id,
-                width: data.width,
-                height: data.height,
-                top: data.top,
-                left: data.left,
-                zIndex: data.zIndex,
-                image: data.image,
-                compressedImage: data.compressedImage,
-                users: data.users
-            })
+            commit('addToken', data)
         }
         
     },
     /**
      * Delete a token on the map
-     * @param {*} param0 
-     * @param {*} data 
      */
-    removeTokenOnMap({commit, getters}, data) {
-        let token = getters.getTokenById(data.id)
-        if (!data.mercure) {
+    removeTokenOnMap: function({commit, getters}, {mercure, id}: {mercure: boolean, id: number})
+    {
+        let token = getters.getTokenById(id)
+        if (!mercure) {
             axios.delete('/api/tokens/' + token.id)
         }else {
-            let index = state.tokens.findIndex((object: Token) => {
-                return object.id === data.id;
+            console.log(id)
+            let index = state.map.tokens.findIndex((token: Token) => {
+                return token.id === id;
             })
             commit('removeToken', index)
         }
     },
     /**
      * Update token information on the map
-     * @param {*} param0 
-     * @param {*} data 
      */
-    updateToken({commit, getters}, data) {
-        let token = getters.getTokenById(data.id)
-        commit('updateToken', {token, data})
+    updateToken: function({commit, getters}, updatedToken: Token): void
+    {
+        let token = getters.getTokenById(updatedToken.id)
+        commit('updateToken', {token, updatedToken})
     },
     /**
      * Push updated token information via API
-     * @param {*} param0 
-     * @param {*} data 
      */
-    finishUpdateToken({commit, getters}, data) {
-        let token = getters.getTokenById(data.id)
+    finishUpdateToken: async function({getters}, updatedToken: Token): Promise<void>
+    {
+        let token = getters.getTokenById(updatedToken.id);
+        let users = [] as string[];
+        updatedToken.users.forEach((user: User) => {
+            users.push(user["@id"]!);
+        })
         axios.patch('/api/tokens/' + token.id, {
-            "width": data.width,
-            "height": data.height,
-            'topPosition': data.top,
-            "leftPosition": data.left,
-            "zIndex": data.zIndex,
-            "users": data.users
+            "width": updatedToken.width,
+            "height": updatedToken.height,
+            'topPosition': updatedToken.topPosition,
+            "leftPosition": updatedToken.leftPosition,
+            "zIndex": updatedToken.zIndex,
+            "users": users
         }, {
             headers: {
                 'Content-Type': 'application/merge-patch+json'
@@ -138,95 +116,87 @@ const actions = {
     },
     /**
      * Update only token depth and push modification via API
-     * @param {*} param0 
-     * @param {*} data 
      */
-    changeZIndex({commit, getters}, data) {
-        let token = getters.getTokenById(data.id)
-        commit('changeZIndex', {token, data}),
+    changeZIndex: function({commit, getters}, updatedToken: Token)
+    {
+        let token = getters.getTokenById(updatedToken.id)
+        let zIndex = updatedToken.zIndex
+        commit('setTokenZIndex', {token, zIndex}),
         axios.patch('/api/tokens/' + token.id, {
-            "zIndex": data.zIndex
+            "zIndex": zIndex
         }, {
             headers: {
                 'Content-Type': 'application/merge-patch+json'
             }
         })
     },
-    setRatio({commit}, data) {
+    setRatio: function({commit}, data)
+    {
         commit('setRatio', data)
+    },
+    setLayer: function({commit}, layer: number)
+    {
+        commit('setLayer', layer)
     }
 }
 
 const mutations = {
-    setMap (state, map) {
-        /*Map*/
-        state.map.id = map.id
-        state.map.name = map.name
-        state.map.width = map.width
-        state.map.height = map.height
-        state.map.hasDynamicLight = map.hasDynamicLight
-        /*Tokens*/
-        state.tokens = []
-        map.tokens.forEach(token => {
-            let users = [] as User[];
-            token.users.forEach((user: User) => {
-                users.push({
-                    id: user.id
-                })
-            })
-            state.tokens.push({
-                id: token.id,
-                width: token.width,
-                height: token.height,
-                top: token.topPosition,
-                left: token.leftPosition,
-                zIndex: token.zIndex,
-                image: token.asset.image,
-                compressedImage: token.asset.compressedImage,
-                users: users
-            })
-        });
+    setMap: function(state: any, map: Map)
+    {
+        state.map = map
     },
-    addToken(state, token) {
-        state.tokens.push(token)
+    addToken: function(state: any, token: Token)
+    {
+        state.map.tokens.push(token)
     },
-    removeToken(state, tokenId) {
-        state.tokens.splice(tokenId, 1)
+    removeToken: function(state: any, tokenId: number)
+    {
+        state.map.tokens.splice(tokenId, 1)
     },
-    updateToken(state, {token, data}) {
-        token.width = data.width
-        token.height = data.height
-        token.top = data.top
-        token.left = data.left
-        token.zIndex = data.zIndex
-        token.users = data.users
+    updateToken: function(state: any, {token, updatedToken}: {token: Token, updatedToken: Token})
+    {
+        token.width = updatedToken.width
+        token.height = updatedToken.height
+        token.topPosition = updatedToken.topPosition
+        token.leftPosition = updatedToken.leftPosition
+        token.zIndex = updatedToken.zIndex
+        token.users = updatedToken.users
     },
-    setTokenWidth(state, data) {
-        data.token.width = data.width
+    setTokenWidth: function(state: any, {token, width}: {token: Token, width: number})
+    {
+        token.width = width
     },
-    setTokenHeight(state, data) {
-        data.token.height = data.height
+    setTokenHeight: function(state: any, {token, height}: {token: Token, height: number})
+    {
+        token.height = height
     },
-    setTokenTop(state, data) {
-        data.token.top = data.top
+    setTokenTop: function(state: any, {token, topPosition}: {token: Token, topPosition: number})
+    {
+        token.topPosition = topPosition
     },
-    setTokenLeft(state, data) {
-        data.token.left = data.left
+    setTokenLeft: function(state: any, {token, leftPosition}: {token: Token, leftPosition: number})
+    {
+        token.leftPosition = leftPosition
     },
-    setTokenZIndex(state, data) {
-        data.token.zIndex = data.zIndex
+    setTokenZIndex: function(state: any, {token, zIndex}: {token: Token, zIndex: number})
+    {
+        token.zIndex = zIndex
     },
-    addTokenPlayer(state, data) {
-        data.token.users.push(data.user)
+    addTokenPlayer: function(state: any, {token, user}: {token: Token, user: User})
+    {
+        token.users.push(user)
     },
-    removeTokenPlayer(state, data) {
-        data.token.users.splice(data.user, 1)
+    removeTokenPlayer: function(state: any, {token, user}: {token: Token, user: User})
+    {
+        token.users.splice(user, 1)
     },
-    changeZIndex(state, data) {
-        data.token.zIndex = data.zIndex
-    },
-    setRatio(state, data) {
+    setRatio: function(state: any, data)
+    {
         state.ratio = data
+    },
+    setLayer: function(state: any, layer: number)
+    {
+        state.layer = layer;
     }
 }
 

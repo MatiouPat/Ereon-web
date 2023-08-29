@@ -6,6 +6,7 @@ use App\Repository\AttributeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AttributeRepository::class)]
 class Attribute
@@ -13,9 +14,11 @@ class Attribute
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["personage:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["personage:read"])]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'attributes')]

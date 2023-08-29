@@ -34,8 +34,8 @@ import { AssetRepository } from '../repository/assetRepository';
             addToken: function(e: DragEvent) {
                 if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor')!)) {
                     this.addTokenOnMap({
-                        id: (e.target as HTMLImageElement).alt,
-                        mercure: false
+                        mercure: false,
+                        data: (e.target as HTMLImageElement).alt,
                     })
                 }
             }

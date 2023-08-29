@@ -1,6 +1,13 @@
 <template>
     <header v-if="isConnected" class="header">
         <nav class="navigation">
+            <ul class="layers" v-if="isGameMaster">
+                <li title="Maps" @click="setLayer(1)"><div class="layer" :class="getLayer == 1 ? 'selected' : ''"><img src="build/images/icons/map.svg" width="16" height="16" alt="Maps"></div><span>Maps</span></li>
+                <li title="Tokens" @click="setLayer(2)"><div class="layer" :class="getLayer == 2 ? 'selected' : ''"><img src="build/images/icons/token.svg" width="16" height="16" alt="Tokens"></div><span>Tokens</span></li>
+            </ul>
+            <ul v-else>
+
+            </ul>
             <ul>
                 <li title="Paramètres"><img src="build/images/icons/settings.svg" width="24" height="24" alt="Paramètres"></li>
                 <li title="Se déconnecter"><a href="/logout"><img src="build/images/icons/logout.svg" width="24" height="24" alt="Se déconnecter"></a></li>
@@ -62,7 +69,8 @@ import { UserRepository } from '../repository/userRepository';
                  * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
                  */
                 isConnected: false as boolean,
-                onParameters: false as boolean
+                onParameters: false as boolean,
+                layer: 1 as number
             }
         },
         props: [
@@ -73,8 +81,12 @@ import { UserRepository } from '../repository/userRepository';
             ...mapGetters('user', [
                 'getConnectedUser',
                 'getCurrentMapId',
-                'getUsername'
+                'getUsername',
+                'isGameMaster',
             ]),
+            ...mapGetters('map', [
+                'getLayer',
+            ])
         },
         methods: {
             ...mapActions('user', [
@@ -88,7 +100,8 @@ import { UserRepository } from '../repository/userRepository';
                 'downloadPersonages'
             ]),
             ...mapActions('map', [
-                'setMap'
+                'setMap',
+                'setLayer'
             ]),
             /**
              * Loading information after choosing a world
@@ -135,15 +148,17 @@ import { UserRepository } from '../repository/userRepository';
     }
 
     .navigation {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
         height: 100%;
     }
 
     .navigation ul {
         display: flex;
         flex-direction: column;
-        justify-content: flex-end;
         align-items: center;
-        height: 100%;
         gap: 16px;
         padding: 16px 0;
 
@@ -152,6 +167,31 @@ import { UserRepository } from '../repository/userRepository';
     .navigation img {
         display: block;
         margin: 0 auto;
+    }
+
+    .navigation .layers span {
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+        margin-top: 4px;
+    }
+
+    .navigation .layer {
+        padding: 8px;
+        background-color: #969696;
+        border-radius: 50%;
+        transition: all 25ms ease-in-out;
+    }
+
+    .navigation .layer:hover {
+        outline: solid 2px #565656;
+        border-radius: 20%;
+    }
+
+    .navigation .layer.selected {
+        background-color: #D68836;
+        outline: solid 2px #565656;
+        border-radius: 20%;
     }
 
     .header-title-box {

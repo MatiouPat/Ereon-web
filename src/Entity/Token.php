@@ -19,8 +19,8 @@ use Symfony\Component\Validator\Constraints\Range;
     normalizationContext: ['groups' => ['token:read']],
     operations: [
         new GetCollection(),
-        new Post(),
-        new Patch(),
+        new Post(output: false),
+        new Patch(output: false),
         new Delete()
     ],
     paginationEnabled: false

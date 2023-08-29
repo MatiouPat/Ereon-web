@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['connection:read']],
     operations: [
         new GetCollection(),
-        new Patch()
+        new Patch(output: false)
     ]
 )]
 #[ApiFilter(DateFilter::class, properties: ['lastConnectionAt'])]
