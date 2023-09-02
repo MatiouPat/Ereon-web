@@ -1,5 +1,5 @@
 <template>
-    <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
+    <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown.prevent="onMouseDown" @mouseup.prevent="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
             <div v-if="map.hasDynamicLight">
                 <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
@@ -79,7 +79,7 @@ import { mapActions, mapGetters } from 'vuex';
              * @param {*} e 
              */
             onMouseDown: function (e: MouseEvent) {
-                if(e.button === 2) {
+                if(e.button === 2 || e.button === 1) {
                     this.startX = e.screenX - this.$el.offsetLeft;
                     this.startY = e.screenY - this.$el.offsetTop;
                     this.mapX = this.$el.scrollLeft;
@@ -115,6 +115,7 @@ import { mapActions, mapGetters } from 'vuex';
                     } else if (this.ratio >= 0.1 && this.ratio <= 2.3) {
                         this.ratio = this.ratio - e.deltaY * 0.0005;
                     }
+                    this.updateRatio();
                 }
             },
             /**
