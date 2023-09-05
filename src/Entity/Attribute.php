@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\AttributeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -9,6 +10,10 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AttributeRepository::class)]
+#[ApiResource(
+    operations: [
+    ]
+)]
 class Attribute
 {
     #[ORM\Id]
@@ -20,6 +25,10 @@ class Attribute
     #[ORM\Column(length: 255)]
     #[Groups(["personage:read"])]
     private ?string $name = null;
+
+    #[ORM\Column(length: 3)]
+    #[Groups(["personage:read"])]
+    private ?string $acronym = null;
 
     #[ORM\ManyToOne(inversedBy: 'attributes')]
     #[ORM\JoinColumn(nullable: false)]
@@ -54,6 +63,18 @@ class Attribute
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getAcronym(): ?string
+    {
+        return $this->acronym;
+    }
+
+    public function setAcronym(string $acronym): static
+    {
+        $this->acronym = $acronym;
 
         return $this;
     }

@@ -19,9 +19,9 @@ class NumberOfAttribute
     #[Groups(["personage:read"])]
     private ?int $value = null;
 
-    #[ORM\ManyToOne(inversedBy: 'numberOfAttributes')]
-    #[Groups(["personage:read"])]
+    #[ORM\ManyToOne(inversedBy: 'numberOfAttributes', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["personage:read"])]
     private ?Attribute $attribute = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfAttributes')]

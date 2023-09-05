@@ -17,3 +17,18 @@ main {
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
+:where(.personage-form, .personage-view) strong {
+    font-weight: 700;
+}
+
+:where(.personage-form, .personage-view) em {
+    font-style: italic;
+}
+
+:where(.personage-form, .personage-view) ul {
+    list-style: inside;
+}
+
+:where(.personage-form, .personage-view) ol {
+    list-style: decimal;
+}

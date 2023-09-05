@@ -6,6 +6,7 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use App\Repository\PersonageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -17,7 +18,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     normalizationContext: ['groups' => ['personage:read']],
     operations: [
-        new GetCollection()
+        new GetCollection(),
+        new Patch()
     ]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact', 'user.discordIdentifier' => 'exact'])]
@@ -61,7 +63,7 @@ class Personage
     #[Groups(["personage:read"])]
     private ?World $world = null;
 
-    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfAttribute::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfAttribute::class, orphanRemoval: true, cascade: ['persist'])]
     #[Groups(["personage:read"])]
     private Collection $numberOfAttributes;
 
