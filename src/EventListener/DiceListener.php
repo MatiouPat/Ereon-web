@@ -3,7 +3,7 @@
 namespace App\EventListener;
 
 use App\Entity\Dice;
-use App\Service\DiceGenerator;
+use App\Service\DiceGeneratorInterface;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Events;
 use Symfony\Component\Mercure\Update;
@@ -15,13 +15,13 @@ use Symfony\Component\Serializer\SerializerInterface;
 class DiceListener
 {
 
-    private DiceGenerator $diceGenerator;
+    private DiceGeneratorInterface $diceGenerator;
 
     private MessageBusInterface $bus;
 
     private SerializerInterface $serializer;
 
-    public function __construct(DiceGenerator $diceGenerator, MessageBusInterface $bus, SerializerInterface $serializer)
+    public function __construct(DiceGeneratorInterface $diceGenerator, MessageBusInterface $bus, SerializerInterface $serializer)
     {
         $this->diceGenerator = $diceGenerator;
         $this->bus = $bus;
