@@ -34,10 +34,14 @@
                         <div>
                             <legend class="form-label">Theme</legend>
                             <fieldset>
-                                <input class="form-control" type="radio" id="light" name="Light" v-model="isDarkTheme" :value="false" @change="changeTheme">
-                                <label for="light">Light</label>
-                                <input class="form-control" type="radio" id="dark" name="Dark" v-model="isDarkTheme" :value="true" @change="changeTheme">
-                                <label for="dark">Dark</label>
+                                <div>
+                                    <input class="form-control" type="radio" id="light" name="Light" v-model="isDarkTheme" :value="false" @change="changeTheme">
+                                    <label for="light">Light</label>
+                                </div>
+                                <div>
+                                    <input class="form-control" type="radio" id="dark" name="Dark" v-model="isDarkTheme" :value="true" @change="changeTheme">
+                                    <label for="dark">Dark</label>
+                                </div>
                             </fieldset>
                         </div>
                     </div>
@@ -309,6 +313,20 @@ import { UserRepository } from '../repository/userRepository';
     .parameters-body {
         padding: 16px;
         background-color: #FFFFFF;
+    }
+
+    .parameters-body fieldset {
+        display: flex;
+        gap: 16px;
+    }
+
+    .parameters-body fieldset div {
+        display: flex;
+        gap: 4px;
+    }
+
+    .parameters-body fieldset :where(input, label) {
+        margin: 0
     }
 
     .worlds-page {
