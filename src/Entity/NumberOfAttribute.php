@@ -2,11 +2,17 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\NumberOfAttributeRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: NumberOfAttributeRepository::class)]
+#[ApiResource(
+    operations: [
+
+    ]
+)]
 class NumberOfAttribute
 {
     #[ORM\Id]
@@ -16,12 +22,12 @@ class NumberOfAttribute
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?int $value = null;
 
-    #[ORM\ManyToOne(inversedBy: 'numberOfAttributes', cascade: ['persist'])]
+    #[ORM\ManyToOne(inversedBy: 'numberOfAttributes')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?Attribute $attribute = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfAttributes')]

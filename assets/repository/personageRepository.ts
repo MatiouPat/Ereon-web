@@ -22,6 +22,7 @@ export class PersonageRepository
         let saveNumberOfAttributes = personage.numberOfAttributes;
         personage.numberOfAttributes?.forEach((numberofattribute: NumberOfAttribute) => {
             numberofattributes.push({
+                ['@id']: numberofattribute["@id"],
                 id: numberofattribute.id,
                 value: numberofattribute.value,
                 attribute: numberofattribute.attribute['@id']

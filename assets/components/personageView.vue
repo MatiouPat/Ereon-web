@@ -285,7 +285,9 @@ export default defineComponent({
     }
 
     hr {
-        display: block;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
         color: #8C2417;
         background-color: #8C2417;
         height: 4px;

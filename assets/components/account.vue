@@ -9,7 +9,7 @@
 
             </ul>
             <ul>
-                <li title="Paramètres"><img src="build/images/icons/settings.svg" width="24" height="24" alt="Paramètres"></li>
+                <li title="Paramètres" @click="onParameters = true"><img src="build/images/icons/settings.svg" width="24" height="24" alt="Paramètres"></li>
                 <li title="Se déconnecter"><a href="/logout"><img src="build/images/icons/logout.svg" width="24" height="24" alt="Se déconnecter"></a></li>
             </ul>
         </nav>
@@ -25,6 +25,21 @@
                     <div class="parameters-header">
                         <h2>Paramètres</h2>
                         <img @click="onParameters = false" src="build/images/icons/close.svg" alt="Fermer">
+                    </div>
+                    <div class="parameters-body">
+                        <div>
+                            <label class="form-label">Volume global</label>
+                            <input class="form-control" type="range" min="0" v-model="globalVolume" max="1" step="0.01" @input="changeUserVolume">
+                        </div>
+                        <div>
+                            <legend class="form-label">Theme</legend>
+                            <fieldset>
+                                <input class="form-control" type="radio" id="light" name="Light" value="0" checked>
+                                <label for="light">Light</label>
+                                <input class="form-control" type="radio" id="dark" name="Dark" value="1">
+                                <label for="dark">Dark</label>
+                            </fieldset>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -70,7 +85,8 @@ import { UserRepository } from '../repository/userRepository';
                  */
                 isConnected: false as boolean,
                 onParameters: false as boolean,
-                layer: 1 as number
+                layer: 1 as number,
+                globalVolume: (this.connectedUser.userParameter.globalVolume / 100) as number
             }
         },
         props: [
@@ -103,6 +119,10 @@ import { UserRepository } from '../repository/userRepository';
                 'setMap',
                 'setLayer'
             ]),
+            ...mapActions('music', [
+                'setUserParameter',
+                'setUserVolume'
+            ]),
             /**
              * Loading information after choosing a world
              * @param connection The connection between player and world
@@ -133,7 +153,14 @@ import { UserRepository } from '../repository/userRepository';
                         this.setConnection(data)
                     }
                 }
+            },
+            changeUserVolume: function() {
+                this.setUserVolume(this.globalVolume);
+                this.emitter.emit("hasChangedUserVolume")
             }
+        },
+        mounted() {
+            this.setUserParameter(this.connectedUser.userParameter);
         }
     })
 </script>
@@ -260,6 +287,10 @@ import { UserRepository } from '../repository/userRepository';
         align-items: center;
         padding: 8px;
         border-bottom: solid 1px #565656;
+    }
+
+    .parameters-body {
+        padding: 8px;
     }
 
     h2 {

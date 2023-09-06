@@ -58,6 +58,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $personages;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    #[Groups("user:read")]
     private ?UserParameter $userParameter = null;
 
     public function __construct()
