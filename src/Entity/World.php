@@ -14,7 +14,7 @@ class World
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["world:read", "user:read", "connection:read", "personage:read"])]
+    #[Groups(["world:read", "user:read", "connection:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -34,9 +34,6 @@ class World
     #[ORM\OneToOne(mappedBy: 'world', cascade: ['persist', 'remove'])]
     private ?MusicPlayer $musicPlayer = null;
 
-    #[ORM\OneToMany(mappedBy: 'world', targetEntity: UserWorldParameter::class, orphanRemoval: true)]
-    private Collection $userWorldParameters;
-
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Attribute::class, orphanRemoval: true)]
     private Collection $attributes;
 
@@ -51,7 +48,6 @@ class World
         $this->connections = new ArrayCollection();
         $this->personages = new ArrayCollection();
         $this->maps = new ArrayCollection();
-        $this->userWorldParameters = new ArrayCollection();
         $this->attributes = new ArrayCollection();
         $this->skills = new ArrayCollection();
         $this->points = new ArrayCollection();
@@ -182,36 +178,6 @@ class World
         }
 
         $this->musicPlayer = $musicPlayer;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, UserWorldParameter>
-     */
-    public function getUserWorldParameters(): Collection
-    {
-        return $this->userWorldParameters;
-    }
-
-    public function addUserWorldParameter(UserWorldParameter $userWorldParameter): self
-    {
-        if (!$this->userWorldParameters->contains($userWorldParameter)) {
-            $this->userWorldParameters->add($userWorldParameter);
-            $userWorldParameter->setWorld($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserWorldParameter(UserWorldParameter $userWorldParameter): self
-    {
-        if ($this->userWorldParameters->removeElement($userWorldParameter)) {
-            // set the owning side to null (unless already changed)
-            if ($userWorldParameter->getWorld() === $this) {
-                $userWorldParameter->setWorld(null);
-            }
-        }
 
         return $this;
     }

@@ -17,3 +17,22 @@ main {
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
+.dark .right-side-box {
+    background-color: #1c1b22;
+}
+
+:where(.personage-form, .personage-view) strong {
+    font-weight: 700;
+}
+
+:where(.personage-form, .personage-view) em {
+    font-style: italic;
+}
+
+:where(.personage-form, .personage-view) ul {
+    list-style: inside;
+}
+
+:where(.personage-form, .personage-view) ol {
+    list-style: decimal;
+}

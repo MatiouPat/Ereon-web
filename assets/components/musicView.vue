@@ -1,15 +1,5 @@
 <template>
     <div class="music-box">
-        <div>
-            <h2>Paramètres</h2>
-            <div>
-                <span>Volume global</span>
-                <div>
-                    <img src="build/images/icons/volume.svg" alt="Volume">
-                    <input type="range" min="0" v-model="globalVolume" max="1" step="0.01" @input="changeVolume">
-                </div>
-            </div>
-        </div>
         <div class="music-informations" v-if="isGameMaster">
             <h2>Musique</h2>
             <span class="music-name">{{ currentMusic.title }}</span>
@@ -68,13 +58,11 @@
 </template>
 
 <script lang="ts">
-import axios from 'axios';
 import { defineComponent, inject } from 'vue';
 import { mapGetters } from 'vuex';
 import { Music } from '../entity/music';
 import { MusicRepository } from '../repository/musicRepository';
 import { MusicPlayerRepository } from '../repository/musicplayerRepository';
-
   
     export default defineComponent({
         data() {
@@ -83,10 +71,8 @@ import { MusicPlayerRepository } from '../repository/musicplayerRepository';
                 musicRepository: new MusicRepository as MusicRepository,
                 musicPlayerRepository: new MusicPlayerRepository as MusicPlayerRepository,
                 musicPlayerId : 0 as number,
-                userWorldParametersId : 0 as number,
                 isPlaying: false as boolean,
                 isLooping: false as boolean,
-                globalVolume: 1 as number,
                 currentMusic: {
                     title: "" as string | undefined,
                     link: "" as string | undefined,
@@ -103,52 +89,28 @@ import { MusicPlayerRepository } from '../repository/musicplayerRepository';
                 'isGameMaster',
                 'getWorld',
                 'getUserId'
+            ]),
+            ...mapGetters('music', [
+                'getUserVolume'
             ])
         },
         methods: {
             play: function () {
                 (this.$refs.musicAudio as HTMLAudioElement).play();
                 this.isPlaying = true;
-                axios.patch('/api/music_players/' + this.musicPlayerId, {
-                    isPlaying: true,
-                    currentTimePlay: this.currentMusic.currentTime
-                }, {
-                    headers: {
-                        'Content-Type': 'application/merge-patch+json'
-                    }
-                });
+                this.musicPlayerRepository.setIsPlaying(this.musicPlayerId, true, this.currentMusic.currentTime);
             },
             pause: function () {
                 (this.$refs.musicAudio as HTMLAudioElement).pause();
                 this.isPlaying = false;
-                axios.patch('/api/music_players/' + this.musicPlayerId, {
-                    isPlaying: false,
-                    currentTimePlay: this.currentMusic.currentTime
-                }, {
-                    headers: {
-                        'Content-Type': 'application/merge-patch+json'
-                    }
-                });
+                this.musicPlayerRepository.setIsPlaying(this.musicPlayerId, false, this.currentMusic.currentTime);
             },
             changeVolume: function () {
-                (this.$refs.musicAudio as HTMLAudioElement).volume = this.globalVolume;
-                axios.patch('/api/user_world_parameters/' + this.userWorldParametersId, {
-                    musicVolume: Number((this.globalVolume * 100).toPrecision(2))
-                }, {
-                    headers: {
-                        'Content-Type': 'application/merge-patch+json'
-                    }
-                });
+                (this.$refs.musicAudio as HTMLAudioElement).volume = this.getUserVolume;
             },
             changeCurrentTime: function () {
                 (this.$refs.musicAudio as HTMLAudioElement).currentTime = this.currentMusic.currentTime;
-                axios.patch('/api/music_players/' + this.musicPlayerId, {
-                    currentTimePlay: Number(this.currentMusic.currentTime)
-                }, {
-                    headers: {
-                        'Content-Type': 'application/merge-patch+json'
-                    }
-                });
+                this.musicPlayerRepository.setCurrentTimePlay(this.musicPlayerId, this.currentMusic.currentTime);
             },
             changeMusic: function (index: number) {
                 this.currentMusic.link = this.musics[index].link;
@@ -158,14 +120,7 @@ import { MusicPlayerRepository } from '../repository/musicplayerRepository';
                 (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
                     this.play();
                 }, { once: true});
-                axios.patch('/api/music_players/' + this.musicPlayerId, {
-                    currentMusic: 'api/music/' + this.musics[index].id,
-                    currentTimePlay: this.currentMusic.currentTime
-                }, {
-                    headers: {
-                        'Content-Type': 'application/merge-patch+json'
-                    }
-                });
+                this.musicPlayerRepository.setCurrentMusic(this.musicPlayerId, this.musics[index].id, this.currentMusic.currentTime);
             },
             updateCurrentTime: function () {
                 this.currentMusic.currentTime =(this.$refs.musicAudio as HTMLAudioElement).currentTime;
@@ -181,19 +136,17 @@ import { MusicPlayerRepository } from '../repository/musicplayerRepository';
             },
             loop: function () {
                 this.isLooping = !this.isLooping;
-                axios.patch('/api/music_players/' + this.musicPlayerId, {
-                    isLooping: this.isLooping
-                }, {
-                    headers: {
-                        'Content-Type': 'application/merge-patch+json'
-                    }
-                });
+                this.musicPlayerRepository.setIsLooping(this.musicPlayerId, this.isLooping);
             }
         },
         mounted() {
             this.musicRepository.findAllMusics().then(res => {
                 this.musics = res
             });
+
+            this.emitter.on('hasChangedUserVolume', () => {
+                this.changeVolume()
+            })
 
             this.emitter.on('isDownload', () => {
                 this.musicPlayerRepository.findMusicPlayerByWorld(this.getWorld.id).then(res => {
@@ -232,12 +185,6 @@ import { MusicPlayerRepository } from '../repository/musicplayerRepository';
                         }
                     }
                 })
-                axios.get('/api/user_world_parameters?user.id=' + this.getUserId + '&world.id=' + this.getWorld.id)
-                    .then(response => {
-                        let userWorldParameter = response.data['hydra:member'][0];
-                        this.userWorldParametersId = userWorldParameter.id;
-                        this.globalVolume = userWorldParameter.musicVolume / 100;
-                    });
             })
         }
     })
@@ -249,10 +196,6 @@ h2 {
     font-size: 1.2rem;
     font-weight: 700;
     margin-bottom: 8px;
-}
-
-input[type = range] {
-    accent-color: #D68836;
 }
 
 .music-informations {

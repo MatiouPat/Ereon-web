@@ -6,6 +6,8 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Put;
 use App\Repository\PersonageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -16,8 +18,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: PersonageRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['personage:read']],
+    denormalizationContext: ['groups' => ['personage:write']],
     operations: [
-        new GetCollection()
+        new GetCollection(),
+        new Patch()
     ]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact', 'user.discordIdentifier' => 'exact'])]
@@ -30,23 +34,23 @@ class Personage
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read", 'dice:read'])]
+    #[Groups(["personage:read", 'personage:write', 'dice:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?string $race = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?string $alignment = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?string $class = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?string $inventory = null;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Dice::class, orphanRemoval: true)]
@@ -61,8 +65,8 @@ class Personage
     #[Groups(["personage:read"])]
     private ?World $world = null;
 
-    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfAttribute::class, orphanRemoval: true)]
-    #[Groups(["personage:read"])]
+    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfAttribute::class, orphanRemoval: true, cascade: ["persist", "remove"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private Collection $numberOfAttributes;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfSkill::class, orphanRemoval: true)]

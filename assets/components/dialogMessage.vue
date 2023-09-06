@@ -57,4 +57,8 @@ import { defineComponent } from 'vue';
         color: #721c24;
         background-color: #f8d7da;
     }
+
+    .dark .message {
+        background-color: #2b2a33;
+    }
 </style>

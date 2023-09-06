@@ -275,7 +275,7 @@ import { MapRepository } from '../repository/mapRepository';
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: dimgrey;
+        background-color: #565656;
         width: 128px;
         height: 128px;
     }
@@ -307,6 +307,10 @@ import { MapRepository } from '../repository/mapRepository';
         margin: auto;
         padding: 16px;
         background-color: #FFF;
+    }
+
+    .dark .map-box {
+        background-color: #1c1b22;
     }
 
 

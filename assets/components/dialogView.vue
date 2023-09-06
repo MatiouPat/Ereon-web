@@ -6,31 +6,31 @@
         <div class="textinput">
             <textarea :disabled="isDisabled" :class="{isDisabled: isDisabled}" v-model="computation" @keydown.enter="rollDice"></textarea>
             <div class="dices">
-                <div class="dice" @click="addDice('d100')">
+                <div class="dice" @click="addDice('/r d100')">
                     <img width="24" height="24" src="/build/images/d100.svg" alt="d100">
                     <span>d100</span>
                 </div>
-                <div class="dice" @click="addDice('d20')">
+                <div class="dice" @click="addDice('/r d20')">
                     <img width="24" height="24" src="/build/images/d20.svg" alt="d20">
                     <span>d20</span>
                 </div>
-                <div class="dice" @click="addDice('d12')">
+                <div class="dice" @click="addDice('/r d12')">
                     <img width="24" height="24" src="/build/images/d12.svg" alt="d12">
                     <span>d12</span>
                 </div>
-                <div class="dice" @click="addDice('d8')">
+                <div class="dice" @click="addDice('/r d8')">
                     <img width="24" height="24" src="/build/images/d8.svg" alt="d8">
                     <span>d8</span>
                 </div>
-                <div class="dice" @click="addDice('d6')">
+                <div class="dice" @click="addDice('/r d6')">
                     <img width="24" height="24" src="/build/images/d6.svg" alt="d6">
                     <span>d6</span>
                 </div>
-                <div class="dice" @click="addDice('d4')">
+                <div class="dice" @click="addDice('/r d4')">
                     <img width="24" height="24" src="/build/images/d4.svg" alt="d4">
                     <span>d4</span>
                 </div>
-                <div class="dice" @click="addDice('d2')">
+                <div class="dice" @click="addDice('/r d2')">
                     <img width="24" height="24" src="/build/images/d2.svg" alt="d2">
                     <span>d2</span>
                 </div>
@@ -81,13 +81,26 @@ import { DiceRepository } from '../repository/diceRepository';
              * Call the API to roll a die
              */
             rollDice: function () {
-                this.diceRepository.createDice(this.getPersonages[0]['@id'], this.computation).catch(e => {
-                    this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - d100+20-4');
-                })
-                this.computation = '';
+                let computation = this.computation.split(' ');
+                if(computation[1]) {
+                    this.diceRepository.createDice(this.getPersonages[0]['@id'], computation[1]).catch(e => {
+                        this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - /r d100+20-4');
+                        this.scollToBottom()
+                    })
+                }else {
+                    this.messages.push('Demande non valide <br> Exemple - /r d100+20-4');
+                    this.scollToBottom()
+                }
             },
             addDice: function (dice: string) {
                 this.computation = dice
+            },
+            scollToBottom: function() {
+                let messages = this.$refs.messages as HTMLElement;
+                setTimeout(() => {
+                    messages.scrollTo({top: messages.scrollHeight, behavior: 'smooth'});
+                    this.computation = '';
+                },2)
             }
         },
         mounted: function() {
@@ -98,6 +111,7 @@ import { DiceRepository } from '../repository/diceRepository';
             es.onmessage = e => {
                 let data = JSON.parse(e.data)
                 this.messages.push(data);
+                this.scollToBottom();
             }
 
             this.diceRepository.findAllDices().then(res => {
@@ -158,20 +172,26 @@ import { DiceRepository } from '../repository/diceRepository';
 
     .dices {
         display: flex;
-        justify-content: space-around;
         margin: 0 8px;
     }
 
     .dice {
-        width: 32px;
+        display: flex;
+        flex-direction: column;
+        width: 40px;
         text-align: center;
         font-size: .8rem;
         font-weight: 500;
         cursor: pointer;
     }
 
+
     .dice img {
         margin: 0 auto 4px auto;
+    }
+
+    .dark .textinput textarea {
+        background-color: #2b2a33;
     }
 
 </style>

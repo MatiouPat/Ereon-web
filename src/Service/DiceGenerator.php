@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Entity\Dice;
 
-class DiceGenerator 
+class DiceGenerator implements DiceGeneratorInterface
 {
 
     /**

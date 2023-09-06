@@ -15,6 +15,7 @@
     </ul>
     <div class="right-side-box-content">
         <dialog-view v-show="pageIndex == 0"></dialog-view>
+        <personage-view v-show="pageIndex == 1"></personage-view>
         <music-view v-show="pageIndex == 2"></music-view>
         <asset-view v-if="isGameMaster" v-show="pageIndex == 3"></asset-view>
     </div>
@@ -24,25 +25,19 @@
 import DialogView from './dialogView.vue'
 import AssetView from './assetView.vue'
 import MusicView from './musicView.vue'
+import PersonageView from './personageView.vue'
 import { mapGetters } from 'vuex'
 import { defineComponent } from 'vue'
 
     export default defineComponent({
         components: {
             DialogView,
+            PersonageView,
             MusicView,
             AssetView
         },
         data () {
             return {
-                /**
-                 * The list of components
-                 */
-                pages: [
-                    DialogView,
-                    MusicView,
-                    AssetView
-                ],
                 /**
                  * The index to choose the component to display
                  */
@@ -82,5 +77,9 @@ import { defineComponent } from 'vue'
 
     .right-side-box-content {
         padding: 16px 8px;
+    }
+
+    .dark .right-side-box-content, .dark .right-side-box-actions {
+        background-color: #1c1b22;
     }
 </style>

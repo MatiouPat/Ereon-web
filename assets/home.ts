@@ -27,7 +27,7 @@ let dialogBox = createApp({
 })
 
 dialogBox.provide("$store", store);
-dialogBox.use(store)
+dialogBox.use(store);
 dialogBox.provide('emitter', emitter);
 
 dialogBox.mount('#right-side-box')

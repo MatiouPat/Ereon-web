@@ -79,3 +79,13 @@ h1 {
     font-size: 1rem;
     margin-top: 16px;
 }
+
+@media (prefers-color-scheme: dark) {
+    html {
+        color: #b3b3b3;
+    }
+
+    .login-wrapper {
+        background-color: #1c1b22;
+    }
+}

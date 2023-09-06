@@ -79,7 +79,7 @@ import { mapActions, mapGetters } from 'vuex';
              * @param {*} e 
              */
             onMouseDown: function (e: MouseEvent) {
-                if(e.button === 2) {
+                if(e.button === 2 || e.button === 1) {
                     this.startX = e.screenX - this.$el.offsetLeft;
                     this.startY = e.screenY - this.$el.offsetTop;
                     this.mapX = this.$el.scrollLeft;
@@ -115,6 +115,7 @@ import { mapActions, mapGetters } from 'vuex';
                     } else if (this.ratio >= 0.1 && this.ratio <= 2.3) {
                         this.ratio = this.ratio - e.deltaY * 0.0005;
                     }
+                    this.updateRatio();
                 }
             },
             /**
@@ -254,10 +255,12 @@ import { mapActions, mapGetters } from 'vuex';
 
     .editor-zoom-add-btn  {
         margin-bottom: -12px;
+        z-index: 5;
     }
 
     .editor-zoom-minus-btn {
         margin-top: -12px;
+        z-index: 5;
     }
 
     .editor-zoom-ratio {
@@ -274,7 +277,7 @@ import { mapActions, mapGetters } from 'vuex';
         display: block;
         transform: rotate(-90deg);
         margin: 80px 0;
-        accent-color: #D68836;
+        width: auto;
     }
 
     canvas {
@@ -282,5 +285,13 @@ import { mapActions, mapGetters } from 'vuex';
         top: 0;
         left: 0;
         z-index: 10;
+    }
+
+    .dark .editor-wrapper {
+        background-color: #131313;
+    }
+
+    .dark .editor {
+        background-color: #2b2a33;
     }
 </style>

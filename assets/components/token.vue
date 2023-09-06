@@ -154,6 +154,9 @@ import { User } from '../entity/user';
              */
             showActions: function (e: MouseEvent) {
                 this.isContexting = true;
+                (this.$refs.token as HTMLElement).addEventListener('mouseleave', () => {
+                    this.isContexting = false;
+                }, {once: true})
             },
             /**
              * Putting the token a little further forward
@@ -540,5 +543,17 @@ import { User } from '../entity/user';
         font-weight: 700;
         color: #D68836;
         margin-bottom: 4px;
+    }
+
+    .dark .context-menu li {
+        background-color: #2b2a33;
+    }
+
+    .context-menu li:hover {
+        background-color: #1c1b22;
+    }
+
+    .dark .modal-box {
+        background-color: #2b2a33;
     }
 </style>

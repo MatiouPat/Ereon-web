@@ -25,6 +25,7 @@
         "build": "encore production --progress"
     },
     "dependencies": {
+        "@vueup/vue-quill": "^1.2.0",
         "axios": "^1.4.0",
         "dotenv": "^16.3.1",
         "mitt": "^3.0.1",
