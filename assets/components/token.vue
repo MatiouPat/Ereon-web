@@ -544,4 +544,16 @@ import { User } from '../entity/user';
         color: #D68836;
         margin-bottom: 4px;
     }
+
+    .dark .context-menu li {
+        background-color: #2b2a33;
+    }
+
+    .context-menu li:hover {
+        background-color: #1c1b22;
+    }
+
+    .dark .modal-box {
+        background-color: #2b2a33;
+    }
 </style>

@@ -311,11 +311,6 @@ import { UserRepository } from '../repository/userRepository';
         background-color: #FFFFFF;
     }
 
-    h2 {
-        font-size: 1.5rem;
-        font-weight: 400;
-    }
-
     .worlds-page {
         position: fixed;
         top: 0;

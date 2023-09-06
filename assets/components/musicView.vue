@@ -198,10 +198,6 @@ h2 {
     margin-bottom: 8px;
 }
 
-input[type = range] {
-    accent-color: #D68836;
-}
-
 .music-informations {
     margin-top: 16px;
 }

@@ -1,5 +1,5 @@
 <template>
-    <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown.prevent="onMouseDown" @mouseup.prevent="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
+    <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
             <div v-if="map.hasDynamicLight">
                 <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
@@ -255,10 +255,12 @@ import { mapActions, mapGetters } from 'vuex';
 
     .editor-zoom-add-btn  {
         margin-bottom: -12px;
+        z-index: 5;
     }
 
     .editor-zoom-minus-btn {
         margin-top: -12px;
+        z-index: 5;
     }
 
     .editor-zoom-ratio {
@@ -275,7 +277,6 @@ import { mapActions, mapGetters } from 'vuex';
         display: block;
         transform: rotate(-90deg);
         margin: 80px 0;
-        accent-color: #D68836;
         width: auto;
     }
 

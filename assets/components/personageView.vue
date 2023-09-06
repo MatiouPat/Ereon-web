@@ -13,30 +13,32 @@
                     <div class="parameters-body">
                         <div class="personage-parameters">
                             <div class="personage-form">
-                                <div>
+                                <div class="form-group">
                                     <label class="form-label">Nom</label>
                                     <input class="form-control" type="text" v-model="currentPersonage.name">
                                 </div>
-                                <div>
+                                <div class="form-group">
                                     <label class="form-label">Race</label>
                                     <input class="form-control" type="text" v-model="currentPersonage.race">
                                 </div>
-                                <div>
+                                <div class="form-group">
                                     <label class="form-label">Alignement</label>
                                     <input class="form-control" type="text" v-model="currentPersonage.alignment">
                                 </div>
-                                <div>
+                                <div class="form-group">
                                     <label class="form-label">Classe</label>
                                     <input class="form-control" type="text" v-model="currentPersonage.class">
                                 </div>
-                                <div class="form-attributes">
+                                <div class="form-group form-attributes">
                                     <div :key="key" v-for="(numberOfAttribute, key) in currentPersonage.numberOfAttributes">
                                         <label class="form-label">{{ numberOfAttribute.attribute?.name }}</label>
                                         <input class="form-control" type="number" v-model="numberOfAttribute.value">
                                     </div>
                                 </div>
-                                <label class="form-label">Inventaire</label>
-                                <quill-editor class="html-editor" ref="inventory" :options="options" @text-change="inventoryChange"/>
+                                <div class="form-group">
+                                    <label class="form-label">Inventaire</label>
+                                    <quill-editor class="html-editor" ref="inventory" :options="options" @text-change="inventoryChange"/>
+                                </div>
                             </div>
                             <div class="parameters-footer">
                                 <button class="btn" type="button" @click="cancel">Annuler</button>
@@ -47,7 +49,7 @@
                             <div class="personage-view-content" style="background-image: url('build/images/sheets/fond_fiche_bleu_2.webp');">
                                 <div class="personage-view-block" style="background-image: url('build/images/sheets/texture_old_paper.png');">
                                     <span class="personage-name">{{ currentPersonage.name }}</span><br>
-                                    <span class="personage-main-info">{{ currentPersonage.race }}, {{ currentPersonage.alignment }}</span>
+                                    <span class="personage-main-info">{{ currentPersonage.class }} {{ currentPersonage.race }}, {{ currentPersonage.alignment }}</span>
                                     <hr>
                                     <div class="personage-attributes">
                                         <div class="personage-attribute" :key="key" v-for="(numberOfAttribute, key) in currentPersonage.numberOfAttributes">
@@ -305,8 +307,9 @@ export default defineComponent({
 
     .form-attributes {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(156px, 1fr));
         column-gap: 8px;
+        row-gap: 12px;
     }
 
     .dark .parameters-header {
