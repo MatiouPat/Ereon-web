@@ -174,4 +174,8 @@ import { DiceRepository } from '../repository/diceRepository';
         margin: 0 auto 4px auto;
     }
 
+    .dark .textinput textarea {
+        background-color: #2b2a33;
+    }
+
 </style>

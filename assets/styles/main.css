@@ -20,6 +20,10 @@ html {
     color: #333333;
 }
 
+html.dark {
+    color: #b3b3b3;
+}
+
 a {
     color: #333333;
     text-decoration: none;

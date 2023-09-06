@@ -276,6 +276,7 @@ import { mapActions, mapGetters } from 'vuex';
         transform: rotate(-90deg);
         margin: 80px 0;
         accent-color: #D68836;
+        width: auto;
     }
 
     canvas {
@@ -283,5 +284,13 @@ import { mapActions, mapGetters } from 'vuex';
         top: 0;
         left: 0;
         z-index: 10;
+    }
+
+    .dark .editor-wrapper {
+        background-color: #131313;
+    }
+
+    .dark .editor {
+        background-color: #2b2a33;
     }
 </style>

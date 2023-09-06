@@ -183,7 +183,7 @@ export default defineComponent({
     .personage-form {
         height: calc(100% - 48px);
         overflow-y: scroll;
-        padding: 8px;
+        padding: 16px;
     }
 
     .parameters-footer {
@@ -202,6 +202,8 @@ export default defineComponent({
         height: 100%;
         overflow-y: scroll;
         background-color: #FFFFFF;
+        color: #423d2a;
+        line-height: 20px;
     }
 
     .personage-view-content {
@@ -227,7 +229,7 @@ export default defineComponent({
         top: 0;
         left: 0;
         height: 4px;
-        width: calc(100% - 2px);
+        width: 100%;
         content: "";
         background-image: url('../images/sheets/background.png');
         border: solid 1px #584a30;
@@ -238,7 +240,7 @@ export default defineComponent({
         bottom: 0;
         left: 0;
         height: 4px;
-        width: calc(100% - 2px);
+        width: 100%;
         content: "";
         background-image: url('../images/sheets/background.png');
         border: solid 1px #584a30;
@@ -260,7 +262,7 @@ export default defineComponent({
     .personage-attributes {
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between;
+        justify-content: space-evenly;
         gap: 8px;
         width: 100%;
         font-size: 1.25rem;
@@ -306,5 +308,14 @@ export default defineComponent({
         grid-template-columns: 1fr 1fr 1fr 1fr;
         column-gap: 8px;
     }
+
+    .dark .parameters-header {
+        background-color: #1c1b22;
+    }
+
+    .dark .parameters-body {
+        background-color: #2b2a33;
+    }
+
 
 </style>

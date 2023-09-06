@@ -17,4 +17,18 @@ export class UserParameterRepository
         });
     }
 
+    public async updateTheme(userId: number, isDarkTheme: boolean): Promise<void>
+    {
+        axios({
+            method: 'PATCH',
+            url: '/api/user_parameters/' + userId,
+            data: {
+                isDarkTheme: Boolean(isDarkTheme)
+            },
+            headers: {
+                'Content-Type': 'application/merge-patch+json'
+            }
+        })
+    }
+
 }

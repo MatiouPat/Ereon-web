@@ -687,3 +687,12 @@ select[multiple].input-lg {
 .affix {
   position: fixed;
 }
+
+.html-editor {
+  height: 33% !important;
+}
+
+.dark input, .dark .html-editor {
+  background: #1c1b22 !important;
+  color: #b3b3b3 !important;
+}

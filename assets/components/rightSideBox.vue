@@ -78,4 +78,8 @@ import { defineComponent } from 'vue'
     .right-side-box-content {
         padding: 16px 8px;
     }
+
+    .dark .right-side-box-content, .dark .right-side-box-actions {
+        background-color: #1c1b22;
+    }
 </style>

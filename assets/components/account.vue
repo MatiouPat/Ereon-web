@@ -34,9 +34,9 @@
                         <div>
                             <legend class="form-label">Theme</legend>
                             <fieldset>
-                                <input class="form-control" type="radio" id="light" name="Light" value="0" checked>
+                                <input class="form-control" type="radio" id="light" name="Light" v-model="isDarkTheme" :value="false" @change="changeTheme">
                                 <label for="light">Light</label>
-                                <input class="form-control" type="radio" id="dark" name="Dark" value="1">
+                                <input class="form-control" type="radio" id="dark" name="Dark" v-model="isDarkTheme" :value="true" @change="changeTheme">
                                 <label for="dark">Dark</label>
                             </fieldset>
                         </div>
@@ -73,6 +73,7 @@ import { defineComponent, inject } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { Connection } from '../entity/connection';
 import { World } from '../entity/world';
+import { UserParameterRepository } from '../repository/userparameterRepository';
 import { UserRepository } from '../repository/userRepository';
 
     export default defineComponent({
@@ -80,13 +81,15 @@ import { UserRepository } from '../repository/userRepository';
             return {
                 emitter: inject('emitter') as any,
                 userRepository: new UserRepository as UserRepository,
+                userParameterRepository: new UserParameterRepository as UserParameterRepository,
                 /**
                  * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
                  */
                 isConnected: false as boolean,
                 onParameters: false as boolean,
                 layer: 1 as number,
-                globalVolume: (this.connectedUser.userParameter.globalVolume / 100) as number
+                globalVolume: this.connectedUser.userParameter.globalVolume as number,
+                isDarkTheme: this.connectedUser.userParameter.isDarkTheme as boolean
             }
         },
         props: [
@@ -157,10 +160,24 @@ import { UserRepository } from '../repository/userRepository';
             changeUserVolume: function() {
                 this.setUserVolume(this.globalVolume);
                 this.emitter.emit("hasChangedUserVolume")
+            },
+            changeTheme: function() {
+                this.userParameterRepository.updateTheme(this.connectedUser.id, this.isDarkTheme)
+                this.setThemeTag()
+            },
+            setThemeTag: function() {
+                if(this.isDarkTheme) {
+                    document.documentElement.classList.remove('light')
+                    document.documentElement.classList.add('dark')
+                } else {
+                    document.documentElement.classList.remove('dark')
+                    document.documentElement.classList.add('light')
+                }
             }
         },
         mounted() {
             this.setUserParameter(this.connectedUser.userParameter);
+            this.setThemeTag();
         }
     })
 </script>
@@ -278,7 +295,6 @@ import { UserRepository } from '../repository/userRepository';
         display: block;
         min-width: 256px;
         min-height: 256px;
-        background-color: #FFFFFF;
     }
 
     .parameters-header {
@@ -287,10 +303,12 @@ import { UserRepository } from '../repository/userRepository';
         align-items: center;
         padding: 8px;
         border-bottom: solid 1px #565656;
+        background-color: #FFFFFF;
     }
 
     .parameters-body {
-        padding: 8px;
+        padding: 16px;
+        background-color: #FFFFFF;
     }
 
     h2 {
@@ -378,6 +396,22 @@ import { UserRepository } from '../repository/userRepository';
 
     .worlds-page .btn {
         margin-top: 64px;
+    }
+
+    .dark .navigation {
+        background-color: #1c1b22;
+    }
+
+    .dark .worlds-page {
+        background-color: #1c1b22;
+    }
+
+    .dark .parameters-header {
+        background-color: #1c1b22;
+    }
+
+    .dark .parameters-body {
+        background-color: #2b2a33;
     }
 
 </style>
