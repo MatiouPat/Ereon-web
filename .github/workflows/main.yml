@@ -8,13 +8,14 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 15
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Deploy to Server
       uses: appleboy/ssh-action@master
+      timeout-minutes: 15
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.SSH_USER }}

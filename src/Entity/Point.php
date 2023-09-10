@@ -28,9 +28,13 @@ class Point
     #[ORM\OneToMany(mappedBy: 'point', targetEntity: NumberOfPoint::class, orphanRemoval: true)]
     private Collection $numberOfPoints;
 
+    #[ORM\OneToMany(mappedBy: 'point', targetEntity: Expense::class, orphanRemoval: true)]
+    private Collection $expenses;
+
     public function __construct()
     {
         $this->numberOfPoints = new ArrayCollection();
+        $this->expenses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -86,6 +90,36 @@ class Point
             // set the owning side to null (unless already changed)
             if ($numberOfPoint->getPoint() === $this) {
                 $numberOfPoint->setPoint(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Expense>
+     */
+    public function getExpenses(): Collection
+    {
+        return $this->expenses;
+    }
+
+    public function addExpense(Expense $expense): static
+    {
+        if (!$this->expenses->contains($expense)) {
+            $this->expenses->add($expense);
+            $expense->setPoint($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExpense(Expense $expense): static
+    {
+        if ($this->expenses->removeElement($expense)) {
+            // set the owning side to null (unless already changed)
+            if ($expense->getPoint() === $this) {
+                $expense->setPoint(null);
             }
         }
 

@@ -43,11 +43,23 @@ class Attribute
     #[ORM\OneToMany(mappedBy: 'attribute', targetEntity: Skill::class)]
     private Collection $skills;
 
+    #[ORM\ManyToMany(targetEntity: Spell::class, mappedBy: 'attributes')]
+    private Collection $spells;
+
+    #[ORM\ManyToMany(targetEntity: Weapon::class, mappedBy: 'attributes')]
+    private Collection $weapons;
+
+    #[ORM\OneToMany(mappedBy: 'attribute', targetEntity: AlterationChange::class)]
+    private Collection $alterationChanges;
+
     public function __construct()
     {
         $this->numberOfAttributes = new ArrayCollection();
         $this->dices = new ArrayCollection();
         $this->skills = new ArrayCollection();
+        $this->spells = new ArrayCollection();
+        $this->weapons = new ArrayCollection();
+        $this->alterationChanges = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -175,6 +187,90 @@ class Attribute
             // set the owning side to null (unless already changed)
             if ($skill->getAttribute() === $this) {
                 $skill->setAttribute(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Spell>
+     */
+    public function getSpells(): Collection
+    {
+        return $this->spells;
+    }
+
+    public function addSpell(Spell $spell): static
+    {
+        if (!$this->spells->contains($spell)) {
+            $this->spells->add($spell);
+            $spell->addAttribute($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSpell(Spell $spell): static
+    {
+        if ($this->spells->removeElement($spell)) {
+            $spell->removeAttribute($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Weapon>
+     */
+    public function getWeapons(): Collection
+    {
+        return $this->weapons;
+    }
+
+    public function addWeapon(Weapon $weapon): static
+    {
+        if (!$this->weapons->contains($weapon)) {
+            $this->weapons->add($weapon);
+            $weapon->addAttribute($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWeapon(Weapon $weapon): static
+    {
+        if ($this->weapons->removeElement($weapon)) {
+            $weapon->removeAttribute($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AlterationChange>
+     */
+    public function getAlterationChanges(): Collection
+    {
+        return $this->alterationChanges;
+    }
+
+    public function addAlterationChange(AlterationChange $alterationChange): static
+    {
+        if (!$this->alterationChanges->contains($alterationChange)) {
+            $this->alterationChanges->add($alterationChange);
+            $alterationChange->setAttribute($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAlterationChange(AlterationChange $alterationChange): static
+    {
+        if ($this->alterationChanges->removeElement($alterationChange)) {
+            // set the owning side to null (unless already changed)
+            if ($alterationChange->getAttribute() === $this) {
+                $alterationChange->setAttribute(null);
             }
         }
 

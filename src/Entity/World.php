@@ -43,6 +43,21 @@ class World
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Point::class, orphanRemoval: true)]
     private Collection $points;
 
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Dice::class, orphanRemoval: true)]
+    private Collection $dices;
+
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Spell::class, orphanRemoval: true)]
+    private Collection $spells;
+
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Currency::class, orphanRemoval: true)]
+    private Collection $currencies;
+
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Alteration::class, orphanRemoval: true)]
+    private Collection $alterations;
+
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: DamageOrResistanceType::class, orphanRemoval: true)]
+    private Collection $damageOrResistanceTypes;
+
     public function __construct()
     {
         $this->connections = new ArrayCollection();
@@ -51,6 +66,11 @@ class World
         $this->attributes = new ArrayCollection();
         $this->skills = new ArrayCollection();
         $this->points = new ArrayCollection();
+        $this->dices = new ArrayCollection();
+        $this->spells = new ArrayCollection();
+        $this->currencies = new ArrayCollection();
+        $this->alterations = new ArrayCollection();
+        $this->damageOrResistanceTypes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -266,6 +286,156 @@ class World
             // set the owning side to null (unless already changed)
             if ($point->getWorld() === $this) {
                 $point->setWorld(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Dice>
+     */
+    public function getDices(): Collection
+    {
+        return $this->dices;
+    }
+
+    public function addDice(Dice $dice): static
+    {
+        if (!$this->dices->contains($dice)) {
+            $this->dices->add($dice);
+            $dice->setWorld($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDice(Dice $dice): static
+    {
+        if ($this->dices->removeElement($dice)) {
+            // set the owning side to null (unless already changed)
+            if ($dice->getWorld() === $this) {
+                $dice->setWorld(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Spell>
+     */
+    public function getSpells(): Collection
+    {
+        return $this->spells;
+    }
+
+    public function addSpell(Spell $spell): static
+    {
+        if (!$this->spells->contains($spell)) {
+            $this->spells->add($spell);
+            $spell->setWorld($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSpell(Spell $spell): static
+    {
+        if ($this->spells->removeElement($spell)) {
+            // set the owning side to null (unless already changed)
+            if ($spell->getWorld() === $this) {
+                $spell->setWorld(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Currency>
+     */
+    public function getCurrencies(): Collection
+    {
+        return $this->currencies;
+    }
+
+    public function addCurrency(Currency $currency): static
+    {
+        if (!$this->currencies->contains($currency)) {
+            $this->currencies->add($currency);
+            $currency->setWorld($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCurrency(Currency $currency): static
+    {
+        if ($this->currencies->removeElement($currency)) {
+            // set the owning side to null (unless already changed)
+            if ($currency->getWorld() === $this) {
+                $currency->setWorld(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Alteration>
+     */
+    public function getAlterations(): Collection
+    {
+        return $this->alterations;
+    }
+
+    public function addAlteration(Alteration $alteration): static
+    {
+        if (!$this->alterations->contains($alteration)) {
+            $this->alterations->add($alteration);
+            $alteration->setWorld($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAlteration(Alteration $alteration): static
+    {
+        if ($this->alterations->removeElement($alteration)) {
+            // set the owning side to null (unless already changed)
+            if ($alteration->getWorld() === $this) {
+                $alteration->setWorld(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DamageOrResistanceType>
+     */
+    public function getDamageOrResistanceTypes(): Collection
+    {
+        return $this->damageOrResistanceTypes;
+    }
+
+    public function addDamageOrResistanceType(DamageOrResistanceType $damageOrResistanceType): static
+    {
+        if (!$this->damageOrResistanceTypes->contains($damageOrResistanceType)) {
+            $this->damageOrResistanceTypes->add($damageOrResistanceType);
+            $damageOrResistanceType->setWorld($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDamageOrResistanceType(DamageOrResistanceType $damageOrResistanceType): static
+    {
+        if ($this->damageOrResistanceTypes->removeElement($damageOrResistanceType)) {
+            // set the owning side to null (unless already changed)
+            if ($damageOrResistanceType->getWorld() === $this) {
+                $damageOrResistanceType->setWorld(null);
             }
         }
 

@@ -61,11 +61,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups("user:read")]
     private ?UserParameter $userParameter = null;
 
+    #[ORM\OneToMany(mappedBy: 'launcher', targetEntity: Dice::class, orphanRemoval: true)]
+    private Collection $dices;
+
     public function __construct()
     {
         $this->tokens = new ArrayCollection();
         $this->connections = new ArrayCollection();
         $this->personages = new ArrayCollection();
+        $this->dices = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -250,6 +254,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->userParameter = $userParameter;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Dice>
+     */
+    public function getDices(): Collection
+    {
+        return $this->dices;
+    }
+
+    public function addDice(Dice $dice): static
+    {
+        if (!$this->dices->contains($dice)) {
+            $this->dices->add($dice);
+            $dice->setLauncher($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDice(Dice $dice): static
+    {
+        if ($this->dices->removeElement($dice)) {
+            // set the owning side to null (unless already changed)
+            if ($dice->getLauncher() === $this) {
+                $dice->setLauncher(null);
+            }
+        }
 
         return $this;
     }
