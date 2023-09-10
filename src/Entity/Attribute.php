@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\AttributeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,8 +15,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: AttributeRepository::class)]
 #[ApiResource(
     operations: [
+        new GetCollection()
     ]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['world.id'  => 'exact'])]
 class Attribute
 {
     #[ORM\Id]
