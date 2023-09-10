@@ -35,6 +35,11 @@ abstract class ItemInformation
         $this->items = new ArrayCollection();
         $this->costs = new ArrayCollection();
     }
+    
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     public function getName(): ?string
     {
