@@ -53,8 +53,8 @@ class Personage
     #[Groups(["personage:read", 'personage:write'])]
     private ?string $inventory = null;
 
-    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Dice::class, orphanRemoval: true)]
-    private Collection $dices;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $biography = null;
 
     #[ORM\ManyToOne(inversedBy: 'personages')]
     #[Groups(["personage:read"])]
@@ -77,12 +77,27 @@ class Personage
     #[Groups(["personage:read"])]
     private Collection $numberOfPoints;
 
+    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Dice::class)]
+    private Collection $dices;
+
+    #[ORM\ManyToMany(targetEntity: Spell::class, mappedBy: 'personages')]
+    private Collection $spells;
+
+    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Item::class, orphanRemoval: true)]
+    private Collection $items;
+
+    #[ORM\ManyToMany(targetEntity: Alteration::class, mappedBy: 'personages')]
+    private Collection $alterations;
+
     public function __construct()
     {
-        $this->dices = new ArrayCollection();
         $this->numberOfAttributes = new ArrayCollection();
         $this->numberOfSkills = new ArrayCollection();
         $this->numberOfPoints = new ArrayCollection();
+        $this->dices = new ArrayCollection();
+        $this->spells = new ArrayCollection();
+        $this->items = new ArrayCollection();
+        $this->alterations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -150,32 +165,14 @@ class Personage
         return $this;
     }
 
-    /**
-     * @return Collection<int, Dice>
-     */
-    public function getDices(): Collection
+    public function getBiography(): ?string
     {
-        return $this->dices;
+        return $this->biography;
     }
 
-    public function addDice(Dice $dice): self
+    public function setBiography(?string $biography): static
     {
-        if (!$this->dices->contains($dice)) {
-            $this->dices->add($dice);
-            $dice->setPersonage($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDice(Dice $dice): self
-    {
-        if ($this->dices->removeElement($dice)) {
-            // set the owning side to null (unless already changed)
-            if ($dice->getPersonage() === $this) {
-                $dice->setPersonage(null);
-            }
-        }
+        $this->biography = $biography;
 
         return $this;
     }
@@ -289,6 +286,120 @@ class Personage
             if ($numberOfPoint->getPersonage() === $this) {
                 $numberOfPoint->setPersonage(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Dice>
+     */
+    public function getDices(): Collection
+    {
+        return $this->dices;
+    }
+
+    public function addDice(Dice $dice): static
+    {
+        if (!$this->dices->contains($dice)) {
+            $this->dices->add($dice);
+            $dice->setPersonage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDice(Dice $dice): static
+    {
+        if ($this->dices->removeElement($dice)) {
+            // set the owning side to null (unless already changed)
+            if ($dice->getPersonage() === $this) {
+                $dice->setPersonage(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Spell>
+     */
+    public function getSpells(): Collection
+    {
+        return $this->spells;
+    }
+
+    public function addSpell(Spell $spell): static
+    {
+        if (!$this->spells->contains($spell)) {
+            $this->spells->add($spell);
+            $spell->addPersonage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSpell(Spell $spell): static
+    {
+        if ($this->spells->removeElement($spell)) {
+            $spell->removePersonage($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Item>
+     */
+    public function getItems(): Collection
+    {
+        return $this->items;
+    }
+
+    public function addItem(Item $item): static
+    {
+        if (!$this->items->contains($item)) {
+            $this->items->add($item);
+            $item->setPersonage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeItem(Item $item): static
+    {
+        if ($this->items->removeElement($item)) {
+            // set the owning side to null (unless already changed)
+            if ($item->getPersonage() === $this) {
+                $item->setPersonage(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Alteration>
+     */
+    public function getAlterations(): Collection
+    {
+        return $this->alterations;
+    }
+
+    public function addAlteration(Alteration $alteration): static
+    {
+        if (!$this->alterations->contains($alteration)) {
+            $this->alterations->add($alteration);
+            $alteration->addPersonage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAlteration(Alteration $alteration): static
+    {
+        if ($this->alterations->removeElement($alteration)) {
+            $alteration->removePersonage($this);
         }
 
         return $this;
