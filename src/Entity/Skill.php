@@ -31,9 +31,13 @@ class Skill
     #[ORM\OneToMany(mappedBy: 'skill', targetEntity: NumberOfSkill::class, orphanRemoval: true)]
     private Collection $numberOfSkills;
 
+    #[ORM\OneToMany(mappedBy: 'skill', targetEntity: AlterationChange::class)]
+    private Collection $alterationChanges;
+
     public function __construct()
     {
         $this->numberOfSkills = new ArrayCollection();
+        $this->alterationChanges = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -101,6 +105,36 @@ class Skill
             // set the owning side to null (unless already changed)
             if ($numberOfSkill->getSkill() === $this) {
                 $numberOfSkill->setSkill(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AlterationChange>
+     */
+    public function getAlterationChanges(): Collection
+    {
+        return $this->alterationChanges;
+    }
+
+    public function addAlterationChange(AlterationChange $alterationChange): static
+    {
+        if (!$this->alterationChanges->contains($alterationChange)) {
+            $this->alterationChanges->add($alterationChange);
+            $alterationChange->setSkill($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAlterationChange(AlterationChange $alterationChange): static
+    {
+        if ($this->alterationChanges->removeElement($alterationChange)) {
+            // set the owning side to null (unless already changed)
+            if ($alterationChange->getSkill() === $this) {
+                $alterationChange->setSkill(null);
             }
         }
 

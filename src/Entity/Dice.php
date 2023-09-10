@@ -58,12 +58,19 @@ class Dice
     private ?string $computation = null;
 
     #[ORM\ManyToOne(inversedBy: 'dices')]
-    #[ORM\JoinColumn(nullable: false)]
+    private ?Attribute $attribute = null;
+
+    #[ORM\ManyToOne(inversedBy: 'dices')]
     #[Groups(['dice:read', 'dice:write'])]
     private ?Personage $personage = null;
 
     #[ORM\ManyToOne(inversedBy: 'dices')]
-    private ?Attribute $attribute = null;
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $launcher = null;
+
+    #[ORM\ManyToOne(inversedBy: 'dices')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?World $world = null;
 
     public function getId(): ?int
     {
@@ -118,18 +125,6 @@ class Dice
         return $this;
     }
 
-    public function getPersonage(): ?Personage
-    {
-        return $this->personage;
-    }
-
-    public function setPersonage(?Personage $personage): self
-    {
-        $this->personage = $personage;
-
-        return $this;
-    }
-
     public function getAttribute(): ?Attribute
     {
         return $this->attribute;
@@ -138,6 +133,42 @@ class Dice
     public function setAttribute(?Attribute $attribute): self
     {
         $this->attribute = $attribute;
+
+        return $this;
+    }
+
+    public function getPersonage(): ?Personage
+    {
+        return $this->personage;
+    }
+
+    public function setPersonage(?Personage $personage): static
+    {
+        $this->personage = $personage;
+
+        return $this;
+    }
+
+    public function getLauncher(): ?User
+    {
+        return $this->launcher;
+    }
+
+    public function setLauncher(?User $launcher): static
+    {
+        $this->launcher = $launcher;
+
+        return $this;
+    }
+
+    public function getWorld(): ?World
+    {
+        return $this->world;
+    }
+
+    public function setWorld(?World $world): static
+    {
+        $this->world = $world;
 
         return $this;
     }
