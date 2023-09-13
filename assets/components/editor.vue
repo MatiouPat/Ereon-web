@@ -199,7 +199,7 @@ import { mapActions, mapGetters } from 'vuex';
         position: relative;
         overflow: scroll;
         height: 100%;
-        width: calc(100dvw - 300px);
+        width: calc(100dvw - 348px);
         background-color: #E2E2E2;
     }
 

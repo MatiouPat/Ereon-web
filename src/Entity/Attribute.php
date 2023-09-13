@@ -14,6 +14,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AttributeRepository::class)]
 #[ApiResource(
+    normalizationContext: ['groups' => ['attribute:read']],
     operations: [
         new GetCollection()
     ]
@@ -24,15 +25,15 @@ class Attribute
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["attribute:read", "personage:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read"])]
+    #[Groups(["attribute:read", "personage:read"])]
     private ?string $name = null;
 
     #[ORM\Column(length: 3)]
-    #[Groups(["personage:read"])]
+    #[Groups(["attribute:read", "personage:read"])]
     private ?string $acronym = null;
 
     #[ORM\ManyToOne(inversedBy: 'attributes')]
