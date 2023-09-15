@@ -77,6 +77,8 @@ import { defineComponent } from 'vue'
 
     .right-side-box-content {
         padding: 16px 8px;
+        height: calc(100dvh - 42px);
+        width: 300px;
     }
 
     .dark .right-side-box-content, .dark .right-side-box-actions {

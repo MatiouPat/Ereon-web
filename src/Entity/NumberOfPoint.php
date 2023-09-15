@@ -2,11 +2,18 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Patch;
 use App\Repository\NumberOfPointRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: NumberOfPointRepository::class)]
+#[ApiResource(
+    operations: [
+        new Patch()
+    ]
+)]
 class NumberOfPoint
 {
     #[ORM\Id]
@@ -16,20 +23,20 @@ class NumberOfPoint
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?int $current = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?int $min = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?int $max = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfPoints')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?Point $point = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfPoints')]
