@@ -3,7 +3,7 @@
         <div class="personage" :key="key" v-for="(personage, key) in personages" @click="viewPersonage(personage)">
             {{ personage.name }}
         </div>
-        <button class="btn" type="button" @click="createPersonage">Ajouter</button>
+        <button class="btn btn-primary" type="button" @click="createPersonage">Ajouter</button>
         <Teleport to="#content">
             <div class="parameters-wrapper" v-show="isDisplayed">
                 <div class="parameters">
@@ -14,65 +14,97 @@
                     <div class="parameters-body">
                         <div class="personage-parameters">
                             <div class="personage-form">
-                                <div class="form-group" ref="currentPersonageName">
-                                    <label class="form-label">Nom<i class="form-required">*</i></label>
-                                    <span class="form-error"><img width="16" height="16" src="build/images/icons/warning.svg">Cette chaine de charactère doit être supérieure ou égale à 2 caractères</span>
-                                    <input class="form-control" type="text" v-model="currentPersonage.name">
+                                <div class="form-part">
+                                    <div class="form-part-header" @click="expandParameter">
+                                        <h3>Informations générales</h3>
+                                        <img width="24" height="24" src="build/images/icons/expand_less.svg" alt="">
+                                    </div>
+                                    <div class="form-part-content">
+                                        <div class="form-group" ref="currentPersonageName">
+                                            <label class="form-label">Nom<i class="form-required">*</i></label>
+                                            <span class="form-error"><img width="16" height="16" src="build/images/icons/warning.svg">Cette chaine de charactère doit être supérieure ou égale à 2 caractères</span>
+                                            <input class="form-control" type="text" v-model="currentPersonage.name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Race</label>
+                                            <input class="form-control" type="text" v-model="currentPersonage.race">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Image</label>
+                                            <input class="form-control" type="file" @change="previewFiles">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Alignement</label>
+                                            <input class="form-control" type="text" v-model="currentPersonage.alignment">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Classe</label>
+                                            <input class="form-control" type="text" v-model="currentPersonage.class">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Biographie</label>
+                                            <quill-editor class="html-editor" ref="biography" :options="options" @text-change="biographyChange"/>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Race</label>
-                                    <input class="form-control" type="text" v-model="currentPersonage.race">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Image</label>
-                                    <input class="form-control" type="file" @change="previewFiles">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Alignement</label>
-                                    <input class="form-control" type="text" v-model="currentPersonage.alignment">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Classe</label>
-                                    <input class="form-control" type="text" v-model="currentPersonage.class">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Biographie</label>
-                                    <quill-editor class="html-editor" ref="biography" :options="options" @text-change="biographyChange"/>
-                                </div>
-                                <div class="form-points">
-                                    <div class="form-group" :key="key" v-for="(numberOfPoint, key) in currentPersonage.numberOfPoints">
-                                        <label class="form-label">{{ numberOfPoint.point?.acronym }}</label>
-                                        <div class="form-point">
-                                            <div class="form-group">
-                                                <label class="form-label">Min</label>
-                                                <input class="form-control" type="number" v-model="numberOfPoint.min">
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label">Actuel</label>
-                                                <input class="form-control" type="number" v-model="numberOfPoint.current">
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label">Max</label>
-                                                <input class="form-control" type="number" v-model="numberOfPoint.max">
+                                <div class="form-part">
+                                    <div class="form-part-header" @click="expandParameter">
+                                        <h3>Points (PV, PM, etc...)</h3>
+                                        <img width="24" height="24" src="build/images/icons/expand_less.svg" alt="">
+                                    </div>
+                                    <div class="form-part-content">
+                                        <div class="form-points">
+                                            <div class="form-group" :key="key" v-for="(numberOfPoint, key) in currentPersonage.numberOfPoints">
+                                                <label class="form-label">{{ numberOfPoint.point?.acronym }}</label>
+                                                <div class="form-point">
+                                                    <div class="form-group">
+                                                        <label class="form-label">Min</label>
+                                                        <input class="form-control" type="number" v-model="numberOfPoint.min">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Actuel</label>
+                                                        <input class="form-control" type="number" v-model="numberOfPoint.current">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Max</label>
+                                                        <input class="form-control" type="number" v-model="numberOfPoint.max">
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-attributes">
-                                    <div class="form-group" :key="key" v-for="(numberOfAttribute, key) in currentPersonage.numberOfAttributes">
-                                        <label class="form-label">{{ numberOfAttribute.attribute?.name }}</label>
-                                        <input class="form-control" type="number" v-model="numberOfAttribute.value">
+                                <div class="form-part">
+                                    <div class="form-part-header" @click="expandParameter">
+                                        <h3>Attributs</h3>
+                                        <img width="24" height="24" src="build/images/icons/expand_less.svg" alt="">
+                                    </div>
+                                    <div class="form-part-content">
+                                        <div class="form-attributes">
+                                            <div class="form-group" :key="key" v-for="(numberOfAttribute, key) in currentPersonage.numberOfAttributes">
+                                                <label class="form-label">{{ numberOfAttribute.attribute?.name }}</label>
+                                                <input class="form-control" type="number" v-model="numberOfAttribute.value">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Inventaire</label>
-                                    <quill-editor class="html-editor" ref="inventory" :options="options" @text-change="inventoryChange"/>
+                                <div class="form-part">
+                                    <div class="form-part-header" @click="expandParameter">
+                                        <h3>Inventaire</h3>
+                                        <img width="24" height="24" src="build/images/icons/expand_less.svg" alt="">
+                                    </div>
+                                    <div class="form-part-content">
+                                        <div class="form-group">
+                                            <label class="form-label">Inventaire</label>
+                                            <quill-editor class="html-editor" ref="inventory" :options="options" @text-change="inventoryChange"/>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="parameters-footer">
-                                <button class="btn" type="button" @click="cancel">Annuler</button>
-                                <button class="btn" type="button" v-if="isModification && isGameMaster" @click="deletePersonage">Supprimer</button>
-                                <button class="btn" type="button" @click="updatePersonage">Valider</button>
+                                <button class="btn btn-secondary" type="button" @click="cancel">Annuler</button>
+                                <button class="btn btn-secondary" type="button" v-if="isModification && isGameMaster" @click="deletePersonage">Supprimer</button>
+                                <button class="btn btn-primary" type="button" @click="updatePersonage">Valider</button>
                             </div>
                         </div>
                         <div class="personage-view">
@@ -238,6 +270,21 @@ export default defineComponent({
         },
         previewFiles: function(e) {
             this.currentPersonage.imageFile = e.target.files[0];
+        },
+        expandParameter: function(e: MouseEvent) {
+            let target = e.currentTarget as HTMLElement;
+            if(target.parentElement?.classList.contains('expanded')) {
+                target.parentElement?.classList.remove('expanded');
+                (target.children[1] as HTMLImageElement).src = 'build/images/icons/expand_less.svg'
+            }else {
+                let formParts = document.getElementsByClassName('form-part');
+                for(let i = 0; i < formParts.length; i++) {
+                    formParts[i].classList.remove('expanded');
+                    (formParts[i].children[0].children[1] as HTMLImageElement).src = 'build/images/icons/expand_less.svg'
+                }
+                target.parentElement?.classList.add('expanded');
+                (target.children[1] as HTMLImageElement).src = 'build/images/icons/expand_more.svg'
+            }
         }
     },
     mounted() {
@@ -307,6 +354,26 @@ export default defineComponent({
         height: calc(100% - 48px);
         overflow-y: scroll;
         padding: 16px;
+    }
+
+    .form-part {
+        margin-bottom: 16px;
+    }
+
+    .form-part-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: solid 1px #565656;
+        margin-bottom: 8px;
+    }
+
+    .form-part-content {
+        display: none;
+    }
+
+    .form-part.expanded .form-part-content {
+        display: block;
     }
 
     .parameters-footer {
@@ -462,11 +529,9 @@ export default defineComponent({
     }
 
     h3 {
-        color: #8C2417;
         font-size: 1.5rem;
         padding-bottom: 4px;
         margin-bottom: 8px;
-        border-bottom: solid 1px #8C2417;
     }
 
     .form-attributes, .form-point {
