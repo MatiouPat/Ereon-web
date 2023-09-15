@@ -327,7 +327,8 @@ export default defineComponent({
         min-width: 256px;
         width: 92%;
         min-height: 256px;
-        height: 92%;
+        height: 100%;
+        max-height: 92%;
         background-color: #FFFFFF;
     }
 
@@ -347,7 +348,8 @@ export default defineComponent({
     }
 
     .personage-parameters {
-        width: calc(100% - 1080px);
+        width: 100%;
+        height: 100%;
     }
 
     .personage-form {
@@ -387,9 +389,9 @@ export default defineComponent({
     }
 
     .personage-view {
-        display: block;
-        width: 1080px;
-        height: 100%;
+        display: none;
+        width: 540px;
+        height: 100%;;
         overflow-y: scroll;
         background-color: #FFFFFF;
         color: #423d2a;
@@ -401,9 +403,12 @@ export default defineComponent({
         display: flex;
         width: 1080px;
         height: 1396px;
+        margin-top: -349px;
+        margin-left: -270px;
         background-repeat: no-repeat;
         background-size: cover;
         padding: 48px;
+        transform: scale(0.5);
     }
 
     .personage-view-block {
@@ -549,5 +554,50 @@ export default defineComponent({
         background-color: #2b2a33;
     }
 
+    /* Large devices (laptops/desktops, 992px and up) */
+    @media only screen and (min-width: 992px) {
+        .personage-parameters {
+            width: calc(100% - 540px);
+        }
+
+        .personage-view {
+            display: block;
+        }
+    } 
+
+    /* Extra large devices (large laptops and desktops, 1200px and up) */
+    @media only screen and (min-width: 1200px) {
+
+        .personage-parameters {
+            width: calc(100% - 756px);
+        }
+
+        .personage-view {
+            width: 756px;
+        }
+
+        .personage-view-content {
+            margin-top: -209px;
+            margin-left: -162px;
+            transform: scale(0.7);
+        }
+    }
+
+    @media only screen and (min-width: 1600px) {
+
+        .personage-parameters {
+            width: calc(100% - 1080px);
+        }
+
+        .personage-view {
+            width: 1080px;
+        }
+
+        .personage-view-content {
+            margin-top: 0;
+            margin-left: 0;
+            transform: scale(1);
+        }
+    }
 
 </style>
