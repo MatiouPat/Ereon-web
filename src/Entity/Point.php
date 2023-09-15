@@ -2,6 +2,10 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\PointRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -9,16 +13,23 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PointRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['point:read']],
+    operations: [
+        new GetCollection()
+    ]
+)]
+#[ApiFilter(SearchFilter::class, properties: ['world.id'  => 'exact'])]
 class Point
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(['point:read', "personage:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 3)]
-    #[Groups(["personage:read"])]
+    #[Groups(['point:read', "personage:read"])]
     private ?string $acronym = null;
 
     #[ORM\ManyToOne(inversedBy: 'points')]

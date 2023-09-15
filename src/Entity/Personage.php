@@ -5,15 +5,19 @@ namespace App\Entity;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
-use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
 use App\Repository\PersonageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Vich\UploaderBundle\Mapping\Annotation\Uploadable;
+use Vich\UploaderBundle\Mapping\Annotation\UploadableField;
 
 #[ORM\Entity(repositoryClass: PersonageRepository::class)]
 #[ApiResource(
@@ -21,10 +25,17 @@ use Symfony\Component\Serializer\Annotation\Groups;
     denormalizationContext: ['groups' => ['personage:write']],
     operations: [
         new GetCollection(),
-        new Patch()
+        new Post(),
+        new Delete(),
+        new Patch(),
+        new Post(
+            uriTemplate: '/personages/{id}',
+            requirements: ['id' => '\d+']
+        )
     ]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact', 'user.discordIdentifier' => 'exact'])]
+#[Uploadable]
 class Personage
 {
     #[ORM\Id]
@@ -54,7 +65,19 @@ class Personage
     private ?string $inventory = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?string $biography = null;
+
+    #[UploadableField(mapping: 'personages', fileNameProperty: 'imageName')]
+    #[Groups("personage:write")]
+    private ?File $imageFile = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups("personage:read")]
+    private ?string $imageName = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'personages')]
     #[Groups(["personage:read"])]
@@ -62,7 +85,7 @@ class Personage
 
     #[ORM\ManyToOne(inversedBy: 'personages')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?World $world = null;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfAttribute::class, orphanRemoval: true, cascade: ["persist", "remove"])]
@@ -73,8 +96,8 @@ class Personage
     #[Groups(["personage:read"])]
     private Collection $numberOfSkills;
 
-    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfPoint::class, orphanRemoval: true)]
-    #[Groups(["personage:read"])]
+    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfPoint::class, orphanRemoval: true, cascade: ["persist", "remove"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private Collection $numberOfPoints;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Dice::class)]
@@ -173,6 +196,54 @@ class Personage
     public function setBiography(?string $biography): static
     {
         $this->biography = $biography;
+
+        return $this;
+    }
+
+	/**
+	 * @return 
+	 */
+	public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+	
+	/**
+	 * @param  $imageFile 
+	 * @return self
+	 */
+	public function setImageFile(?File $imageFile): self
+    {
+        $this->imageFile = $imageFile;
+        return $this;
+    }
+
+	/**
+	 * @return 
+	 */
+	public function getImageName(): ?string
+    {
+        return $this->imageName;
+    }
+	
+	/**
+	 * @param  $imageName 
+	 * @return self
+	 */
+	public function setImageName(?string $imageName): self
+    {
+        $this->imageName = $imageName;
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }

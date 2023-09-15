@@ -55,7 +55,7 @@
                             <h3>Sur map</h3>
                             <span>Aucun joueur présent sur cette partie</span>
                         </div>
-                        <button type="button" class="btn" @click="submitForm">Valider</button>
+                        <button type="button" class="btn btn-primary" @click="submitForm">Valider</button>
                     </form>
                 </div>
             </div>

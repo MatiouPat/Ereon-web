@@ -16,35 +16,39 @@ export class PersonageRepository
         })
     }
 
-    public async updatePersonagePartially(personage: Personage): Promise<void>
+    public async createPersonage(personage: Personage): Promise<Personage>
     {
-        let numberofattributes = [] as NumberOfAttribute[]
-        let saveNumberOfAttributes = personage.numberOfAttributes;
-        personage.numberOfAttributes?.forEach((numberofattribute: NumberOfAttribute) => {
-            numberofattributes.push({
-                ['@id']: numberofattribute["@id"],
-                id: numberofattribute.id,
-                value: numberofattribute.value,
-                attribute: numberofattribute.attribute['@id']
-            })
-        })
-        personage.numberOfAttributes = numberofattributes
-        axios({
-            method: 'PATCH',
-            url: '/api/personages/' + personage.id,
-            data: {
-                name: personage.name,
-                race: personage.race,
-                alignment: personage.alignment,
-                class: personage.class,
-                inventory: personage.inventory,
-                numberOfAttributes: personage.numberOfAttributes
-            },
+        return axios({
+            method: 'POST',
+            url: '/api/personages',
+            data: personage,
             headers: {
-                'Content-Type': 'application/merge-patch+json'
+                'Content-Type': 'multipart/form-data'
             }
         })
-        personage.numberOfAttributes = saveNumberOfAttributes;
+        .then((res) => {
+            return res.data
+        })
+    }
+
+    public async deletePersonage(personageId: number): Promise<void>
+    {
+        axios({
+            method: 'DELETE',
+            url: '/api/personages/' + personageId
+        });
+    }
+
+    public async updatePersonagePartially(personage: Personage): Promise<void>
+    {
+        axios({
+            method: 'POST',
+            url: '/api/personages/' + personage.id,
+            data: personage,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
     }
 
 }

@@ -68,7 +68,7 @@
                 </div>
             </div>
         </div>
-        <a class="btn" href="/logout">Se déconnecter</a>
+        <a class="btn btn-secondary" href="/logout">Se déconnecter</a>
     </div>
 </template>
 

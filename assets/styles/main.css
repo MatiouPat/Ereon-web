@@ -38,12 +38,26 @@ a {
     display: inline-block;
     border: none;
     border-radius: 24px;
-    background-color: #D68836;
-    color: #fff;
     padding: 8px 16px;
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #D68836;
+    color: #fff;
+}
+
+.btn-secondary {
+    background: none;
+    color: #565656;
+    border: solid 1px #565656;
+}
+
+.dark .btn-secondary {
+    color: #b3b3b3;
+    border-color: #b3b3b3;
 }
 
 .alert {
