@@ -21,7 +21,10 @@ export class PersonageRepository
         return axios({
             method: 'POST',
             url: '/api/personages',
-            data: personage
+            data: personage,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         })
         .then((res) => {
             return res.data
@@ -39,11 +42,11 @@ export class PersonageRepository
     public async updatePersonagePartially(personage: Personage): Promise<void>
     {
         axios({
-            method: 'PATCH',
+            method: 'POST',
             url: '/api/personages/' + personage.id,
             data: personage,
             headers: {
-                'Content-Type': 'application/merge-patch+json'
+                'Content-Type': 'multipart/form-data'
             }
         });
     }

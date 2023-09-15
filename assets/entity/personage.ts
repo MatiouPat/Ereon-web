@@ -7,6 +7,8 @@ export interface Personage {
   class?: string;
   inventory?: string;
   biography?: string;
+  imageFile?: File;
+  imageName?: string;
   user?: any;
   world?: any;
   numberOfAttributes?: any;

@@ -5,6 +5,7 @@ namespace App\EventListener;
 use ApiPlatform\Serializer\SerializerContextBuilderInterface;
 use ApiPlatform\Symfony\EventListener\DeserializeListener as DecoratedListener;
 use ApiPlatform\Util\RequestAttributesExtractor;
+use App\Entity\Personage;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -46,7 +47,11 @@ class DeserializeListener
         }
         $data = $request->request->all();
         $files = $request->files->all();
+        /**
+         * @var Personage
+         */
         $object = $this->denormalizer->denormalize(array_merge($data, $files), $attributes['resource_class'], null, $context);
+        $object->setUpdatedAt(new \DateTimeImmutable());
         $request->attributes->set('data', $object);
     }
 

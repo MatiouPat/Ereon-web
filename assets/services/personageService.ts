@@ -41,6 +41,7 @@ export class PersonageService
     public async updatePersonagePartially(personage: Personage): Promise<void>
     {
         let req = JSON.parse(JSON.stringify(personage));
+        req.imageFile = personage.imageFile;
         req.numberOfAttributes?.forEach((numberOfAttribute: NumberOfAttribute, index: number) => {
             numberOfAttribute.attribute = numberOfAttribute.attribute['@id'];
             this.numberOfAttributeRepository.updateNumberOfAttributePartially(numberOfAttribute);

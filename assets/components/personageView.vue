@@ -24,6 +24,10 @@
                                     <input class="form-control" type="text" v-model="currentPersonage.race">
                                 </div>
                                 <div class="form-group">
+                                    <label class="form-label">Image</label>
+                                    <input class="form-control" type="file" @change="previewFiles">
+                                </div>
+                                <div class="form-group">
                                     <label class="form-label">Alignement</label>
                                     <input class="form-control" type="text" v-model="currentPersonage.alignment">
                                 </div>
@@ -101,6 +105,7 @@
                                     <hr>
                                     <p v-html="currentPersonage.biography"></p>
                                 </div>
+                                <img class="personage-image" v-if="currentPersonage.imageName" :src="'/uploads/images/personages/' + currentPersonage.imageName">
                             </div>
                         </div>
                     </div>
@@ -230,6 +235,9 @@ export default defineComponent({
                 (this.$refs.currentPersonageName as HTMLElement).classList.remove('is-error')
                 return true;
             }
+        },
+        previewFiles: function(e) {
+            this.currentPersonage.imageFile = e.target.files[0];
         }
     },
     mounted() {
@@ -322,6 +330,7 @@ export default defineComponent({
     }
 
     .personage-view-content {
+        position: relative;
         display: flex;
         width: 1080px;
         height: 1396px;
@@ -443,6 +452,13 @@ export default defineComponent({
         color: #8C2417;
         background-color: #8C2417;
         height: 2px;
+    }
+
+    .personage-image {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 60%;
     }
 
     h3 {
