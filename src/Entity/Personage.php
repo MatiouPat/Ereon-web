@@ -14,7 +14,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Vich\UploaderBundle\Mapping\Annotation\Uploadable;
+use Vich\UploaderBundle\Mapping\Annotation\UploadableField;
 
 #[ORM\Entity(repositoryClass: PersonageRepository::class)]
 #[ApiResource(
@@ -24,10 +27,15 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new GetCollection(),
         new Post(),
         new Delete(),
-        new Patch()
+        new Patch(),
+        new Post(
+            uriTemplate: '/personages/{id}',
+            requirements: ['id' => '\d+']
+        )
     ]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact', 'user.discordIdentifier' => 'exact'])]
+#[Uploadable]
 class Personage
 {
     #[ORM\Id]
@@ -59,6 +67,17 @@ class Personage
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(["personage:read", 'personage:write'])]
     private ?string $biography = null;
+
+    #[UploadableField(mapping: 'personages', fileNameProperty: 'imageName')]
+    #[Groups("personage:write")]
+    private ?File $imageFile = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups("personage:read")]
+    private ?string $imageName = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'personages')]
     #[Groups(["personage:read"])]
@@ -177,6 +196,54 @@ class Personage
     public function setBiography(?string $biography): static
     {
         $this->biography = $biography;
+
+        return $this;
+    }
+
+	/**
+	 * @return 
+	 */
+	public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+	
+	/**
+	 * @param  $imageFile 
+	 * @return self
+	 */
+	public function setImageFile(?File $imageFile): self
+    {
+        $this->imageFile = $imageFile;
+        return $this;
+    }
+
+	/**
+	 * @return 
+	 */
+	public function getImageName(): ?string
+    {
+        return $this->imageName;
+    }
+	
+	/**
+	 * @param  $imageName 
+	 * @return self
+	 */
+	public function setImageName(?string $imageName): self
+    {
+        $this->imageName = $imageName;
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
