@@ -13,7 +13,7 @@
             <svg height="24px" viewBox="0 0 24 24" width="24px" :fill="pageIndex == 3 ? '#D68836' : '#565656'"><path d="m0,0h24v24H0V0Z" style="fill:none;"/><path d="m21,21V3H3v18h18Zm-12.38-6.75l2.28,3.05,3.34-4.17,4.5,5.62H5.25l3.38-4.5Z"/></svg>
         </li>
     </ul>
-    <div class="right-side-box-content">
+    <div class="right-side-box-content" v-if="isDownloaded">
         <dialog-view v-show="pageIndex == 0"></dialog-view>
         <personage-view v-show="pageIndex == 1"></personage-view>
         <music-view v-show="pageIndex == 2"></music-view>
@@ -27,7 +27,7 @@ import AssetView from './assetView.vue'
 import MusicView from './musicView.vue'
 import PersonageView from './personageView.vue'
 import { mapGetters } from 'vuex'
-import { defineComponent } from 'vue'
+import { defineComponent, inject } from 'vue'
 
     export default defineComponent({
         components: {
@@ -38,10 +38,12 @@ import { defineComponent } from 'vue'
         },
         data () {
             return {
+                emitter: inject('emitter') as any,
                 /**
                  * The index to choose the component to display
                  */
-                pageIndex: 0 as number
+                pageIndex: 0 as number,
+                isDownloaded: false as boolean
             }
         },
         computed: {
@@ -57,7 +59,12 @@ import { defineComponent } from 'vue'
             choose: function(index: number) {
                 this.pageIndex = index
             }
-        }
+        },
+        mounted() {
+            this.emitter.on('isDownload', () => {
+                this.isDownloaded = true
+            })
+        },
     })
 </script>
 

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\ExistsFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
@@ -35,6 +36,7 @@ use Vich\UploaderBundle\Mapping\Annotation\UploadableField;
     ]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact', 'user.discordIdentifier' => 'exact'])]
+#[ApiFilter(ExistsFilter::class, properties: ['user'])]
 #[Uploadable]
 class Personage
 {
