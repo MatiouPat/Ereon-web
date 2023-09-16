@@ -102,7 +102,7 @@ class Personage
     #[Groups(["personage:read", 'personage:write'])]
     private Collection $numberOfPoints;
 
-    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Dice::class)]
+    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Dice::class, cascade: ["remove"])]
     private Collection $dices;
 
     #[ORM\ManyToMany(targetEntity: Spell::class, mappedBy: 'personages')]
