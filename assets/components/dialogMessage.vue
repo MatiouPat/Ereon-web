@@ -1,7 +1,8 @@
 <template>
-    <div class="message" v-if="dice.personage">
+    <div class="message" v-if="dice.launcher">
         <div class="message-step">
-            <span class="message-author">{{ dice.personage.name }}: </span>
+            <span v-if="dice.personage" class="message-author">{{ dice.personage.name }}: </span>
+            <span v-else class="message-author">MJ: </span>
             <span>{{ dice.computation }}</span>
         </div>
         <span class="message-step">{{ calculation }}</span><br>

@@ -3,6 +3,7 @@ export interface Dice {
   id: number;
   computation?: string;
   personage?: any;
+  launcher?: any;
   readonly diceNumber?: number;
   readonly brutValue?: number;
   readonly finalValue?: number;

@@ -35,14 +35,14 @@
                     <span>d2</span>
                 </div>
             </div>
-            <span v-if="isDisabled && !isGameMaster" class="alert alert-danger">Vous n'avez aucun personnage</span>
-            <select v-if="isGameMaster">
-                <option>MJ</option>
-                <option :key="key" v-for="(personage, key) in nonPlayerPersonages">{{ personage.name }}</option>
+            <select v-if="isGameMaster" v-model="launcher">
+                <option :value="0">MJ</option>
+                <option :key="key" v-for="(personage, key) in nonPlayerPersonages" :value="personage.id">{{ personage.name }}</option>
             </select>
-            <select v-if="!isGameMaster && getPersonages">
-                <option :key="key" v-for="(personage, key) in getPersonages">{{ personage.name }}</option>
+            <select v-else-if="!isGameMaster && getPersonages" v-model="launcher">
+                <option :key="key" v-for="(personage, key) in getPersonages" :value="personage.id">{{ personage.name }}</option>
             </select>
+            <span v-else class="alert alert-danger">Vous n'avez aucun personnage</span>
             <button type="button" @click="rollDice">Envoyer</button>
         </div>
     </div>
@@ -73,14 +73,16 @@ import { PersonageRepository } from '../repository/personageRepository';
                  * The dice roll requested by the user mapped to the textarea
                  */
                 computation: "" as string,
-                nonPlayerPersonages: [] as Personage[]
+                nonPlayerPersonages: [] as Personage[],
+                launcher: 0 as number
             }
         },
         computed: {
             ...mapGetters('user', [
                 'getPersonages',
                 'isGameMaster',
-                "getWorld"
+                'getWorld',
+                'getUserId'
             ]),
             /**
              * If the user has a character in the world
@@ -96,7 +98,7 @@ import { PersonageRepository } from '../repository/personageRepository';
             rollDice: function () {
                 let computation = this.computation.split(' ');
                 if(computation[1]) {
-                    this.diceRepository.createDice(this.getPersonages[0]['@id'], computation[1]).catch(e => {
+                    this.diceRepository.createDice(this.getUserId, this.getWorld.id, computation[1], this.launcher).catch(e => {
                         this.messages.push(e.response.data['hydra:description'] + '<br> Exemple - /r d100+20-4');
                         this.scollToBottom()
                     })
@@ -136,6 +138,10 @@ import { PersonageRepository } from '../repository/personageRepository';
             this.personageRepository.findNonPlayerPersonagesByWorld(this.getWorld.id).then(res => {
                 this.nonPlayerPersonages = res
             })
+
+            if(!this.isGameMaster) {
+                this.launcher = this.getPersonages[0].id
+            }
         }
     })
 </script>

@@ -15,16 +15,30 @@ export class DiceRepository
         })
     }
     
-    public async createDice(personageUri: string, computation: string): Promise<void>
+    public async createDice(userId: number, worldId: number, computation: string, personageId: number): Promise<void>
     {
-        return axios({
-            method: 'POST',
-            url: '/api/dices',
-            data: {
-                computation: computation,
-                personage: personageUri
-            }
-        })
+        if(personageId === 0) {
+            return axios({
+                method: 'POST',
+                url: '/api/dices',
+                data: {
+                    computation: computation,
+                    launcher: '/api/users/' + userId,
+                    world: '/api/worlds/' + worldId
+                }
+            })
+        }else {
+            return axios({
+                method: 'POST',
+                url: '/api/dices',
+                data: {
+                    computation: computation,
+                    launcher: '/api/users/' + userId,
+                    world: '/api/worlds/' + worldId,
+                    personage: '/api/personages/' + personageId
+                }
+            })
+        }
     }
 
 }

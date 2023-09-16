@@ -143,11 +143,11 @@ import { UserRepository } from '../repository/userRepository';
                 this.setWorld(world)
                 this.sendIsConnected()
                 this.getAllConnections()
+                this.downloadPersonages()
                 this.userRepository.findUserByWorldAndWhereIsNotGameMaster(world.id).then(res => {
                     this.setPlayers(res)
                     this.emitter.emit("isDownload")
                 })
-                this.downloadPersonages()
                 this.isConnected = true
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
