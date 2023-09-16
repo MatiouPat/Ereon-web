@@ -688,9 +688,11 @@ select[multiple].input-lg {
   height: 33% !important;
 }
 
-.dark input, .dark .html-editor {
+.dark input, .dark select, .dark .html-editor {
   background: #1c1b22 !important;
   color: #b3b3b3 !important;
+  border: solid 1px #b3b3b3;
+  border-radius: 4px;
 }
 
 .form-required {

@@ -4,7 +4,7 @@
             <DialogMessage v-for="(message, index) in messages" :key="index" :dice="message"></DialogMessage>
         </div>
         <div class="textinput">
-            <textarea :disabled="isDisabled" :class="{isDisabled: isDisabled}" v-model="computation" @keydown.enter="rollDice"></textarea>
+            <textarea :disabled="isDisabled && !isGameMaster" :style="isDisabled && !isGameMaster ? 'background-color: #C8C8C8;' : ''" v-model="computation" @keydown.enter="rollDice"></textarea>
             <div class="dices">
                 <div class="dice" @click="addDice('/r d100')">
                     <img width="24" height="24" src="/build/images/d100.svg" alt="d100">
@@ -35,7 +35,14 @@
                     <span>d2</span>
                 </div>
             </div>
-            <span v-if="isDisabled" class="alert alert-danger">Vous n'avez aucun personnage</span>
+            <span v-if="isDisabled && !isGameMaster" class="alert alert-danger">Vous n'avez aucun personnage</span>
+            <select v-if="isGameMaster">
+                <option>MJ</option>
+                <option :key="key" v-for="(personage, key) in nonPlayerPersonages">{{ personage.name }}</option>
+            </select>
+            <select v-if="!isGameMaster && getPersonages">
+                <option :key="key" v-for="(personage, key) in getPersonages">{{ personage.name }}</option>
+            </select>
             <button type="button" @click="rollDice">Envoyer</button>
         </div>
     </div>
@@ -47,6 +54,8 @@ import { defineComponent } from 'vue';
 import DialogMessage from './dialogMessage.vue';
 import { Dice } from '../entity/dice';
 import { DiceRepository } from '../repository/diceRepository';
+import { Personage } from '../entity/personage';
+import { PersonageRepository } from '../repository/personageRepository';
 
     export default defineComponent({
         components: {
@@ -55,6 +64,7 @@ import { DiceRepository } from '../repository/diceRepository';
         data() {
             return {
                 diceRepository: new DiceRepository as DiceRepository,
+                personageRepository: new PersonageRepository as PersonageRepository,
                 /**
                  * The list of all messages
                  */
@@ -62,12 +72,15 @@ import { DiceRepository } from '../repository/diceRepository';
                 /**
                  * The dice roll requested by the user mapped to the textarea
                  */
-                computation: "" as string
+                computation: "" as string,
+                nonPlayerPersonages: [] as Personage[]
             }
         },
         computed: {
             ...mapGetters('user', [
-                'getPersonages'
+                'getPersonages',
+                'isGameMaster',
+                "getWorld"
             ]),
             /**
              * If the user has a character in the world
@@ -119,6 +132,10 @@ import { DiceRepository } from '../repository/diceRepository';
                     this.messages.push(dice)
                 });
             })
+
+            this.personageRepository.findNonPlayerPersonagesByWorld(this.getWorld.id).then(res => {
+                this.nonPlayerPersonages = res
+            })
         }
     })
 </script>
@@ -153,10 +170,6 @@ import { DiceRepository } from '../repository/diceRepository';
         height: 100%;
         resize: none;
         border: solid 1px #565656;
-    }
-
-    .textinput textarea.isDisabled {
-        background-color: #C8C8C8;
     }
 
     .textinput button {

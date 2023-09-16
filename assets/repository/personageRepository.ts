@@ -16,6 +16,17 @@ export class PersonageRepository
         })
     }
 
+    public async findNonPlayerPersonagesByWorld(worldId: number): Promise<Personage[]>
+    {
+        return axios({
+            method: 'GET',
+            url: '/api/personages?exists[user]=false&world.id' + worldId
+        })
+        .then(res => {
+            return res.data['hydra:member']
+        })
+    }
+
     public async createPersonage(personage: Personage): Promise<Personage>
     {
         return axios({
