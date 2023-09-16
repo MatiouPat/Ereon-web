@@ -8,19 +8,19 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Deploy to Server
       uses: appleboy/ssh-action@master
-      timeout-minutes: 15
+      timeout-minutes: 20
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.SSH_USER }}
         password: ${{ secrets.SSH_PASSWORD }}
-        command_timeout: 15m
+        command_timeout: 20m
         script: |
           cd /home/matiou/Ereon-web
           git pull origin main
