@@ -31,7 +31,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Image</label>
-                                            <input class="form-control" type="file" @change="previewFiles">
+                                            <input class="form-control" type="file" @change="previewFiles" ref="image">
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Alignement</label>
@@ -137,7 +137,7 @@
                                     <hr>
                                     <p v-html="currentPersonage.biography"></p>
                                 </div>
-                                <img class="personage-image" v-if="currentPersonage.imageName" :src="'/uploads/images/personages/' + currentPersonage.imageName">
+                                <img class="personage-image" v-if="currentPersonage.image?.imageName" :src="'/uploads/images/personages/' + currentPersonage.image.imageName">
                             </div>
                         </div>
                     </div>
@@ -160,6 +160,7 @@ import { NumberOfAttribute } from '../entity/numberofattribute';
 import { PointRepository } from '../repository/pointRepository';
 import { Point } from '../entity/point';
 import { NumberOfPoint } from '../entity/numberofpoint';
+import { Image } from '../entity/image';
 
 export default defineComponent({
     data() {
@@ -195,6 +196,9 @@ export default defineComponent({
     methods: {
         viewPersonage: function(personage: Personage) {
             this.currentPersonage = personage;
+            if(!this.currentPersonage.image){
+                this.currentPersonage.image = {} as Image;
+            }
             (this.$refs.currentPersonageName as HTMLElement).classList.remove('is-error');
             this.isModification = true;
             this.isDisplayed = true;
@@ -220,12 +224,14 @@ export default defineComponent({
                         this.personages.push(res)
                     })
                 }
+                (this.$refs.image as HTMLInputElement).value = ''
             }
         },
         createPersonage: function() {
             let personage: Personage = {};
             personage.inventory = '';
             personage.biography = '';
+            personage.image = {} as Image;
             personage.world = '/api/worlds/' + this.getWorld.id;
             this.attributeRepository.findAttributeByWorld(this.getWorld.id).then((attributes) => {
                 personage.numberOfAttributes = [];
@@ -269,7 +275,7 @@ export default defineComponent({
             }
         },
         previewFiles: function(e) {
-            this.currentPersonage.imageFile = e.target.files[0];
+            this.currentPersonage.image.imageFile = e.target.files[0];
         },
         expandParameter: function(e: MouseEvent) {
             let target = e.currentTarget as HTMLElement;
