@@ -45,6 +45,8 @@ export class PersonageService
             personage.image = image;
             if (image.id) {
                 req.image = 'api/images/' + image.id
+            }else {
+                req.image = undefined
             }
             req.numberOfAttributes?.forEach((numberofattribute: NumberOfAttribute) => {
                 numberofattribute.attribute = numberofattribute.attribute['@id'];
@@ -76,6 +78,8 @@ export class PersonageService
             personage.image = image;
             if (image.id) {
                 req.image = 'api/images/' + image.id
+            }else {
+                req.image = undefined
             }
             req.numberOfAttributes?.forEach((numberOfAttribute: NumberOfAttribute, index: number) => {
                 numberOfAttribute.attribute = numberOfAttribute.attribute['@id'];

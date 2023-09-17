@@ -26,6 +26,13 @@
                                             <input class="form-control" type="text" v-model="currentPersonage.name">
                                         </div>
                                         <div class="form-group">
+                                            <label>Joueur</label>
+                                            <select v-model="currentPersonage.user">
+                                                <option :value="null"></option>
+                                                <option :key="key" v-for="(player, key) in getPlayers" :value="'/api/users/' + player.id">{{ player.username }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
                                             <label class="form-label">Race</label>
                                             <input class="form-control" type="text" v-model="currentPersonage.race">
                                         </div>
@@ -187,7 +194,8 @@ export default defineComponent({
     computed: {
         ...mapGetters('user', [
             'getWorld',
-            'isGameMaster'
+            'isGameMaster',
+            'getPlayers'
         ])
     },
     components: {
