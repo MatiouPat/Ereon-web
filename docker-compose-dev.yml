@@ -38,17 +38,17 @@ services:
       - ereon:/var/www/:rw
   ereon-db:
     container_name: ereon-db
-    image: postgres:16-alpine
+    image: mariadb:10.9.5
     restart: always
     env_file:
       - .env
       - .env.local
     expose:
-      - 5432
+      - 3306
     networks:
       - database
     volumes:
-      - ereon-db_data:/var/lib/postgresql/data:rw
+      - ereon-db_data:/var/lib/mysql
   ereon-mercure:
     container_name: ereon-mercure
     image: dunglas/mercure:v0.14
