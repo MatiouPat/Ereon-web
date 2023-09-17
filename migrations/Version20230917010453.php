@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230917002125 extends AbstractMigration
+final class Version20230917010453 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -47,7 +47,7 @@ final class Version20230917002125 extends AbstractMigration
         $this->addSql('CREATE SEQUENCE skill_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE spell_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE token_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
-        $this->addSql('CREATE SEQUENCE user_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
+        $this->addSql('CREATE SEQUENCE "user_id_seq" INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE user_parameter_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE world_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE TABLE alteration (id INT NOT NULL, world_id INT NOT NULL, name VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
@@ -237,7 +237,7 @@ final class Version20230917002125 extends AbstractMigration
         $this->addSql('DROP SEQUENCE skill_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE spell_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE token_id_seq CASCADE');
-        $this->addSql('DROP SEQUENCE user_id_seq CASCADE');
+        $this->addSql('DROP SEQUENCE "user_id_seq" CASCADE');
         $this->addSql('DROP SEQUENCE user_parameter_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE world_id_seq CASCADE');
         $this->addSql('ALTER TABLE alteration DROP CONSTRAINT FK_9FE087C48925311C');
