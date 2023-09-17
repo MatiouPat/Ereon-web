@@ -195,7 +195,8 @@ export default defineComponent({
         ...mapGetters('user', [
             'getWorld',
             'isGameMaster',
-            'getPlayers'
+            'getPlayers',
+            'getUserId'
         ])
     },
     components: {
@@ -302,9 +303,15 @@ export default defineComponent({
         }
     },
     mounted() {
-        this.personageService.findAllPersonages().then(res => {
-            this.personages = res;
-        })
+        if(this.isGameMaster) {
+            this.personageService.findAllPersonages().then(res => {
+                this.personages = res;
+            })
+        }else {
+            this.personageService.findPersonagesByUser(this.getUserId).then(res => {
+                this.personages = res;
+            })
+        }
     }
 })
 
