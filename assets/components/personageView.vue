@@ -304,11 +304,11 @@ export default defineComponent({
     },
     mounted() {
         if(this.isGameMaster) {
-            this.personageService.findAllPersonages().then(res => {
+            this.personageService.findPersonagesByWorld(this.getWorld.id).then(res => {
                 this.personages = res;
             })
         }else {
-            this.personageService.findPersonagesByUser(this.getUserId).then(res => {
+            this.personageService.findPersonagesByWorldAndByUser(this.getWorld.id, this.getUserId).then(res => {
                 this.personages = res;
             })
         }
