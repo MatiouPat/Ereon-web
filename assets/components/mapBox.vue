@@ -313,5 +313,8 @@ import { MapRepository } from '../repository/mapRepository';
         background-color: #1c1b22;
     }
 
+    .dark .modal-box {
+        background-color: #2b2a33;
+    }
 
 </style>
