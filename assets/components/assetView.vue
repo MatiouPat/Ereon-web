@@ -35,7 +35,7 @@ import { AssetRepository } from '../repository/assetRepository';
                 if(document.elementsFromPoint(e.pageX, e.pageY).includes(document.getElementById('editor')!)) {
                     this.addTokenOnMap({
                         mercure: false,
-                        data: (e.target as HTMLImageElement).alt,
+                        data: Number((e.target as HTMLImageElement).alt),
                     })
                 }
             }
