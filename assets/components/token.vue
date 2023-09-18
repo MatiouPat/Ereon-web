@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isGameMaster && token.layer == getLayer" class="token" ref="token" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown.prevent="move" @contextmenu="showActions">
+    <div v-if="isGameMaster && token.layer == getLayer || isPropertiesContexting" class="token" ref="token" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown.prevent="move" @contextmenu="showActions">
         <div class="resizers" :class="{isResizing: isResizing}">
             <div class="resizer top-left" @mousedown.stop="resize"></div>
             <div class="resizer top-middle" @mousedown.stop="resize"></div>
@@ -22,29 +22,36 @@
                         <div class="form-part">
                             <h3>Positionnement</h3>
                             <div class="row">
-                                <div class="field">
-                                    <label>Width</label>
-                                    <input :value="token.width" type="number" @input="setTokenWidth">
+                                <div class="form-group">
+                                    <label class="form-label">Width</label>
+                                    <input class="form-control" :value="token.width" type="number" @input="setTokenWidth">
                                 </div>
-                                <div class="field">
-                                    <label>Height</label>
-                                    <input :value="token.height" type="number" @input="setTokenHeight">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="field">
-                                    <label>Top</label>
-                                    <input :value="token.topPosition" type="number" @input="setTokenTop">
-                                </div>
-                                <div class="field">
-                                    <label>Left</label>
-                                    <input :value="token.leftPosition" type="number" @input="setTokenLeft">
+                                <div class="form-group">
+                                    <label class="form-label">Height</label>
+                                    <input class="form-control" :value="token.height" type="number" @input="setTokenHeight">
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="field">
-                                    <label>Zindex</label>
-                                    <input :value="token.zIndex" type="number" @input="setTokenZIndex">
+                                <div class="form-group">
+                                    <label class="form-label">Top</label>
+                                    <input class="form-control" :value="token.topPosition" type="number" @input="setTokenTop">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Left</label>
+                                    <input class="form-control" :value="token.leftPosition" type="number" @input="setTokenLeft">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="form-label">Zindex</label>
+                                    <input class="form-control" :value="token.zIndex" type="number" @input="setTokenZIndex">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Layer</label>
+                                    <select class="form-control" :value="token.layer" @input="setTokenLayer">
+                                        <option :value="1">Map</option>
+                                        <option :value="2">Token</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -59,7 +66,7 @@
                             <h3>Contrôle</h3>
                             <span>Aucun joueur présent sur cette partie</span>
                         </div>
-                        <button type="button" class="btn" @click="submitForm">Valider</button>
+                        <button type="button" class="btn btn-primary" @click="submitForm">Valider</button>
                     </form>
                 </div>
             </div>
@@ -344,6 +351,12 @@ import { User } from '../entity/user';
                 this.$store.commit('map/setTokenZIndex', {
                     token: this.token,
                     zIndex: (e.target as InputHTMLAttributes).value
+                })
+            },
+            setTokenLayer: function(e: Event) {
+                this.$store.commit('map/setTokenLayer', {
+                    token: this.token,
+                    layer: (e.target as InputHTMLAttributes).value
                 })
             },
             addTokenPlayer: function(e: Event) {

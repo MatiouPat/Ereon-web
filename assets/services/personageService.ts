@@ -1,4 +1,3 @@
-import axios from "axios";
 import { Image } from "../entity/image";
 import { NumberOfAttribute } from "../entity/numberofattribute";
 import { NumberOfPoint } from "../entity/numberofpoint";

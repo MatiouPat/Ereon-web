@@ -1,7 +1,8 @@
-import axios from "axios"
 import { Token } from "../../entity/token"
 import { User } from "../../entity/user"
 import { Map } from "../../entity/map"
+import { TokenService } from "../../services/tokenService"
+import { MapService } from "../../services/mapService"
 
 const state = {
     /**
@@ -40,28 +41,21 @@ const actions = {
     /**
      * Define current map
      */
-    setMap: async function({commit}, map: Map): Promise<void>
+    setMap: async function({commit}, mapId: number): Promise<void>
     {
-        axios.get('api/maps/' + map).then((e) => {
-            commit('setMap', e.data)
+        let mapService = new MapService();
+        mapService.findMapById(mapId).then((res) => {
+            commit('setMap', res)
         })
     },
     /**
      * Add a token to the map
      */
-    addTokenOnMap: async function({commit, getters}, {mercure, data}: {mercure: boolean, data: Token | string}): Promise<void>
+    addTokenOnMap: async function({commit, getters}, {mercure, data}: {mercure: boolean, data: Token | number}): Promise<void>
     {
-        if (!mercure) {
-            axios.post('api/tokens', {
-                "width": 64,
-                "height": 64,
-                'topPosition': 0,
-                "leftPosition": 0,
-                "zIndex": 0,
-                "layer": getters.getLayer,
-                "map": getters.map['@id'],
-                "asset": "/api/assets/" + data
-            })
+        if (!mercure && typeof data === "number") {
+            let tokenService = new TokenService;
+            tokenService.createToken(getters.getLayer, getters.map.id, data);
         } else {
             commit('addToken', data)
         }
@@ -72,9 +66,10 @@ const actions = {
      */
     removeTokenOnMap: function({commit, getters}, {mercure, id}: {mercure: boolean, id: number})
     {
+        let tokenService = new TokenService;
         let token = getters.getTokenById(id)
         if (!mercure) {
-            axios.delete('/api/tokens/' + token.id)
+            tokenService.deleteToken(token.id)
         }else {
             console.log(id)
             let index = state.map.tokens.findIndex((token: Token) => {
@@ -96,39 +91,24 @@ const actions = {
      */
     finishUpdateToken: async function({getters}, updatedToken: Token): Promise<void>
     {
+        let tokenService = new TokenService;
         let token = getters.getTokenById(updatedToken.id);
-        let users = [] as string[];
-        updatedToken.users.forEach((user: User) => {
-            users.push(user["@id"]!);
-        })
-        axios.patch('/api/tokens/' + token.id, {
-            "width": updatedToken.width,
-            "height": updatedToken.height,
-            'topPosition': updatedToken.topPosition,
-            "leftPosition": updatedToken.leftPosition,
-            "zIndex": updatedToken.zIndex,
-            "users": users
-        }, {
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+        tokenService.updateTokenPartially(token);
     },
     /**
      * Update only token depth and push modification via API
      */
     changeZIndex: function({commit, getters}, updatedToken: Token)
     {
-        let token = getters.getTokenById(updatedToken.id)
+        
+        let tokenService = new TokenService;
+        let token = getters.getTokenById(updatedToken.id);
         let zIndex = updatedToken.zIndex
         commit('setTokenZIndex', {token, zIndex}),
-        axios.patch('/api/tokens/' + token.id, {
-            "zIndex": zIndex
-        }, {
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+        tokenService.updateTokenPartially({
+            "id": token.id,
+            "zIndex": token.zIndex
+        });
     },
     setRatio: function({commit}, data)
     {
@@ -181,6 +161,10 @@ const mutations = {
     setTokenZIndex: function(state: any, {token, zIndex}: {token: Token, zIndex: number})
     {
         token.zIndex = zIndex
+    },
+    setTokenLayer: function(state: any, {token, layer}: {token: Token, layer: number})
+    {
+        token.layer = layer
     },
     addTokenPlayer: function(state: any, {token, user}: {token: Token, user: User})
     {
