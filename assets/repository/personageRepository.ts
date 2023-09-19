@@ -1,15 +1,14 @@
 import axios from "axios";
 import { Personage } from "../entity/personage";
-import { NumberOfAttribute } from "../entity/numberofattribute";
 
 export class PersonageRepository
 {
 
-    public async findAllPersonages(): Promise<Personage[]>
+    public async findPersonagesByWorld(worldId: number): Promise<Personage[]>
     {
         return axios({
             method: 'GET',
-            url: '/api/personages'
+            url: '/api/personages?world.id=' + worldId
         })
         .then(res => {
             return res.data['hydra:member']
@@ -20,7 +19,18 @@ export class PersonageRepository
     {
         return axios({
             method: 'GET',
-            url: '/api/personages?exists[user]=false&world.id' + worldId
+            url: '/api/personages?exists[user]=false&world.id=' + worldId
+        })
+        .then(res => {
+            return res.data['hydra:member']
+        })
+    }
+
+    public async findPersonagesByWorldAndByUser(worldId: number, userId: number): Promise<Personage[]>
+    {
+        return axios({
+            method: 'GET',
+            url: '/api/personages?world.id=' + worldId + '&user.id=' + userId
         })
         .then(res => {
             return res.data['hydra:member']

@@ -1,4 +1,3 @@
-import axios from "axios";
 import { Image } from "../entity/image";
 import { NumberOfAttribute } from "../entity/numberofattribute";
 import { NumberOfPoint } from "../entity/numberofpoint";
@@ -9,7 +8,8 @@ import { NumberOfPointRepository } from "../repository/numberofpointRepository";
 import { PersonageRepository } from "../repository/personageRepository";
 
 /**
- * 
+ * @author Matthieu Pays <pays.matthieuic@gmail.com>
+ * Service used by character sheet components to set up a CRUD on the world's characters
  */
 export class PersonageService
 {
@@ -23,18 +23,32 @@ export class PersonageService
     private imageRepository: ImageRepository = new ImageRepository();
 
     /**
-     * 
+     * Find all the characters in a world
+     * @param worldId Id of the chosen world
      * @returns 
      */
-    public async findAllPersonages(): Promise<Personage[]>
+    public async findPersonagesByWorld(worldId: number): Promise<Personage[]>
     {
-        return this.personageRepository.findAllPersonages().then((res) => {
-            return res
+        return this.personageRepository.findPersonagesByWorld(worldId).then((res) => {
+            return res;
         })
     }
 
     /**
-     * 
+     * Find all characters on chosen world by connected user 
+     * @param worldId Id of the chosen world
+     * @param userId Id of logged-in user
+     * @returns 
+     */
+    public async findPersonagesByWorldAndByUser(worldId: number, userId: number): Promise<Personage[]>
+    {
+        return this.personageRepository.findPersonagesByWorldAndByUser(worldId, userId).then((res) => {
+            return res;
+        })
+    }
+
+    /**
+     * Create a new character
      * @param personage 
      * @returns 
      */
@@ -45,6 +59,8 @@ export class PersonageService
             personage.image = image;
             if (image.id) {
                 req.image = 'api/images/' + image.id
+            }else {
+                req.image = undefined
             }
             req.numberOfAttributes?.forEach((numberofattribute: NumberOfAttribute) => {
                 numberofattribute.attribute = numberofattribute.attribute['@id'];
@@ -57,7 +73,7 @@ export class PersonageService
     }
 
     /**
-     * 
+     * Delete a character
      * @param personageId 
      */
     public async deletePersonage(personageId: number): Promise<void>
@@ -66,7 +82,7 @@ export class PersonageService
     }
 
     /**
-     * 
+     * Edit a character
      * @param personage 
      */
     public async updatePersonagePartially(personage: Personage): Promise<void>
@@ -76,6 +92,8 @@ export class PersonageService
             personage.image = image;
             if (image.id) {
                 req.image = 'api/images/' + image.id
+            }else {
+                req.image = undefined
             }
             req.numberOfAttributes?.forEach((numberOfAttribute: NumberOfAttribute, index: number) => {
                 numberOfAttribute.attribute = numberOfAttribute.attribute['@id'];
@@ -92,7 +110,7 @@ export class PersonageService
     }
 
     /**
-     * 
+     * Call the image service if an image is uploaded via the form in the character component.
      * @param image 
      */
     private async uploadImage(image: Image): Promise<Image>

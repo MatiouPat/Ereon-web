@@ -67,7 +67,7 @@ class Personage
     private ?Image $image = null;
 
     #[ORM\ManyToOne(inversedBy: 'personages')]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'personages')]

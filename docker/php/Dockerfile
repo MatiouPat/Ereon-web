@@ -31,6 +31,7 @@ RUN composer install && \
     npm install && \
     npm run build
 
-RUN chmod +x ./docker/php/entrypoint.sh
+RUN chmod +x ./docker/php/entrypoint.sh && \
+    chmod 777 -R var/
 
 ENTRYPOINT [ "./docker/php/entrypoint.sh" ]
