@@ -1,14 +1,14 @@
 <template>
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
-            <div v-if="map.hasDynamicLight">
+            <div v-if="map.hasDynamicLight && !isGameMaster">
                 <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
                 <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
                 <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
-                <Token :id="token.id" @is-moving="draw" :key="token.id" v-for="token in map.tokens"></Token>
+                <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
             </div>
             <div v-else>
-                <Token :id="token.id" :key="token.id" v-for="token in map.tokens"></Token>
+                <TokenComposent :id="token.id" :key="token.id" v-for="token in map.tokens"></TokenComposent>
             </div>
         </div>
         <div class="editor-zoom">
@@ -22,12 +22,13 @@
 
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import Token from './token.vue'
+import TokenComposent from './token.vue'
 import { mapActions, mapGetters } from 'vuex';
+import { Token } from '../entity/token';
 
     export default defineComponent({
         components: {
-            Token
+            TokenComposent
         },
         data() {
             return {
@@ -64,8 +65,23 @@ import { mapActions, mapGetters } from 'vuex';
         computed: {
             ...mapGetters('map', [
                 'map',
-                'getRatio'
+                'getRatio',
+                'getControllableTokens'
+            ]),
+            ...mapGetters('user', [
+                'isGameMaster',
+                'getUserId'
             ])
+        },
+        watch: {
+            map: {
+                handler() {
+                    if (this.map.hasDynamicLight && !this.isGameMaster) {
+                        this.draw();
+                    }
+                },
+                flush: 'post'
+            }
         },
         methods: {
             ...mapActions('map', [
@@ -126,26 +142,34 @@ import { mapActions, mapGetters } from 'vuex';
                 e.preventDefault();
             },
             draw: function () {
-                let x = this.map.tokens[0].left
-                let y = this.map.tokens[0].top
+                if(this.map.hasDynamicLight && this.fog && this.dark && !this.isGameMaster) {
+                    let tokens = this.getControllableTokens(this.getUserId);
 
-                this.fog!.clearRect(0, 0, this.map.width, this.map.height)
-                this.dark!.clearRect(0, 0, this.map.width, this.map.height)
+                    this.fog!.clearRect(0, 0, this.map.width, this.map.height)
+                    this.dark!.clearRect(0, 0, this.map.width, this.map.height)
+                    this.main!.clearRect(0, 0, this.map.width, this.map.height)
+                    
+                    this.fog!.globalAlpha = 1;
+                    this.fog!.fillStyle = 'black';
+                    this.fog!.fillRect(0, 0, this.map.width, this.map.height);
+                    this.fog!.globalCompositeOperation = 'destination-out';
 
-                this.fog!.globalAlpha = 1;
-                this.fog!.fillStyle = 'black';
-                this.fog!.fillRect(0, 0, this.map.width, this.map.height);
-                this.fog!.globalCompositeOperation = 'destination-out';
-                let fog_gd = this.fog!.createRadialGradient(x, y, 600, x, y, 0)
-                fog_gd.addColorStop(0, 'rgba(255, 255, 255, 0)');
-                fog_gd.addColorStop(1, 'rgba(255, 255, 255, 1)');
-                this.fog!.fillStyle = fog_gd
-                this.fog!.beginPath();
-                this.fog!.arc(x, y, 400, 0, 2*Math.PI);
-                this.fog!.closePath()
-                this.fog!.fill();
+                    tokens.forEach((token: Token) => {
+                        let x = token.leftPosition! + token.width! / 2;
+                        let y = token.topPosition! + token.height! / 2;
+                        let fog_gd = this.fog!.createRadialGradient(x, y, 150, x, y, 300)
+                        fog_gd.addColorStop(0, 'rgba(0, 0, 0, 1)');
+                        fog_gd.addColorStop(.2, 'rgba(0, 0, 0, .4)');
+                        fog_gd.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                        this.fog!.fillStyle = fog_gd
+                        this.fog!.beginPath();
+                        this.fog!.arc(x, y, 600, 0, 2*Math.PI);
+                        this.fog!.closePath()
+                        this.fog!.fill();
+                    });
 
-                this.fog!.globalCompositeOperation = this.dark!.globalCompositeOperation = this.main!.globalCompositeOperation
+                    this.fog!.globalCompositeOperation = this.dark!.globalCompositeOperation = this.main!.globalCompositeOperation;
+                }
             },
             zoomIn: function () {
                 if (this.ratio < 2.3) {
@@ -164,12 +188,6 @@ import { mapActions, mapGetters } from 'vuex';
             }
         },
         mounted() {
-            if (this.map.hasDynamicLight) {
-                this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
-                this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
-                this.dark = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
-            }
-
             const url = new URL(process.env.MERCURE_PUBLIC_URL!);
             url.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/tokens');
 
@@ -186,9 +204,17 @@ import { mapActions, mapGetters } from 'vuex';
             (this.$refs.editorWrapper as HTMLElement).scrollLeft = 2048;
 
             this.emitter.on('isDownload', () => {
-                if (this.map.hasDynamicLight) {
+                if (this.map.hasDynamicLight && !this.isGameMaster) {
+                    this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
+                    this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
+                    this.dark = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
                     this.draw()
                 }
+            })
+
+            this.emitter.on('isMoving', () => {
+                console.log('draw')
+                this.draw()
             })
         }
     })

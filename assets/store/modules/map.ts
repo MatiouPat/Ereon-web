@@ -27,13 +27,16 @@ const getters = {
         return state.map.tokens.find((token: Token) => token.id === tokenId)
     },
     canControlledBy: (state: any) => (userId: number, tokenId: number) => {
-        return (state.map.tokens.find((token: Token) => token.id === tokenId && token.users?.find((user: User) => user.id == userId)) != null) ? true : false
+        return (state.map.tokens.find((token: Token) => token.id === tokenId && token.users!.find((user: User) => user.id == userId)) != null) ? true : false
     },
     getIndexOfUser: (state: any) => (user: User, tokenId: number) => {
         return state.map.tokens.find((token: Token) => token.id === tokenId).users.indexOf(user)
     },
     getRatio: (state: any) => {
         return state.ratio
+    },
+    getControllableTokens: (state: any) => (userId: number) => {
+        return state.map.tokens.filter((token: Token) => token.users!.find((user: User) => user.id == userId))
     }
 }
 

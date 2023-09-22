@@ -76,7 +76,7 @@
             <img :src="'/uploads/images/asset/' + token.asset.image" alt="Map">
         </picture>
     </div>
-    <div v-else-if="!isGameMaster && canControlledBy(getUserId, id)" class="token" ref="token" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}" @mousedown.prevent="move">
+    <div v-else-if="!isGameMaster && canControlledBy(getUserId, id)" class="token" ref="token" style="z-index: 20;" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px'}" @mousedown.prevent="move">
         <picture>
             <source type="image/webp" :srcset="'/uploads/images/asset/' + token.asset.compressedImage">
             <img :src="'/uploads/images/asset/' + token.asset.image" alt="Map">
@@ -99,6 +99,7 @@ import { User } from '../entity/user';
     export default defineComponent({
         data() {
             return {
+                emitter: inject('emitter') as any,
                 $store: inject('store') as any,
                 /**
                  * The token being resized
@@ -232,6 +233,7 @@ import { User } from '../entity/user';
                 token.leftPosition = Math.floor(left!);
                 token.topPosition = Math.floor(top!);
                 this.updateToken(token);
+                this.emitter.emit('isMoving');
             },
             /**
              * Start token resizing after clicking on a resizer
@@ -326,37 +328,37 @@ import { User } from '../entity/user';
             setTokenWidth: function(e: Event) {
                 this.$store.commit('map/setTokenWidth', {
                     token: this.token,
-                    width: (e.target as InputHTMLAttributes).value
+                    width: Number((e.target as InputHTMLAttributes).value)
                 })
             },
             setTokenHeight: function(e: Event) {
                 this.$store.commit('map/setTokenHeight', {
                     token: this.token,
-                    height: (e.target as InputHTMLAttributes).value
+                    height: Number((e.target as InputHTMLAttributes).value)
                 })
             },
             setTokenTop: function(e: Event) {
                 this.$store.commit('map/setTokenTop', {
                     token: this.token,
-                    topPosition: (e.target as InputHTMLAttributes).value
+                    topPosition: Number((e.target as InputHTMLAttributes).value)
                 })
             },
             setTokenLeft: function(e: Event) {
                 this.$store.commit('map/setTokenLeft', {
                     token: this.token,
-                    leftPosition: (e.target as InputHTMLAttributes).value
+                    leftPosition: Number((e.target as InputHTMLAttributes).value)
                 })
             },
             setTokenZIndex: function(e: Event) {
                 this.$store.commit('map/setTokenZIndex', {
                     token: this.token,
-                    zIndex: (e.target as InputHTMLAttributes).value
+                    zIndex: Number((e.target as InputHTMLAttributes).value)
                 })
             },
             setTokenLayer: function(e: Event) {
                 this.$store.commit('map/setTokenLayer', {
                     token: this.token,
-                    layer: (e.target as InputHTMLAttributes).value
+                    layer: Number((e.target as InputHTMLAttributes).value)
                 })
             },
             addTokenPlayer: function(e: Event) {
@@ -399,6 +401,7 @@ import { User } from '../entity/user';
             updateEs.onmessage = e => {
                 if (e.data != "") {
                     this.updateToken(JSON.parse(e.data))
+                    this.emitter.emit('isMoving');
                 } else {
                     this.removeTokenOnMap({
                         id: this.id,
