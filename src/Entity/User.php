@@ -24,7 +24,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     ]
 )]
 #[ApiFilter(BooleanFilter::class, properties: ['connections.isGameMaster'])]
-#[ApiFilter(SearchFilter::class, properties: ['connections.world.id' => 'exact'])]
+#[ApiFilter(SearchFilter::class, properties: ['connections.world.id' => 'exact', 'discordIdentifier' => 'exact', 'connections.world.serverIdentifier' => 'exact'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -53,9 +53,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $tokens;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Connection::class, orphanRemoval: true)]
+    #[Groups("user:read")]
     private Collection $connections;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Personage::class)]
+    #[Groups("user:read")]
     private Collection $personages;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
