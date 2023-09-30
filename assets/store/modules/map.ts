@@ -13,7 +13,8 @@ const state = {
         height: 0
     } as Map,
     ratio: 1 as number,
-    layer: 1 as number
+    layer: 1 as number,
+    onDrawing: false as boolean
 }
 
 const getters = {
@@ -22,6 +23,9 @@ const getters = {
     },
     getLayer: (state: any) => {
         return state.layer
+    },
+    getOnDrawing: (state: any) => {
+        return state.onDrawing;
     },
     getTokenById: (state: any) => (tokenId: number) => {
         return state.map.tokens.find((token: Token) => token.id === tokenId)
@@ -120,6 +124,10 @@ const actions = {
     setLayer: function({commit}, layer: number)
     {
         commit('setLayer', layer)
+    },
+    setOnDrawing: function({commit}, onDrawing: boolean): void
+    {
+        commit('setOnDrawing', onDrawing);
     }
 }
 
@@ -184,6 +192,10 @@ const mutations = {
     setLayer: function(state: any, layer: number)
     {
         state.layer = layer;
+    },
+    setOnDrawing: function(state: any, onDrawing: number)
+    {
+        state.onDrawing = onDrawing;
     }
 }
 

@@ -8,6 +8,7 @@
                 <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
             </div>
             <div v-else>
+                <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height"></canvas>
                 <TokenComposent :id="token.id" :key="token.id" v-for="token in map.tokens"></TokenComposent>
             </div>
         </div>
@@ -59,14 +60,23 @@ import { Token } from '../entity/token';
                 mapY: 0 as number,
                 fog: null as CanvasRenderingContext2D | null,
                 dark: null as CanvasRenderingContext2D | null,
-                main: null as CanvasRenderingContext2D | null
+                main: null as CanvasRenderingContext2D | null,
+                walls: [] as {
+                    start: { x: number, y: number }
+                    end: { x: number, y: number}
+                }[],
+                drawingWall: {} as {
+                    start: { x: number, y: number }
+                    end: { x: number, y: number}
+                }
             }
         },
         computed: {
             ...mapGetters('map', [
                 'map',
                 'getRatio',
-                'getControllableTokens'
+                'getControllableTokens',
+                'getOnDrawing'
             ]),
             ...mapGetters('user', [
                 'isGameMaster',
@@ -144,7 +154,7 @@ import { Token } from '../entity/token';
             draw: function () {
                 if(this.map.hasDynamicLight && this.fog && this.dark && !this.isGameMaster) {
                     let tokens = this.getControllableTokens(this.getUserId);
-
+                    
                     this.fog!.clearRect(0, 0, this.map.width, this.map.height)
                     this.dark!.clearRect(0, 0, this.map.width, this.map.height)
                     this.main!.clearRect(0, 0, this.map.width, this.map.height)
@@ -171,6 +181,21 @@ import { Token } from '../entity/token';
                     this.fog!.globalCompositeOperation = this.dark!.globalCompositeOperation = this.main!.globalCompositeOperation;
                 }
             },
+            drawGameMasterVue: function () {
+                this.main!.clearRect(0, 0, this.map.width, this.map.height);
+                this.main!.strokeStyle = "red";
+                this.main!.lineWidth = 3;
+                this.main!.beginPath();
+                this.main!.moveTo(this.drawingWall.start.x, this.drawingWall.start.y);
+                this.main!.lineTo(this.drawingWall.end.x, this.drawingWall.end.y);
+                this.main!.stroke();
+                this.walls.forEach((wall) => {
+                    this.main!.beginPath();
+                    this.main!.moveTo(wall.start.x, wall.start.y);
+                    this.main!.lineTo(wall.end.x, wall.end.y);
+                    this.main!.stroke();
+                })
+            },
             zoomIn: function () {
                 if (this.ratio < 2.3) {
                     this.ratio = Number(this.ratio) + 0.01
@@ -185,6 +210,28 @@ import { Token } from '../entity/token';
             },
             updateRatio: function () {
                 this.setRatio(this.ratio)
+            },
+            drawStart: function(e: MouseEvent) {
+                if (e.button === 0) {
+                    this.drawingWall = {
+                        start: { x: e.offsetX, y: e.offsetY },
+                        end: { x: e.offsetX, y: e.offsetY },
+                    };
+                    document.addEventListener("mousemove", this.drawUpdate)
+                    document.addEventListener("mouseup", this.drawEnd)
+                }
+            },
+            drawUpdate: function (e: MouseEvent) {
+                this.drawingWall.end = {
+                    x: e.offsetX,
+                    y: e.offsetY,
+                };
+                this.emitter.emit("drawWall");
+            },
+            drawEnd: function () {
+                document.removeEventListener("mousemove", this.drawUpdate);
+                this.walls.push(this.drawingWall);
+                this.emitter.emit("drawWall");
             }
         },
         mounted() {
@@ -204,8 +251,8 @@ import { Token } from '../entity/token';
             (this.$refs.editorWrapper as HTMLElement).scrollLeft = 2048;
 
             this.emitter.on('isDownload', () => {
+                this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
                 if (this.map.hasDynamicLight && !this.isGameMaster) {
-                    this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
                     this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
                     this.dark = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
                     this.draw()
@@ -213,8 +260,11 @@ import { Token } from '../entity/token';
             })
 
             this.emitter.on('isMoving', () => {
-                console.log('draw')
-                this.draw()
+                this.draw();
+            })
+
+            this.emitter.on("drawWall", () => {
+                this.drawGameMasterVue();
             })
         }
     })

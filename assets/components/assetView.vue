@@ -1,7 +1,7 @@
 <template>
     <div class="assets-box">
-        <picture v-for="asset in assets" @dragend="addToken" :key="asset.id">
-            <source type="image/webp" :srcset="'/uploads/images/asset/' + asset.compressedImage">
+        <picture v-for="asset in assets" :key="asset.id">
+            <source type="image/webp" v-on="{ dragend: getOnDrawing ? addToken : null }" :srcset="'/uploads/images/asset/' + asset.compressedImage">
             <img :src="'/uploads/images/asset/' + asset.image" :alt="asset.id.toString()" width="64" height="64">
         </picture>
     </div>
@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { Asset } from '../entity/asset';
 import { AssetRepository } from '../repository/assetRepository';
 
@@ -22,6 +22,11 @@ import { AssetRepository } from '../repository/assetRepository';
                  */
                 assets: [] as Asset[]
             }
+        },
+        computed: {
+            ...mapGetters('map', [
+                'getOnDrawing'
+            ])
         },
         methods: {
             ...mapActions('map', [
