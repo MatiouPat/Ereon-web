@@ -2,7 +2,7 @@
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
             <div v-if="map.hasDynamicLight && !isGameMaster">
-                <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
+                <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height" style="z-index: 15;"></canvas>
                 <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
                 <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
                 <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
@@ -26,6 +26,15 @@ import { defineComponent, inject } from 'vue';
 import TokenComposent from './token.vue'
 import { mapActions, mapGetters } from 'vuex';
 import { Token } from '../entity/token';
+import * as twgl from 'twgl.js';
+import lightVertSrc from "../shaders/light.vert";
+import lightFragSrc from "../shaders/light.frag";
+import shadowVertSrc from "../shaders/shadow.vert";
+import shadowFragSrc from "../shaders/shadow.frag";
+import sceneVertSrc from "../shaders/scene.vert";
+import sceneFragSrc from "../shaders/scene.frag";
+import { calculateGeometry } from "../geometry";
+import { Vec2 } from '../vec2';
 
     export default defineComponent({
         components: {
@@ -58,17 +67,19 @@ import { Token } from '../entity/token';
                  * The Y position at which the user begins scrolling in relation to the map
                  */
                 mapY: 0 as number,
-                fog: null as CanvasRenderingContext2D | null,
+                fog: null as WebGLRenderingContext | null,
                 dark: null as CanvasRenderingContext2D | null,
                 main: null as CanvasRenderingContext2D | null,
                 walls: [] as {
-                    start: { x: number, y: number }
-                    end: { x: number, y: number}
+                    start: Vec2
+                    end: Vec2
                 }[],
                 drawingWall: {} as {
-                    start: { x: number, y: number }
-                    end: { x: number, y: number}
-                }
+                    start: Vec2
+                    end: Vec2
+                },
+                lightTexture: {} as WebGLTexture,
+                sceneTexture: {} as WebGLTexture
             }
         },
         computed: {
@@ -151,23 +162,114 @@ import { Token } from '../entity/token';
             onContextMenu: function (e: MouseEvent) {
                 e.preventDefault();
             },
-            draw: function () {
+            draw: async function () {
+                console.log(this.walls)
                 if(this.map.hasDynamicLight && this.fog && this.dark && !this.isGameMaster) {
-                    let tokens = this.getControllableTokens(this.getUserId);
-                    
-                    this.fog!.clearRect(0, 0, this.map.width, this.map.height)
-                    this.dark!.clearRect(0, 0, this.map.width, this.map.height)
-                    this.main!.clearRect(0, 0, this.map.width, this.map.height)
-                    
-                    this.fog!.globalAlpha = 1;
-                    this.fog!.fillStyle = 'black';
-                    this.fog!.fillRect(0, 0, this.map.width, this.map.height);
-                    this.fog!.globalCompositeOperation = 'destination-out';
+                    const quadArrays = {
+                        vertex: {
+                        numComponents: 2,
+                        data: new Float32Array([
+                            // Bottom left tri
+                            -1,
+                            -1,
+                            -1,
+                            1,
+                            1,
+                            -1,
 
+                            // Top right tri
+                            -1,
+                            1,
+                            1,
+                            -1,
+                            1,
+                            1,
+                        ]),
+                        },
+                    };
+                    const shadowProgram = twgl.createProgramInfo(this.fog, [shadowVertSrc, shadowFragSrc]);
+                    const lightProgram = twgl.createProgramInfo(this.fog, [lightVertSrc, lightFragSrc]);
+                    const sceneProgram = twgl.createProgramInfo(this.fog, [sceneVertSrc, sceneFragSrc]);
+                    const arrays = {
+                        vertex: {
+                        numComponents: 2,
+                        data: [],
+                        },
+                    };
+                    const shadowBuffer = twgl.createBufferInfoFromArrays(this.fog, arrays);
+                    const quadBuffer = twgl.createBufferInfoFromArrays(this.fog, quadArrays);
+                    const attachments = [
+                        {
+                            format: this.fog.RGBA,
+                            type: this.fog.UNSIGNED_BYTE,
+                            min: this.fog.LINEAR,
+                            wrap: this.fog.CLAMP_TO_EDGE
+                        }
+                    ]
+                    const shadowFramebuffer = twgl.createFramebufferInfo(this.fog, attachments);
+                    const lightFramebuffer = twgl.createFramebufferInfo(this.fog, attachments);
+                    let tokens = this.getControllableTokens(this.getUserId);
+
+                    twgl.bindFramebufferInfo(this.fog, shadowFramebuffer)
+                    //this.fog!.clearRect(0, 0, this.map.width, this.map.height)
+                    /*this.dark!.clearRect(0, 0, this.map.width, this.map.height)
+                    this.main!.clearRect(0, 0, this.map.width, this.map.height)*/
+                    
+                    //this.fog!.globalAlpha = 1;
+                    //this.fog!.fillStyle = 'black';
+                    //this.fog!.fillRect(0, 0, this.map.width, this.map.height);
+                    //this.fog!.globalCompositeOperation = 'destination-out';
+
+
+                    
+                    let x = tokens[0].leftPosition! + tokens[0].width! / 2;
+                    let y = tokens[0].topPosition! + tokens[0].height! / 2;
+                    let coord = this.canvasToGlCoords(x, y)
+
+                    // Draw shadows
+                    const vertices = [] as number[];
+                    for (const wall of this.walls) {
+                        vertices.push(
+                            ...calculateGeometry({
+                                light: coord,
+                                a: this.canvasToGlCoords(wall.start.x, wall.start.y),
+                                b: this.canvasToGlCoords(wall.end.x, wall.end.y),
+                                lightRadius: 3,
+                            })
+                        );
+                    }
+
+                    twgl.setAttribInfoBufferFromArray(
+                        this.fog,
+                        shadowBuffer.attribs!.vertex,
+                        vertices
+                    );
+                    shadowBuffer.numElements = vertices.length / 2;
+
+                    this.fog.enable(this.fog.BLEND);
+                    this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.ONE_MINUS_SRC_ALPHA);
+
+                    this.fog.useProgram(shadowProgram.program);
+                    twgl.setBuffersAndAttributes(this.fog, shadowProgram, shadowBuffer);
+                    twgl.drawBufferInfo(this.fog, shadowBuffer);
+
+                    // Draw lights
+                    twgl.bindFramebufferInfo(this.fog, lightFramebuffer);
+                    this.fog.clearColor(0.3, 0.3, 0.3, 1.0);
+                    this.fog.clear(this.fog.COLOR_BUFFER_BIT);
+                    this.fog.enable(this.fog.BLEND);
+                    this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
+
+                    this.fog.useProgram(lightProgram.program);
+                    twgl.setBuffersAndAttributes(this.fog, lightProgram, quadBuffer);
+                    twgl.setUniforms(lightProgram, {
+                        lightPosition: [coord.x, coord.y],
+                        shadowTexture: shadowFramebuffer.attachments[0],
+                        lightTexture: this.lightTexture,
+                    });
+                    twgl.drawBufferInfo(this.fog, quadBuffer);
                     tokens.forEach((token: Token) => {
-                        let x = token.leftPosition! + token.width! / 2;
-                        let y = token.topPosition! + token.height! / 2;
-                        let fog_gd = this.fog!.createRadialGradient(x, y, 150, x, y, 300)
+                        /*let fog_gd = this.fog!.createRadialGradient(x, y, 150, x, y, 300)
                         fog_gd.addColorStop(0, 'rgba(0, 0, 0, 1)');
                         fog_gd.addColorStop(.2, 'rgba(0, 0, 0, .4)');
                         fog_gd.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -175,13 +277,33 @@ import { Token } from '../entity/token';
                         this.fog!.beginPath();
                         this.fog!.arc(x, y, 600, 0, 2*Math.PI);
                         this.fog!.closePath()
-                        this.fog!.fill();
+                        this.fog!.fill();*/
+
+                        
                     });
 
-                    this.fog!.globalCompositeOperation = this.dark!.globalCompositeOperation = this.main!.globalCompositeOperation;
+                    // Draw scene
+                    this.fog.bindFramebuffer(this.fog.FRAMEBUFFER, null);
+                    this.fog.clearColor(0.0, 0.0, 0.0, 1.0);
+                    this.fog.clear(this.fog.COLOR_BUFFER_BIT);
+                    this.fog.enable(this.fog.BLEND);
+                    this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
+
+                    this.fog.useProgram(sceneProgram.program);
+                    twgl.setBuffersAndAttributes(this.fog, sceneProgram, quadBuffer);
+                    twgl.setUniforms(sceneProgram, {
+                        lightTexture: lightFramebuffer.attachments[0],
+                        sceneTexture: this.sceneTexture,
+                    });
+                    this.fog.enable(this.fog.BLEND);
+                    this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
+                    twgl.drawBufferInfo(this.fog, quadBuffer);
+
+                    //this.fog!.globalCompositeOperation = this.dark!.globalCompositeOperation = this.main!.globalCompositeOperation;
                 }
             },
             drawGameMasterVue: function () {
+                console.log('drawmaster', this.walls)
                 this.main!.clearRect(0, 0, this.map.width, this.map.height);
                 this.main!.strokeStyle = "red";
                 this.main!.lineWidth = 3;
@@ -190,6 +312,7 @@ import { Token } from '../entity/token';
                 this.main!.lineTo(this.drawingWall.end.x, this.drawingWall.end.y);
                 this.main!.stroke();
                 this.walls.forEach((wall) => {
+                    console.log(wall)
                     this.main!.beginPath();
                     this.main!.moveTo(wall.start.x, wall.start.y);
                     this.main!.lineTo(wall.end.x, wall.end.y);
@@ -212,6 +335,7 @@ import { Token } from '../entity/token';
                 this.setRatio(this.ratio)
             },
             drawStart: function(e: MouseEvent) {
+                console.log('drawline')
                 if (e.button === 0) {
                     this.drawingWall = {
                         start: { x: e.offsetX, y: e.offsetY },
@@ -230,8 +354,17 @@ import { Token } from '../entity/token';
             },
             drawEnd: function () {
                 document.removeEventListener("mousemove", this.drawUpdate);
-                this.walls.push(this.drawingWall);
+                this.walls.push({
+                    start: {x: this.drawingWall.start.x, y: this.drawingWall.start.y},
+                    end: {x: this.drawingWall.end.x, y: this.drawingWall.end.y}
+                });
                 this.emitter.emit("drawWall");
+            },
+            canvasToGlCoords: function (x: number, y: number) {
+                return {
+                    x: (x / this.map.width) * 2 - 1,
+                    y: -((y / this.map.width) * 2 - 1),
+                };
             }
         },
         mounted() {
@@ -252,9 +385,11 @@ import { Token } from '../entity/token';
 
             this.emitter.on('isDownload', () => {
                 this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
-                if (this.map.hasDynamicLight && !this.isGameMaster) {
-                    this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
-                    this.dark = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
+                if (this.map.hasDynamicLight) {
+                    this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl");
+                    this.lightTexture = twgl.createTexture(this.fog, {src: "./build/images/lightsource.png"})
+                    this.sceneTexture = twgl.createTexture(this.fog, {src: "./uploads/images/asset/taverne-01.png" })
+                    this.dark = (this.$refs.dark as HTMLCanvasElement).getContext("2d");
                     this.draw()
                 }
             })
