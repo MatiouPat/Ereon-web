@@ -8,8 +8,9 @@
                     <li title="Light" @click="setLayer(3)"><div class="layer" :class="getLayer == 3 ? 'selected' : ''"><img src="build/images/icons/light.svg" width="16" height="16" alt="Light"></div><span>Light</span></li>
                 </ul>
                 <ul class="tools">
-                    <li title="Light" @click="setOnDrawing(false)"><div class="tool" :class="!getOnDrawing ? 'selected' : ''"><img src="build/images/icons/mouse.svg" width="20" height="20" alt="Light"></div></li>
+                    <li title="Click" @click="setOnDrawing(false)"><div class="tool" :class="!getOnDrawing ? 'selected' : ''"><img src="build/images/icons/mouse.svg" width="20" height="20" alt="Click"></div></li>
                     <li title="Light" @click="setOnDrawing(true); setLayer(3)"><div class="tool" :class="getOnDrawing ? 'selected' : ''"><img src="build/images/icons/line.svg" width="20" height="20" alt="Light"></div></li>
+                    <li title="Supprimer tous les murs" @click="deleteAllLightingWalls(); emitter.emit('drawWall')"><div class="tool"><img src="build/images/icons/delete.svg" width="20" height="20" alt="Supprimer tous les murs"></div></li>
                 </ul>
             </ul>
             <ul v-else>
@@ -86,6 +87,7 @@ import { Connection } from '../entity/connection';
 import { World } from '../entity/world';
 import { UserParameterRepository } from '../repository/userparameterRepository';
 import { UserRepository } from '../repository/userRepository';
+import { LightingWallService } from '../services/lightingwallService';
 
     export default defineComponent({
         data() {
@@ -93,6 +95,7 @@ import { UserRepository } from '../repository/userRepository';
                 emitter: inject('emitter') as any,
                 userRepository: new UserRepository as UserRepository,
                 userParameterRepository: new UserParameterRepository as UserParameterRepository,
+                lightingWallService: new LightingWallService as LightingWallService,
                 /**
                  * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
                  */
@@ -133,7 +136,8 @@ import { UserRepository } from '../repository/userRepository';
             ...mapActions('map', [
                 'setMap',
                 'setLayer',
-                'setOnDrawing'
+                'setOnDrawing',
+                'deleteAllLightingWalls'
             ]),
             ...mapActions('music', [
                 'setUserParameter',

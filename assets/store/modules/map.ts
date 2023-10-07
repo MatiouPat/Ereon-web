@@ -3,6 +3,8 @@ import { User } from "../../entity/user"
 import { Map } from "../../entity/map"
 import { TokenService } from "../../services/tokenService"
 import { MapService } from "../../services/mapService"
+import { LightingWall } from "../../entity/lightingwall"
+import { LightingWallService } from "../../services/lightingwallService"
 
 const state = {
     /**
@@ -128,6 +130,19 @@ const actions = {
     setOnDrawing: function({commit}, onDrawing: boolean): void
     {
         commit('setOnDrawing', onDrawing);
+    },
+    addLightingWall: function({commit}, lightingWall: LightingWall): void
+    {
+        let lightingWallService = new LightingWallService;
+        lightingWallService.createLightingWall(lightingWall);
+        commit('addLightingWall', lightingWall);
+        
+    },
+    deleteAllLightingWalls: function({commit, getters}): void
+    {
+        let lightingWallService = new LightingWallService;
+        lightingWallService.deleteAllLightingWallsByMap(getters.map.lightingWalls);
+        commit('deleteAllLightingWalls');
     }
 }
 
@@ -196,6 +211,14 @@ const mutations = {
     setOnDrawing: function(state: any, onDrawing: number)
     {
         state.onDrawing = onDrawing;
+    },
+    addLightingWall: function(state:any, lightingWall: LightingWall)
+    {
+        state.map.lightingWalls.push(lightingWall);
+    },
+    deleteAllLightingWalls: function(state:any)
+    {
+        state.map.lightingWalls = []
     }
 }
 

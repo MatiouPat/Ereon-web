@@ -2,14 +2,12 @@
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
             <div v-if="map.hasDynamicLight && !isGameMaster">
-                <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height" style="z-index: 15;"></canvas>
-                <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
-                <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
+                <canvas ref="fog" id="fog" :width="map.width" :height="map.height" style="z-index: 15;"></canvas>
                 <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
             </div>
             <div v-else>
-                <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height"></canvas>
-                <TokenComposent :id="token.id" :key="token.id" v-for="token in map.tokens"></TokenComposent>
+                <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height" :style="{zIndex: getLayer === 3 ? 10 : -100}"></canvas>
+                <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
             </div>
         </div>
         <div class="editor-zoom">
@@ -25,7 +23,6 @@
 import { defineComponent, inject } from 'vue';
 import TokenComposent from './token.vue'
 import { mapActions, mapGetters } from 'vuex';
-import { Token } from '../entity/token';
 import * as twgl from 'twgl.js';
 import lightVertSrc from "../shaders/light.vert";
 import lightFragSrc from "../shaders/light.frag";
@@ -34,7 +31,8 @@ import shadowFragSrc from "../shaders/shadow.frag";
 import sceneVertSrc from "../shaders/scene.vert";
 import sceneFragSrc from "../shaders/scene.frag";
 import { calculateGeometry } from "../geometry";
-import { Vec2 } from '../vec2';
+import { LightingWallService } from '../services/lightingwallService';
+import { LightingWall } from '../entity/lightingwall';
 
     export default defineComponent({
         components: {
@@ -43,6 +41,7 @@ import { Vec2 } from '../vec2';
         data() {
             return {
                 emitter: inject('emitter') as any,
+                lightWallService: new LightingWallService as LightingWallService,
                 /**
                  * The zoom in on the map
                  */
@@ -70,14 +69,7 @@ import { Vec2 } from '../vec2';
                 fog: null as WebGLRenderingContext | null,
                 dark: null as CanvasRenderingContext2D | null,
                 main: null as CanvasRenderingContext2D | null,
-                walls: [] as {
-                    start: Vec2
-                    end: Vec2
-                }[],
-                drawingWall: {} as {
-                    start: Vec2
-                    end: Vec2
-                },
+                drawingWall: {} as LightingWall,
                 lightTexture: {} as WebGLTexture,
                 sceneTexture: {} as WebGLTexture
             }
@@ -86,6 +78,7 @@ import { Vec2 } from '../vec2';
             ...mapGetters('map', [
                 'map',
                 'getRatio',
+                'getLayer',
                 'getControllableTokens',
                 'getOnDrawing'
             ]),
@@ -109,7 +102,8 @@ import { Vec2 } from '../vec2';
                 'addTokenOnMap',
                 'updateToken',
                 'removeTokenOnMap',
-                'setRatio'
+                'setRatio',
+                'addLightingWall'
             ]),
             /**
              * Starts scrolling the map after right-clicking
@@ -163,27 +157,13 @@ import { Vec2 } from '../vec2';
                 e.preventDefault();
             },
             draw: async function () {
-                console.log(this.walls)
-                if(this.map.hasDynamicLight && this.fog && this.dark && !this.isGameMaster) {
+                if(this.map.hasDynamicLight && this.fog && !this.isGameMaster) {
                     const quadArrays = {
                         vertex: {
                         numComponents: 2,
                         data: new Float32Array([
-                            // Bottom left tri
-                            -1,
-                            -1,
-                            -1,
-                            1,
-                            1,
-                            -1,
-
-                            // Top right tri
-                            -1,
-                            1,
-                            1,
-                            -1,
-                            1,
-                            1,
+                            -1, -1, -1, 1, 1, -1,
+                            -1, 1, 1, -1, 1, 1,
                         ]),
                         },
                     };
@@ -211,16 +191,6 @@ import { Vec2 } from '../vec2';
                     let tokens = this.getControllableTokens(this.getUserId);
 
                     twgl.bindFramebufferInfo(this.fog, shadowFramebuffer)
-                    //this.fog!.clearRect(0, 0, this.map.width, this.map.height)
-                    /*this.dark!.clearRect(0, 0, this.map.width, this.map.height)
-                    this.main!.clearRect(0, 0, this.map.width, this.map.height)*/
-                    
-                    //this.fog!.globalAlpha = 1;
-                    //this.fog!.fillStyle = 'black';
-                    //this.fog!.fillRect(0, 0, this.map.width, this.map.height);
-                    //this.fog!.globalCompositeOperation = 'destination-out';
-
-
                     
                     let x = tokens[0].leftPosition! + tokens[0].width! / 2;
                     let y = tokens[0].topPosition! + tokens[0].height! / 2;
@@ -228,12 +198,12 @@ import { Vec2 } from '../vec2';
 
                     // Draw shadows
                     const vertices = [] as number[];
-                    for (const wall of this.walls) {
+                    for (const wall of this.map.lightingWalls) {
                         vertices.push(
                             ...calculateGeometry({
                                 light: coord,
-                                a: this.canvasToGlCoords(wall.start.x, wall.start.y),
-                                b: this.canvasToGlCoords(wall.end.x, wall.end.y),
+                                a: this.canvasToGlCoords(wall.startX, wall.startY),
+                                b: this.canvasToGlCoords(wall.endX, wall.endY),
                                 lightRadius: 3,
                             })
                         );
@@ -268,19 +238,6 @@ import { Vec2 } from '../vec2';
                         lightTexture: this.lightTexture,
                     });
                     twgl.drawBufferInfo(this.fog, quadBuffer);
-                    tokens.forEach((token: Token) => {
-                        /*let fog_gd = this.fog!.createRadialGradient(x, y, 150, x, y, 300)
-                        fog_gd.addColorStop(0, 'rgba(0, 0, 0, 1)');
-                        fog_gd.addColorStop(.2, 'rgba(0, 0, 0, .4)');
-                        fog_gd.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                        this.fog!.fillStyle = fog_gd
-                        this.fog!.beginPath();
-                        this.fog!.arc(x, y, 600, 0, 2*Math.PI);
-                        this.fog!.closePath()
-                        this.fog!.fill();*/
-
-                        
-                    });
 
                     // Draw scene
                     this.fog.bindFramebuffer(this.fog.FRAMEBUFFER, null);
@@ -298,24 +255,20 @@ import { Vec2 } from '../vec2';
                     this.fog.enable(this.fog.BLEND);
                     this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
                     twgl.drawBufferInfo(this.fog, quadBuffer);
-
-                    //this.fog!.globalCompositeOperation = this.dark!.globalCompositeOperation = this.main!.globalCompositeOperation;
                 }
             },
             drawGameMasterVue: function () {
-                console.log('drawmaster', this.walls)
                 this.main!.clearRect(0, 0, this.map.width, this.map.height);
                 this.main!.strokeStyle = "red";
                 this.main!.lineWidth = 3;
                 this.main!.beginPath();
-                this.main!.moveTo(this.drawingWall.start.x, this.drawingWall.start.y);
-                this.main!.lineTo(this.drawingWall.end.x, this.drawingWall.end.y);
+                this.main!.moveTo(this.drawingWall.startX!, this.drawingWall.startY!);
+                this.main!.lineTo(this.drawingWall.endX!, this.drawingWall.endY!);
                 this.main!.stroke();
-                this.walls.forEach((wall) => {
-                    console.log(wall)
+                this.map.lightingWalls.forEach((wall: LightingWall) => {
                     this.main!.beginPath();
-                    this.main!.moveTo(wall.start.x, wall.start.y);
-                    this.main!.lineTo(wall.end.x, wall.end.y);
+                    this.main!.moveTo(wall.startX!, wall.startY!);
+                    this.main!.lineTo(wall.endX!, wall.endY!);
                     this.main!.stroke();
                 })
             },
@@ -335,29 +288,24 @@ import { Vec2 } from '../vec2';
                 this.setRatio(this.ratio)
             },
             drawStart: function(e: MouseEvent) {
-                console.log('drawline')
                 if (e.button === 0) {
-                    this.drawingWall = {
-                        start: { x: e.offsetX, y: e.offsetY },
-                        end: { x: e.offsetX, y: e.offsetY },
-                    };
+                    this.drawingWall.map = '/api/maps/' + this.map.id;
+                    this.drawingWall.startX = e.offsetX;
+                    this.drawingWall.startY = e.offsetY;
+                    this.drawingWall.endX = e.offsetX;
+                    this.drawingWall.endY = e.offsetY;
                     document.addEventListener("mousemove", this.drawUpdate)
                     document.addEventListener("mouseup", this.drawEnd)
                 }
             },
             drawUpdate: function (e: MouseEvent) {
-                this.drawingWall.end = {
-                    x: e.offsetX,
-                    y: e.offsetY,
-                };
+                this.drawingWall.endX = e.offsetX;
+                this.drawingWall.endY = e.offsetY;
                 this.emitter.emit("drawWall");
             },
             drawEnd: function () {
                 document.removeEventListener("mousemove", this.drawUpdate);
-                this.walls.push({
-                    start: {x: this.drawingWall.start.x, y: this.drawingWall.start.y},
-                    end: {x: this.drawingWall.end.x, y: this.drawingWall.end.y}
-                });
+                this.addLightingWall(JSON.parse(JSON.stringify(this.drawingWall)));
                 this.emitter.emit("drawWall");
             },
             canvasToGlCoords: function (x: number, y: number) {
@@ -384,18 +332,21 @@ import { Vec2 } from '../vec2';
             (this.$refs.editorWrapper as HTMLElement).scrollLeft = 2048;
 
             this.emitter.on('isDownload', () => {
-                this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
-                if (this.map.hasDynamicLight) {
+                if (!this.isGameMaster && this.map.hasDynamicLight) {
                     this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl");
-                    this.lightTexture = twgl.createTexture(this.fog, {src: "./build/images/lightsource.png"})
-                    this.sceneTexture = twgl.createTexture(this.fog, {src: "./uploads/images/asset/taverne-01.png" })
-                    this.dark = (this.$refs.dark as HTMLCanvasElement).getContext("2d");
+                    this.sceneTexture = twgl.createTexture(this.fog!, {src: "./uploads/images/asset/taverne-01.webp", min: this.fog!.LINEAR, wrap: this.fog!.CLAMP_TO_EDGE})
+                    this.lightTexture = twgl.createTexture(this.fog!, {src: "./build/images/lightsource.png"})
                     this.draw()
+                }else if(this.isGameMaster && this.map.hasDynamicLight) {
+                    this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
+                    this.drawGameMasterVue();
                 }
             })
 
             this.emitter.on('isMoving', () => {
-                this.draw();
+                if (!this.isGameMaster && this.map.hasDynamicLight) {
+                    this.draw();
+                }
             })
 
             this.emitter.on("drawWall", () => {
@@ -495,7 +446,6 @@ import { Vec2 } from '../vec2';
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 10;
     }
 
     .dark .editor-wrapper {

@@ -60,10 +60,15 @@ class Map
     #[Groups("map:read")]
     private Collection $connections;
 
+    #[ORM\OneToMany(mappedBy: 'map', targetEntity: LightingWall::class, orphanRemoval: true)]
+    #[Groups("map:read")]
+    private Collection $lightingWalls;
+
     public function __construct()
     {
         $this->tokens = new ArrayCollection();
         $this->connections = new ArrayCollection();
+        $this->lightingWalls = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -185,6 +190,36 @@ class Map
             // set the owning side to null (unless already changed)
             if ($connection->getCurrentMap() === $this) {
                 $connection->setCurrentMap(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LightingWall>
+     */
+    public function getLightingWalls(): Collection
+    {
+        return $this->lightingWalls;
+    }
+
+    public function addLightingWall(LightingWall $lightingWall): static
+    {
+        if (!$this->lightingWalls->contains($lightingWall)) {
+            $this->lightingWalls->add($lightingWall);
+            $lightingWall->setMap($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLightingWall(LightingWall $lightingWall): static
+    {
+        if ($this->lightingWalls->removeElement($lightingWall)) {
+            // set the owning side to null (unless already changed)
+            if ($lightingWall->getMap() === $this) {
+                $lightingWall->setMap(null);
             }
         }
 
