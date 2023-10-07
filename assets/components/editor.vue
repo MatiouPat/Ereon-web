@@ -71,7 +71,14 @@ import { LightingWall } from '../entity/lightingwall';
                 main: null as CanvasRenderingContext2D | null,
                 drawingWall: {} as LightingWall,
                 lightTexture: {} as WebGLTexture,
-                sceneTexture: {} as WebGLTexture
+                sceneTexture: {} as WebGLTexture,
+                shadowProgram: {} as twgl.ProgramInfo,
+                lightProgram: {} as twgl.ProgramInfo,
+                sceneProgram: {} as twgl.ProgramInfo,
+                shadowBuffer: {} as twgl.BufferInfo,
+                quadBuffer: {} as twgl.BufferInfo,
+                shadowFramebuffer: {} as twgl.FramebufferInfo,
+                lightFramebuffer: {} as twgl.FramebufferInfo
             }
         },
         computed: {
@@ -158,43 +165,17 @@ import { LightingWall } from '../entity/lightingwall';
             },
             draw: async function () {
                 if(this.map.hasDynamicLight && this.fog && !this.isGameMaster) {
-                    const quadArrays = {
-                        vertex: {
-                        numComponents: 2,
-                        data: new Float32Array([
-                            -1, -1, -1, 1, 1, -1,
-                            -1, 1, 1, -1, 1, 1,
-                        ]),
-                        },
-                    };
-                    const shadowProgram = twgl.createProgramInfo(this.fog, [shadowVertSrc, shadowFragSrc]);
-                    const lightProgram = twgl.createProgramInfo(this.fog, [lightVertSrc, lightFragSrc]);
-                    const sceneProgram = twgl.createProgramInfo(this.fog, [sceneVertSrc, sceneFragSrc]);
-                    const arrays = {
-                        vertex: {
-                        numComponents: 2,
-                        data: [],
-                        },
-                    };
-                    const shadowBuffer = twgl.createBufferInfoFromArrays(this.fog, arrays);
-                    const quadBuffer = twgl.createBufferInfoFromArrays(this.fog, quadArrays);
-                    const attachments = [
-                        {
-                            format: this.fog.RGBA,
-                            type: this.fog.UNSIGNED_BYTE,
-                            min: this.fog.LINEAR,
-                            wrap: this.fog.CLAMP_TO_EDGE
-                        }
-                    ]
-                    const shadowFramebuffer = twgl.createFramebufferInfo(this.fog, attachments);
-                    const lightFramebuffer = twgl.createFramebufferInfo(this.fog, attachments);
                     let tokens = this.getControllableTokens(this.getUserId);
 
-                    twgl.bindFramebufferInfo(this.fog, shadowFramebuffer)
+                    twgl.bindFramebufferInfo(this.fog, this.shadowFramebuffer)
                     
                     let x = tokens[0].leftPosition! + tokens[0].width! / 2;
                     let y = tokens[0].topPosition! + tokens[0].height! / 2;
                     let coord = this.canvasToGlCoords(x, y)
+
+                    // Clear the canvas to black
+                    this.fog.clearColor(0.0, 0.0, 0.0, 1.0);
+                    this.fog.clear(this.fog.COLOR_BUFFER_BIT);
 
                     // Draw shadows
                     const vertices = [] as number[];
@@ -211,33 +192,33 @@ import { LightingWall } from '../entity/lightingwall';
 
                     twgl.setAttribInfoBufferFromArray(
                         this.fog,
-                        shadowBuffer.attribs!.vertex,
+                        this.shadowBuffer.attribs!.vertex,
                         vertices
                     );
-                    shadowBuffer.numElements = vertices.length / 2;
+                    this.shadowBuffer.numElements = vertices.length / 2;
 
                     this.fog.enable(this.fog.BLEND);
                     this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.ONE_MINUS_SRC_ALPHA);
 
-                    this.fog.useProgram(shadowProgram.program);
-                    twgl.setBuffersAndAttributes(this.fog, shadowProgram, shadowBuffer);
-                    twgl.drawBufferInfo(this.fog, shadowBuffer);
+                    this.fog.useProgram(this.shadowProgram.program);
+                    twgl.setBuffersAndAttributes(this.fog, this.shadowProgram, this.shadowBuffer);
+                    twgl.drawBufferInfo(this.fog, this.shadowBuffer);
 
                     // Draw lights
-                    twgl.bindFramebufferInfo(this.fog, lightFramebuffer);
+                    twgl.bindFramebufferInfo(this.fog, this.lightFramebuffer);
                     this.fog.clearColor(0.3, 0.3, 0.3, 1.0);
                     this.fog.clear(this.fog.COLOR_BUFFER_BIT);
                     this.fog.enable(this.fog.BLEND);
                     this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
 
-                    this.fog.useProgram(lightProgram.program);
-                    twgl.setBuffersAndAttributes(this.fog, lightProgram, quadBuffer);
-                    twgl.setUniforms(lightProgram, {
+                    this.fog.useProgram(this.lightProgram.program);
+                    twgl.setBuffersAndAttributes(this.fog, this.lightProgram, this.quadBuffer);
+                    twgl.setUniforms(this.lightProgram, {
                         lightPosition: [coord.x, coord.y],
-                        shadowTexture: shadowFramebuffer.attachments[0],
+                        shadowTexture: this.shadowFramebuffer.attachments[0],
                         lightTexture: this.lightTexture,
                     });
-                    twgl.drawBufferInfo(this.fog, quadBuffer);
+                    twgl.drawBufferInfo(this.fog, this.quadBuffer);
 
                     // Draw scene
                     this.fog.bindFramebuffer(this.fog.FRAMEBUFFER, null);
@@ -246,15 +227,15 @@ import { LightingWall } from '../entity/lightingwall';
                     this.fog.enable(this.fog.BLEND);
                     this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
 
-                    this.fog.useProgram(sceneProgram.program);
-                    twgl.setBuffersAndAttributes(this.fog, sceneProgram, quadBuffer);
-                    twgl.setUniforms(sceneProgram, {
-                        lightTexture: lightFramebuffer.attachments[0],
+                    this.fog.useProgram(this.sceneProgram.program);
+                    twgl.setBuffersAndAttributes(this.fog, this.sceneProgram, this.quadBuffer);
+                    twgl.setUniforms(this.sceneProgram, {
+                        lightTexture: this.lightFramebuffer.attachments[0],
                         sceneTexture: this.sceneTexture,
                     });
                     this.fog.enable(this.fog.BLEND);
                     this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
-                    twgl.drawBufferInfo(this.fog, quadBuffer);
+                    twgl.drawBufferInfo(this.fog, this.quadBuffer);
                 }
             },
             drawGameMasterVue: function () {
@@ -334,9 +315,38 @@ import { LightingWall } from '../entity/lightingwall';
             this.emitter.on('isDownload', () => {
                 if (!this.isGameMaster && this.map.hasDynamicLight) {
                     this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl");
-                    this.sceneTexture = twgl.createTexture(this.fog!, {src: "./uploads/images/asset/taverne-01.webp", min: this.fog!.LINEAR, wrap: this.fog!.CLAMP_TO_EDGE})
-                    this.lightTexture = twgl.createTexture(this.fog!, {src: "./build/images/lightsource.png"})
-                    this.draw()
+                    this.shadowProgram = twgl.createProgramInfo(this.fog!, [shadowVertSrc, shadowFragSrc]);
+                    this.lightProgram = twgl.createProgramInfo(this.fog!, [lightVertSrc, lightFragSrc]);
+                    this.sceneProgram = twgl.createProgramInfo(this.fog!, [sceneVertSrc, sceneFragSrc]);
+                    this.shadowBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
+                        vertex: {
+                            numComponents: 2,
+                            data: [],
+                        },
+                    });
+                    this.quadBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
+                        vertex: {
+                            numComponents: 2,
+                            data: new Float32Array([
+                                -1, -1, -1, 1, 1, -1,
+                                -1, 1, 1, -1, 1, 1,
+                            ])
+                        }
+                    });
+                    const attachments = [{
+                        format: this.fog!.RGBA,
+                        type: this.fog!.UNSIGNED_BYTE,
+                        min: this.fog!.LINEAR,
+                        wrap: this.fog!.CLAMP_TO_EDGE
+                    }];
+                    this.shadowFramebuffer = twgl.createFramebufferInfo(this.fog!, attachments),
+                    this.lightFramebuffer = twgl.createFramebufferInfo(this.fog!, attachments)
+                    this.lightTexture = twgl.createTexture(this.fog!, {src: "./build/images/lightsource.png"}, () => {
+                        this.draw()
+                    })
+                    this.sceneTexture = twgl.createTexture(this.fog!, {src: "./uploads/images/asset/taverne-01.webp", min: this.fog!.LINEAR, wrap: this.fog!.CLAMP_TO_EDGE}, () => {
+                        this.draw()
+                    })
                 }else if(this.isGameMaster && this.map.hasDynamicLight) {
                     this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
                     this.drawGameMasterVue();
