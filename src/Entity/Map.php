@@ -11,6 +11,7 @@ use App\Repository\MapRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MapRepository::class)]
@@ -49,6 +50,7 @@ class Map
     private ?bool $hasDynamicLight = null;
 
     #[ORM\OneToMany(mappedBy: 'map', targetEntity: Token::class, orphanRemoval: true)]
+    #[OrderBy(["zIndex" => "ASC"])]
     #[Groups("map:read")]
     private Collection $tokens;
 

@@ -30,9 +30,13 @@ import shadowVertSrc from "../shaders/shadow.vert";
 import shadowFragSrc from "../shaders/shadow.frag";
 import sceneVertSrc from "../shaders/scene.vert";
 import sceneFragSrc from "../shaders/scene.frag";
+import tokenVertSrc from "../shaders/token.vert";
+import tokenFragSrc from "../shaders/token.frag";
 import { calculateGeometry } from "../geometry";
 import { LightingWallService } from '../services/lightingwallService';
 import { LightingWall } from '../entity/lightingwall';
+import { Token } from '../entity/token';
+import { Asset } from '../entity/asset';
 
     export default defineComponent({
         components: {
@@ -71,9 +75,10 @@ import { LightingWall } from '../entity/lightingwall';
                 main: null as CanvasRenderingContext2D | null,
                 drawingWall: {} as LightingWall,
                 lightTexture: {} as WebGLTexture,
-                sceneTexture: {} as WebGLTexture,
+                tokenTextures: [] as {texture: WebGLTexture, width: number, height: number, position: {x: number, y: number}}[],
                 shadowProgram: {} as twgl.ProgramInfo,
                 lightProgram: {} as twgl.ProgramInfo,
+                tokenProgram: {} as twgl.ProgramInfo,
                 sceneProgram: {} as twgl.ProgramInfo,
                 shadowBuffer: {} as twgl.BufferInfo,
                 quadBuffer: {} as twgl.BufferInfo,
@@ -167,11 +172,65 @@ import { LightingWall } from '../entity/lightingwall';
                 if(this.map.hasDynamicLight && this.fog && !this.isGameMaster) {
                     let tokens = this.getControllableTokens(this.getUserId);
 
-                    twgl.bindFramebufferInfo(this.fog, this.shadowFramebuffer)
+                    twgl.bindFramebufferInfo(this.fog, this.shadowFramebuffer);
                     
                     let x = tokens[0].leftPosition! + tokens[0].width! / 2;
                     let y = tokens[0].topPosition! + tokens[0].height! / 2;
-                    let coord = this.canvasToGlCoords(x, y)
+                    let coord = this.canvasToGlCoords(x, y);
+
+                    // Clear the canvas to black
+                    this.fog.clearColor(0.0, 0.0, 0.0, 1.0);
+                    this.fog.clear(this.fog.COLOR_BUFFER_BIT);
+
+                    // Create the scene texture with differents tokens
+                    this.tokenTextures.forEach((tokenTexture) => {
+                        this.fog!.useProgram(this.tokenProgram.program);
+                        let NOPoint = this.canvasToGlCoords(tokenTexture.position.x, tokenTexture.position.y);
+                        NOPoint = {x: NOPoint.x + 1, y: NOPoint.y - 1};
+                        let NEPoint = this.canvasToGlCoords(tokenTexture.position.x + tokenTexture.width, tokenTexture.position.y);
+                        NEPoint = {x: NEPoint.x - 1, y: NEPoint.y - 1};
+                        let SOPoint = this.canvasToGlCoords(tokenTexture.position.x, tokenTexture.position.y + tokenTexture.height);
+                        SOPoint = {x: SOPoint.x + 1, y: SOPoint.y + 1};
+                        let SEPoint = this.canvasToGlCoords(tokenTexture.position.x + tokenTexture.width, tokenTexture.position.y + tokenTexture.height);
+                        SEPoint = {x: SEPoint.x - 1, y: SEPoint.y + 1};
+                        let tokenBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
+                            vertex: {
+                                numComponents: 2,
+                                data: new Float32Array([
+                                    -1, -1, -1, 1, 1, -1,
+                                    -1, 1, 1, -1, 1, 1,
+                                ])
+                            },
+                            position: {
+                                numComponents: 2,
+                                data: new Float32Array([
+                                    // Bottom left tri (SO, NO, SE)
+                                    SOPoint.x, SOPoint.y, NOPoint.x, NOPoint.y, SEPoint.x, SEPoint.y,
+                                    // Top right tri (NO, SE, NE)
+                                    NOPoint.x, NOPoint.y, SEPoint.x, SEPoint.y, NEPoint.x, NEPoint.y
+                                ])
+                            }
+                        });
+                        twgl.setBuffersAndAttributes(this.fog!, this.tokenProgram, tokenBuffer);
+                        twgl.setUniforms(this.tokenProgram, {
+                            tokenTexture: tokenTexture.texture
+                        });
+                        this.fog!.enable(this.fog!.BLEND);
+                        this.fog!.blendFunc(this.fog!.SRC_ALPHA, this.fog!.ONE_MINUS_SRC_ALPHA );
+                        twgl.drawBufferInfo(this.fog!, this.quadBuffer);
+                    })
+
+                    let sceneTexture = twgl.createTexture(this.fog);
+                    this.fog.bindTexture(this.fog.TEXTURE_2D, sceneTexture);
+                    this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_MIN_FILTER, this.fog.LINEAR);
+                    this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_MAG_FILTER, this.fog.LINEAR);
+                    this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_WRAP_S, this.fog.CLAMP_TO_EDGE);
+                    this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_WRAP_T, this.fog.CLAMP_TO_EDGE);
+                    this.fog.texImage2D(this.fog.TEXTURE_2D, 0, this.fog.RGBA, 2, 2, 0, this.fog.RGBA, this.fog.FLOAT, new Float32Array([
+                                    -1, -1, -1, 1, 1, -1,
+                                    -1, 1, 1, -1, 1, 1,
+                                ]));
+                    this.fog.copyTexImage2D(this.fog.TEXTURE_2D, 0, this.fog.RGBA, 0, 0, this.map.width, this.map.height, 0);
 
                     // Clear the canvas to black
                     this.fog.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -227,15 +286,13 @@ import { LightingWall } from '../entity/lightingwall';
                     this.fog.enable(this.fog.BLEND);
                     this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
 
-                    this.fog.useProgram(this.sceneProgram.program);
-                    twgl.setBuffersAndAttributes(this.fog, this.sceneProgram, this.quadBuffer);
+                    this.fog!.useProgram(this.sceneProgram.program);
+                    twgl.setBuffersAndAttributes(this.fog!, this.tokenProgram, this.quadBuffer);
                     twgl.setUniforms(this.sceneProgram, {
                         lightTexture: this.lightFramebuffer.attachments[0],
-                        sceneTexture: this.sceneTexture,
+                        sceneTexture: sceneTexture
                     });
-                    this.fog.enable(this.fog.BLEND);
-                    this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
-                    twgl.drawBufferInfo(this.fog, this.quadBuffer);
+                    twgl.drawBufferInfo(this.fog!, this.quadBuffer);
                 }
             },
             drawGameMasterVue: function () {
@@ -317,6 +374,7 @@ import { LightingWall } from '../entity/lightingwall';
                     this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl");
                     this.shadowProgram = twgl.createProgramInfo(this.fog!, [shadowVertSrc, shadowFragSrc]);
                     this.lightProgram = twgl.createProgramInfo(this.fog!, [lightVertSrc, lightFragSrc]);
+                    this.tokenProgram = twgl.createProgramInfo(this.fog!, [tokenVertSrc, tokenFragSrc]);
                     this.sceneProgram = twgl.createProgramInfo(this.fog!, [sceneVertSrc, sceneFragSrc]);
                     this.shadowBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
                         vertex: {
@@ -344,9 +402,35 @@ import { LightingWall } from '../entity/lightingwall';
                     this.lightTexture = twgl.createTexture(this.fog!, {src: "./build/images/lightsource.png"}, () => {
                         this.draw()
                     })
-                    this.sceneTexture = twgl.createTexture(this.fog!, {src: "./uploads/images/asset/taverne-01.webp", min: this.fog!.LINEAR, wrap: this.fog!.CLAMP_TO_EDGE}, () => {
-                        this.draw()
-                    })
+                    this.map.tokens.forEach((token: Token) => {
+                        let asset = token.asset as Asset;
+                        if(asset.compressedImage) {
+                            this.tokenTextures.push({
+                                texture: twgl.createTexture(this.fog!, {src: "./uploads/images/asset/" + asset.compressedImage}, () => {
+                                    this.draw();
+                                }),
+                                width: token.width!,
+                                height: token.height!,
+                                position: {
+                                    x: token.leftPosition!,
+                                    y: token.topPosition!
+                                }
+                            });
+                        }else {
+                            this.tokenTextures.push({
+                                texture: twgl.createTexture(this.fog!, {src: "./uploads/images/asset/" + asset.image}, () => {
+                                    this.draw();
+                                }),
+                                width: token.width!,
+                                height: token.height!,
+                                position: {
+                                    x: token.leftPosition!,
+                                    y: token.topPosition!
+                                }
+                            });
+                        }
+                    });
+                    
                 }else if(this.isGameMaster && this.map.hasDynamicLight) {
                     this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
                     this.drawGameMasterVue();
@@ -355,6 +439,12 @@ import { LightingWall } from '../entity/lightingwall';
 
             this.emitter.on('isMoving', () => {
                 if (!this.isGameMaster && this.map.hasDynamicLight) {
+                    this.map.tokens.forEach((token: Token, index: number) => {
+                        this.tokenTextures[index].position = {
+                                x: token.leftPosition!,
+                                y: token.topPosition!
+                            }
+                    });
                     this.draw();
                 }
             })
