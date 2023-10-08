@@ -30,7 +30,7 @@ export class TokenService
     {
         let req: Token = JSON.parse(JSON.stringify(token));
         req.asset = undefined;
-        req.users.forEach((user: User, key: number) => {
+        req.users!.forEach((user: User, key: number) => {
             req.users[key] = '/api/users/' + user.id
         })
         this.tokenRepository.updateTokenPartially(req);

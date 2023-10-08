@@ -3,6 +3,8 @@ import { User } from "../../entity/user"
 import { Map } from "../../entity/map"
 import { TokenService } from "../../services/tokenService"
 import { MapService } from "../../services/mapService"
+import { LightingWall } from "../../entity/lightingwall"
+import { LightingWallService } from "../../services/lightingwallService"
 
 const state = {
     /**
@@ -13,7 +15,8 @@ const state = {
         height: 0
     } as Map,
     ratio: 1 as number,
-    layer: 1 as number
+    layer: 1 as number,
+    onDrawing: false as boolean
 }
 
 const getters = {
@@ -23,17 +26,23 @@ const getters = {
     getLayer: (state: any) => {
         return state.layer
     },
+    getOnDrawing: (state: any) => {
+        return state.onDrawing;
+    },
     getTokenById: (state: any) => (tokenId: number) => {
         return state.map.tokens.find((token: Token) => token.id === tokenId)
     },
     canControlledBy: (state: any) => (userId: number, tokenId: number) => {
-        return (state.map.tokens.find((token: Token) => token.id === tokenId && token.users?.find((user: User) => user.id == userId)) != null) ? true : false
+        return (state.map.tokens.find((token: Token) => token.id === tokenId && token.users!.find((user: User) => user.id == userId)) != null) ? true : false
     },
     getIndexOfUser: (state: any) => (user: User, tokenId: number) => {
         return state.map.tokens.find((token: Token) => token.id === tokenId).users.indexOf(user)
     },
     getRatio: (state: any) => {
         return state.ratio
+    },
+    getControllableTokens: (state: any) => (userId: number) => {
+        return state.map.tokens.filter((token: Token) => token.users!.find((user: User) => user.id == userId))
     }
 }
 
@@ -117,6 +126,23 @@ const actions = {
     setLayer: function({commit}, layer: number)
     {
         commit('setLayer', layer)
+    },
+    setOnDrawing: function({commit}, onDrawing: boolean): void
+    {
+        commit('setOnDrawing', onDrawing);
+    },
+    addLightingWall: function({commit}, lightingWall: LightingWall): void
+    {
+        let lightingWallService = new LightingWallService;
+        lightingWallService.createLightingWall(lightingWall);
+        commit('addLightingWall', lightingWall);
+        
+    },
+    deleteAllLightingWalls: function({commit, getters}): void
+    {
+        let lightingWallService = new LightingWallService;
+        lightingWallService.deleteAllLightingWallsByMap(getters.map.lightingWalls);
+        commit('deleteAllLightingWalls');
     }
 }
 
@@ -181,6 +207,18 @@ const mutations = {
     setLayer: function(state: any, layer: number)
     {
         state.layer = layer;
+    },
+    setOnDrawing: function(state: any, onDrawing: number)
+    {
+        state.onDrawing = onDrawing;
+    },
+    addLightingWall: function(state:any, lightingWall: LightingWall)
+    {
+        state.map.lightingWalls.push(lightingWall);
+    },
+    deleteAllLightingWalls: function(state:any)
+    {
+        state.map.lightingWalls = []
     }
 }
 

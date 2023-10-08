@@ -1,14 +1,13 @@
 <template>
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
-            <div v-if="map.hasDynamicLight">
-                <canvas ref="main" id="main" :width="map.width" :height="map.height"></canvas>
-                <canvas ref="fog" id="fog" :width="map.width" :height="map.height"></canvas>
-                <canvas ref="dark" id="dark" :width="map.width" :height="map.height"></canvas>
-                <Token :id="token.id" @is-moving="draw" :key="token.id" v-for="token in map.tokens"></Token>
+            <div v-if="map.hasDynamicLight && !isGameMaster">
+                <canvas ref="fog" id="fog" :width="map.width" :height="map.height" style="z-index: 15;"></canvas>
+                <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
             </div>
             <div v-else>
-                <Token :id="token.id" :key="token.id" v-for="token in map.tokens"></Token>
+                <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height" :style="{zIndex: getLayer === 3 ? 10 : -100}"></canvas>
+                <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
             </div>
         </div>
         <div class="editor-zoom">
@@ -22,16 +21,31 @@
 
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import Token from './token.vue'
+import TokenComposent from './token.vue'
 import { mapActions, mapGetters } from 'vuex';
+import * as twgl from 'twgl.js';
+import lightVertSrc from "../shaders/light.vert";
+import lightFragSrc from "../shaders/light.frag";
+import shadowVertSrc from "../shaders/shadow.vert";
+import shadowFragSrc from "../shaders/shadow.frag";
+import sceneVertSrc from "../shaders/scene.vert";
+import sceneFragSrc from "../shaders/scene.frag";
+import tokenVertSrc from "../shaders/token.vert";
+import tokenFragSrc from "../shaders/token.frag";
+import { calculateGeometry } from "../geometry";
+import { LightingWallService } from '../services/lightingwallService';
+import { LightingWall } from '../entity/lightingwall';
+import { Token } from '../entity/token';
+import { Asset } from '../entity/asset';
 
     export default defineComponent({
         components: {
-            Token
+            TokenComposent
         },
         data() {
             return {
                 emitter: inject('emitter') as any,
+                lightWallService: new LightingWallService as LightingWallService,
                 /**
                  * The zoom in on the map
                  */
@@ -56,23 +70,52 @@ import { mapActions, mapGetters } from 'vuex';
                  * The Y position at which the user begins scrolling in relation to the map
                  */
                 mapY: 0 as number,
-                fog: null as CanvasRenderingContext2D | null,
+                fog: null as WebGLRenderingContext | null,
                 dark: null as CanvasRenderingContext2D | null,
-                main: null as CanvasRenderingContext2D | null
+                main: null as CanvasRenderingContext2D | null,
+                drawingWall: {} as LightingWall,
+                lightTexture: {} as WebGLTexture,
+                tokenTextures: [] as {texture: WebGLTexture, width: number, height: number, position: {x: number, y: number}}[],
+                shadowProgram: {} as twgl.ProgramInfo,
+                lightProgram: {} as twgl.ProgramInfo,
+                tokenProgram: {} as twgl.ProgramInfo,
+                sceneProgram: {} as twgl.ProgramInfo,
+                shadowBuffer: {} as twgl.BufferInfo,
+                quadBuffer: {} as twgl.BufferInfo,
+                shadowFramebuffer: {} as twgl.FramebufferInfo,
+                lightFramebuffer: {} as twgl.FramebufferInfo
             }
         },
         computed: {
             ...mapGetters('map', [
                 'map',
-                'getRatio'
+                'getRatio',
+                'getLayer',
+                'getControllableTokens',
+                'getOnDrawing'
+            ]),
+            ...mapGetters('user', [
+                'isGameMaster',
+                'getUserId'
             ])
+        },
+        watch: {
+            map: {
+                handler() {
+                    if (this.map.hasDynamicLight && !this.isGameMaster) {
+                        this.draw();
+                    }
+                },
+                flush: 'post'
+            }
         },
         methods: {
             ...mapActions('map', [
                 'addTokenOnMap',
                 'updateToken',
                 'removeTokenOnMap',
-                'setRatio'
+                'setRatio',
+                'addLightingWall'
             ]),
             /**
              * Starts scrolling the map after right-clicking
@@ -125,27 +168,147 @@ import { mapActions, mapGetters } from 'vuex';
             onContextMenu: function (e: MouseEvent) {
                 e.preventDefault();
             },
-            draw: function () {
-                let x = this.map.tokens[0].left
-                let y = this.map.tokens[0].top
+            draw: async function () {
+                if(this.map.hasDynamicLight && this.fog && !this.isGameMaster) {
+                    let tokens = this.getControllableTokens(this.getUserId);
 
-                this.fog!.clearRect(0, 0, this.map.width, this.map.height)
-                this.dark!.clearRect(0, 0, this.map.width, this.map.height)
+                    twgl.bindFramebufferInfo(this.fog, this.shadowFramebuffer);
+                    
+                    let x = tokens[0].leftPosition! + tokens[0].width! / 2;
+                    let y = tokens[0].topPosition! + tokens[0].height! / 2;
+                    let coord = this.canvasToGlCoords(x, y);
 
-                this.fog!.globalAlpha = 1;
-                this.fog!.fillStyle = 'black';
-                this.fog!.fillRect(0, 0, this.map.width, this.map.height);
-                this.fog!.globalCompositeOperation = 'destination-out';
-                let fog_gd = this.fog!.createRadialGradient(x, y, 600, x, y, 0)
-                fog_gd.addColorStop(0, 'rgba(255, 255, 255, 0)');
-                fog_gd.addColorStop(1, 'rgba(255, 255, 255, 1)');
-                this.fog!.fillStyle = fog_gd
-                this.fog!.beginPath();
-                this.fog!.arc(x, y, 400, 0, 2*Math.PI);
-                this.fog!.closePath()
-                this.fog!.fill();
+                    // Clear the canvas to black
+                    this.fog.clearColor(0.0, 0.0, 0.0, 1.0);
+                    this.fog.clear(this.fog.COLOR_BUFFER_BIT);
 
-                this.fog!.globalCompositeOperation = this.dark!.globalCompositeOperation = this.main!.globalCompositeOperation
+                    // Create the scene texture with differents tokens
+                    this.tokenTextures.forEach((tokenTexture) => {
+                        this.fog!.useProgram(this.tokenProgram.program);
+                        let NOPoint = this.canvasToGlCoords(tokenTexture.position.x, tokenTexture.position.y);
+                        NOPoint = {x: NOPoint.x + 1, y: NOPoint.y - 1};
+                        let NEPoint = this.canvasToGlCoords(tokenTexture.position.x + tokenTexture.width, tokenTexture.position.y);
+                        NEPoint = {x: NEPoint.x - 1, y: NEPoint.y - 1};
+                        let SOPoint = this.canvasToGlCoords(tokenTexture.position.x, tokenTexture.position.y + tokenTexture.height);
+                        SOPoint = {x: SOPoint.x + 1, y: SOPoint.y + 1};
+                        let SEPoint = this.canvasToGlCoords(tokenTexture.position.x + tokenTexture.width, tokenTexture.position.y + tokenTexture.height);
+                        SEPoint = {x: SEPoint.x - 1, y: SEPoint.y + 1};
+                        let tokenBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
+                            vertex: {
+                                numComponents: 2,
+                                data: new Float32Array([
+                                    -1, -1, -1, 1, 1, -1,
+                                    -1, 1, 1, -1, 1, 1,
+                                ])
+                            },
+                            position: {
+                                numComponents: 2,
+                                data: new Float32Array([
+                                    // Bottom left tri (SO, NO, SE)
+                                    SOPoint.x, SOPoint.y, NOPoint.x, NOPoint.y, SEPoint.x, SEPoint.y,
+                                    // Top right tri (NO, SE, NE)
+                                    NOPoint.x, NOPoint.y, SEPoint.x, SEPoint.y, NEPoint.x, NEPoint.y
+                                ])
+                            }
+                        });
+                        twgl.setBuffersAndAttributes(this.fog!, this.tokenProgram, tokenBuffer);
+                        twgl.setUniforms(this.tokenProgram, {
+                            tokenTexture: tokenTexture.texture
+                        });
+                        this.fog!.enable(this.fog!.BLEND);
+                        this.fog!.blendFunc(this.fog!.SRC_ALPHA, this.fog!.ONE_MINUS_SRC_ALPHA );
+                        twgl.drawBufferInfo(this.fog!, this.quadBuffer);
+                    })
+
+                    let sceneTexture = twgl.createTexture(this.fog);
+                    this.fog.bindTexture(this.fog.TEXTURE_2D, sceneTexture);
+                    this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_MIN_FILTER, this.fog.LINEAR);
+                    this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_MAG_FILTER, this.fog.LINEAR);
+                    this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_WRAP_S, this.fog.CLAMP_TO_EDGE);
+                    this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_WRAP_T, this.fog.CLAMP_TO_EDGE);
+                    this.fog.texImage2D(this.fog.TEXTURE_2D, 0, this.fog.RGBA, 2, 2, 0, this.fog.RGBA, this.fog.FLOAT, new Float32Array([
+                                    -1, -1, -1, 1, 1, -1,
+                                    -1, 1, 1, -1, 1, 1,
+                                ]));
+                    this.fog.copyTexImage2D(this.fog.TEXTURE_2D, 0, this.fog.RGBA, 0, 0, this.map.width, this.map.height, 0);
+
+                    // Clear the canvas to black
+                    this.fog.clearColor(0.0, 0.0, 0.0, 1.0);
+                    this.fog.clear(this.fog.COLOR_BUFFER_BIT);
+
+                    // Draw shadows
+                    const vertices = [] as number[];
+                    for (const wall of this.map.lightingWalls) {
+                        vertices.push(
+                            ...calculateGeometry({
+                                light: coord,
+                                a: this.canvasToGlCoords(wall.startX, wall.startY),
+                                b: this.canvasToGlCoords(wall.endX, wall.endY),
+                                lightRadius: 3,
+                            })
+                        );
+                    }
+
+                    twgl.setAttribInfoBufferFromArray(
+                        this.fog,
+                        this.shadowBuffer.attribs!.vertex,
+                        vertices
+                    );
+                    this.shadowBuffer.numElements = vertices.length / 2;
+
+                    this.fog.enable(this.fog.BLEND);
+                    this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.ONE_MINUS_SRC_ALPHA);
+
+                    this.fog.useProgram(this.shadowProgram.program);
+                    twgl.setBuffersAndAttributes(this.fog, this.shadowProgram, this.shadowBuffer);
+                    twgl.drawBufferInfo(this.fog, this.shadowBuffer);
+
+                    // Draw lights
+                    twgl.bindFramebufferInfo(this.fog, this.lightFramebuffer);
+                    this.fog.clearColor(0.3, 0.3, 0.3, 1.0);
+                    this.fog.clear(this.fog.COLOR_BUFFER_BIT);
+                    this.fog.enable(this.fog.BLEND);
+                    this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
+
+                    this.fog.useProgram(this.lightProgram.program);
+                    twgl.setBuffersAndAttributes(this.fog, this.lightProgram, this.quadBuffer);
+                    twgl.setUniforms(this.lightProgram, {
+                        lightPosition: [coord.x, coord.y],
+                        shadowTexture: this.shadowFramebuffer.attachments[0],
+                        lightTexture: this.lightTexture,
+                    });
+                    twgl.drawBufferInfo(this.fog, this.quadBuffer);
+
+                    // Draw scene
+                    this.fog.bindFramebuffer(this.fog.FRAMEBUFFER, null);
+                    this.fog.clearColor(0.0, 0.0, 0.0, 1.0);
+                    this.fog.clear(this.fog.COLOR_BUFFER_BIT);
+                    this.fog.enable(this.fog.BLEND);
+                    this.fog.blendFunc(this.fog.SRC_ALPHA, this.fog.DST_ALPHA);
+
+                    this.fog!.useProgram(this.sceneProgram.program);
+                    twgl.setBuffersAndAttributes(this.fog!, this.tokenProgram, this.quadBuffer);
+                    twgl.setUniforms(this.sceneProgram, {
+                        lightTexture: this.lightFramebuffer.attachments[0],
+                        sceneTexture: sceneTexture
+                    });
+                    twgl.drawBufferInfo(this.fog!, this.quadBuffer);
+                }
+            },
+            drawGameMasterVue: function () {
+                this.main!.clearRect(0, 0, this.map.width, this.map.height);
+                this.main!.strokeStyle = "red";
+                this.main!.lineWidth = 3;
+                this.main!.beginPath();
+                this.main!.moveTo(this.drawingWall.startX!, this.drawingWall.startY!);
+                this.main!.lineTo(this.drawingWall.endX!, this.drawingWall.endY!);
+                this.main!.stroke();
+                this.map.lightingWalls.forEach((wall: LightingWall) => {
+                    this.main!.beginPath();
+                    this.main!.moveTo(wall.startX!, wall.startY!);
+                    this.main!.lineTo(wall.endX!, wall.endY!);
+                    this.main!.stroke();
+                })
             },
             zoomIn: function () {
                 if (this.ratio < 2.3) {
@@ -161,15 +324,36 @@ import { mapActions, mapGetters } from 'vuex';
             },
             updateRatio: function () {
                 this.setRatio(this.ratio)
+            },
+            drawStart: function(e: MouseEvent) {
+                if (e.button === 0) {
+                    this.drawingWall.map = '/api/maps/' + this.map.id;
+                    this.drawingWall.startX = e.offsetX;
+                    this.drawingWall.startY = e.offsetY;
+                    this.drawingWall.endX = e.offsetX;
+                    this.drawingWall.endY = e.offsetY;
+                    document.addEventListener("mousemove", this.drawUpdate)
+                    document.addEventListener("mouseup", this.drawEnd)
+                }
+            },
+            drawUpdate: function (e: MouseEvent) {
+                this.drawingWall.endX = e.offsetX;
+                this.drawingWall.endY = e.offsetY;
+                this.emitter.emit("drawWall");
+            },
+            drawEnd: function () {
+                document.removeEventListener("mousemove", this.drawUpdate);
+                this.addLightingWall(JSON.parse(JSON.stringify(this.drawingWall)));
+                this.emitter.emit("drawWall");
+            },
+            canvasToGlCoords: function (x: number, y: number) {
+                return {
+                    x: (x / this.map.width) * 2 - 1,
+                    y: -((y / this.map.width) * 2 - 1),
+                };
             }
         },
         mounted() {
-            if (this.map.hasDynamicLight) {
-                this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
-                this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
-                this.dark = (this.$refs.fog as HTMLCanvasElement).getContext("2d");
-            }
-
             const url = new URL(process.env.MERCURE_PUBLIC_URL!);
             url.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/tokens');
 
@@ -186,9 +370,87 @@ import { mapActions, mapGetters } from 'vuex';
             (this.$refs.editorWrapper as HTMLElement).scrollLeft = 2048;
 
             this.emitter.on('isDownload', () => {
-                if (this.map.hasDynamicLight) {
-                    this.draw()
+                if (!this.isGameMaster && this.map.hasDynamicLight) {
+                    this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl");
+                    this.shadowProgram = twgl.createProgramInfo(this.fog!, [shadowVertSrc, shadowFragSrc]);
+                    this.lightProgram = twgl.createProgramInfo(this.fog!, [lightVertSrc, lightFragSrc]);
+                    this.tokenProgram = twgl.createProgramInfo(this.fog!, [tokenVertSrc, tokenFragSrc]);
+                    this.sceneProgram = twgl.createProgramInfo(this.fog!, [sceneVertSrc, sceneFragSrc]);
+                    this.shadowBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
+                        vertex: {
+                            numComponents: 2,
+                            data: [],
+                        },
+                    });
+                    this.quadBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
+                        vertex: {
+                            numComponents: 2,
+                            data: new Float32Array([
+                                -1, -1, -1, 1, 1, -1,
+                                -1, 1, 1, -1, 1, 1,
+                            ])
+                        }
+                    });
+                    const attachments = [{
+                        format: this.fog!.RGBA,
+                        type: this.fog!.UNSIGNED_BYTE,
+                        min: this.fog!.LINEAR,
+                        wrap: this.fog!.CLAMP_TO_EDGE
+                    }];
+                    this.shadowFramebuffer = twgl.createFramebufferInfo(this.fog!, attachments),
+                    this.lightFramebuffer = twgl.createFramebufferInfo(this.fog!, attachments)
+                    this.lightTexture = twgl.createTexture(this.fog!, {src: "./build/images/lightsource.png"}, () => {
+                        this.draw()
+                    })
+                    this.map.tokens.forEach((token: Token) => {
+                        let asset = token.asset as Asset;
+                        if(asset.compressedImage) {
+                            this.tokenTextures.push({
+                                texture: twgl.createTexture(this.fog!, {src: "./uploads/images/asset/" + asset.compressedImage}, () => {
+                                    this.draw();
+                                }),
+                                width: token.width!,
+                                height: token.height!,
+                                position: {
+                                    x: token.leftPosition!,
+                                    y: token.topPosition!
+                                }
+                            });
+                        }else {
+                            this.tokenTextures.push({
+                                texture: twgl.createTexture(this.fog!, {src: "./uploads/images/asset/" + asset.image}, () => {
+                                    this.draw();
+                                }),
+                                width: token.width!,
+                                height: token.height!,
+                                position: {
+                                    x: token.leftPosition!,
+                                    y: token.topPosition!
+                                }
+                            });
+                        }
+                    });
+                    
+                }else if(this.isGameMaster && this.map.hasDynamicLight) {
+                    this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
+                    this.drawGameMasterVue();
                 }
+            })
+
+            this.emitter.on('isMoving', () => {
+                if (!this.isGameMaster && this.map.hasDynamicLight) {
+                    this.map.tokens.forEach((token: Token, index: number) => {
+                        this.tokenTextures[index].position = {
+                                x: token.leftPosition!,
+                                y: token.topPosition!
+                            }
+                    });
+                    this.draw();
+                }
+            })
+
+            this.emitter.on("drawWall", () => {
+                this.drawGameMasterVue();
             })
         }
     })
@@ -284,7 +546,6 @@ import { mapActions, mapGetters } from 'vuex';
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 10;
     }
 
     .dark .editor-wrapper {

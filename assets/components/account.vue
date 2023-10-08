@@ -1,16 +1,24 @@
 <template>
     <header v-if="isConnected" class="header">
         <nav class="navigation">
-            <ul class="layers" v-if="isGameMaster">
-                <li title="Maps" @click="setLayer(1)"><div class="layer" :class="getLayer == 1 ? 'selected' : ''"><img src="build/images/icons/map.svg" width="16" height="16" alt="Maps"></div><span>Maps</span></li>
-                <li title="Tokens" @click="setLayer(2)"><div class="layer" :class="getLayer == 2 ? 'selected' : ''"><img src="build/images/icons/token.svg" width="16" height="16" alt="Tokens"></div><span>Tokens</span></li>
+            <ul class="all-tools" v-if="isGameMaster">
+                <ul class="layers">
+                    <li title="Maps" @click="setLayer(1)"><div class="layer" :class="getLayer == 1 ? 'selected' : ''"><img src="build/images/icons/map.svg" width="16" height="16" alt="Maps"></div><span>Maps</span></li>
+                    <li title="Tokens" @click="setLayer(2)"><div class="layer" :class="getLayer == 2 ? 'selected' : ''"><img src="build/images/icons/token.svg" width="16" height="16" alt="Tokens"></div><span>Tokens</span></li>
+                    <li title="Light" @click="setLayer(3)"><div class="layer" :class="getLayer == 3 ? 'selected' : ''"><img src="build/images/icons/light.svg" width="16" height="16" alt="Light"></div><span>Light</span></li>
+                </ul>
+                <ul class="tools">
+                    <li title="Click" @click="setOnDrawing(false)"><div class="tool" :class="!getOnDrawing ? 'selected' : ''"><img src="build/images/icons/mouse.svg" width="20" height="20" alt="Click"></div></li>
+                    <li title="Light" @click="setOnDrawing(true); setLayer(3)"><div class="tool" :class="getOnDrawing ? 'selected' : ''"><img src="build/images/icons/line.svg" width="20" height="20" alt="Light"></div></li>
+                    <li title="Supprimer tous les murs" @click="deleteAllLightingWalls(); emitter.emit('drawWall')"><div class="tool"><img src="build/images/icons/delete.svg" width="20" height="20" alt="Supprimer tous les murs"></div></li>
+                </ul>
             </ul>
             <ul v-else>
 
             </ul>
             <ul>
-                <li title="Paramètres" @click="onParameters = true"><img src="build/images/icons/settings.svg" width="24" height="24" alt="Paramètres"></li>
-                <li title="Se déconnecter"><a href="/logout"><img src="build/images/icons/logout.svg" width="24" height="24" alt="Se déconnecter"></a></li>
+                <li title="Paramètres" @click="onParameters = true"><img src="build/images/icons/settings.svg" width="20" height="20" alt="Paramètres"></li>
+                <li title="Se déconnecter"><a href="/logout"><img src="build/images/icons/logout.svg" width="20" height="20" alt="Se déconnecter"></a></li>
             </ul>
         </nav>
         <div class="connected-users" v-for="connectedUser in getConnectedUser" :key="connectedUser.id">
@@ -79,6 +87,7 @@ import { Connection } from '../entity/connection';
 import { World } from '../entity/world';
 import { UserParameterRepository } from '../repository/userparameterRepository';
 import { UserRepository } from '../repository/userRepository';
+import { LightingWallService } from '../services/lightingwallService';
 
     export default defineComponent({
         data() {
@@ -86,6 +95,7 @@ import { UserRepository } from '../repository/userRepository';
                 emitter: inject('emitter') as any,
                 userRepository: new UserRepository as UserRepository,
                 userParameterRepository: new UserParameterRepository as UserParameterRepository,
+                lightingWallService: new LightingWallService as LightingWallService,
                 /**
                  * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
                  */
@@ -109,6 +119,7 @@ import { UserRepository } from '../repository/userRepository';
             ]),
             ...mapGetters('map', [
                 'getLayer',
+                'getOnDrawing'
             ])
         },
         methods: {
@@ -124,7 +135,9 @@ import { UserRepository } from '../repository/userRepository';
             ]),
             ...mapActions('map', [
                 'setMap',
-                'setLayer'
+                'setLayer',
+                'setOnDrawing',
+                'deleteAllLightingWalls'
             ]),
             ...mapActions('music', [
                 'setUserParameter',
@@ -203,6 +216,10 @@ import { UserRepository } from '../repository/userRepository';
         height: 100%;
     }
 
+    .navigation .all-tools ul:not(:last-child) {
+        border-bottom: solid 2px #565656;
+    }
+
     .navigation ul {
         display: flex;
         flex-direction: column;
@@ -231,7 +248,7 @@ import { UserRepository } from '../repository/userRepository';
         transition: all 25ms ease-in-out;
     }
 
-    .navigation .layer:hover {
+    .navigation :where(.layer:hover, .tool:hover) {
         outline: solid 2px #565656;
         border-radius: 20%;
     }
@@ -240,6 +257,17 @@ import { UserRepository } from '../repository/userRepository';
         background-color: #D68836;
         outline: solid 2px #565656;
         border-radius: 20%;
+    }
+
+    .navigation .tool {
+        padding: 4px;
+        border-radius: 50%;
+        transition: all 25ms ease-in-out;
+    }
+
+    .navigation .tool.selected {
+        outline: solid 2px #565656;
+        background-color: #969696;
     }
 
     .header-title-box {

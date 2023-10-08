@@ -7,4 +7,5 @@ export interface Map {
   hasDynamicLight?: boolean;
   tokens?: any;
   connections?: any;
+  lightingWalls?: any;
 }

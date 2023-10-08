@@ -92,6 +92,16 @@ Encore
 
     .enableVueLoader()
 
+    .addLoader({
+        test: /\.vert$/,
+        loader: 'raw-loader'
+    })
+
+    .addLoader({
+        test: /\.frag$/,
+        loader: 'raw-loader'
+    })
+
     .configureDefinePlugin((options) => {
         options['process.env'] = {
             MERCURE_PUBLIC_URL: JSON.stringify(process.env.MERCURE_PUBLIC_URL)
