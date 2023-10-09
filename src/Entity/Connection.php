@@ -32,7 +32,7 @@ class Connection
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["connection:read", "world:read"])]
+    #[Groups(["connection:read", "world:read", "user:read"])]
     private ?bool $isGameMaster = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -41,7 +41,7 @@ class Connection
 
     #[ORM\ManyToOne(inversedBy: 'connections')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups("connection:read")]
+    #[Groups(["connection:read", "user:read"])]
     private ?World $world = null;
 
     #[ORM\ManyToOne(inversedBy: 'connections')]

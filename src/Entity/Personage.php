@@ -28,7 +28,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Patch()
     ]
 )]
-#[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact', 'user.discordIdentifier' => 'exact'])]
+#[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact'])]
 #[ApiFilter(ExistsFilter::class, properties: ['user'])]
 class Personage
 {
@@ -39,7 +39,7 @@ class Personage
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read", 'personage:write', 'dice:read'])]
+    #[Groups(["personage:read", 'personage:write', 'dice:read', "user:read"])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]

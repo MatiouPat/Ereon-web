@@ -18,12 +18,20 @@ class World
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["world:read", "user:read", "connection:read"])]
+    #[Groups(["world:read", "user:read", "connection:read", 'dice:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["world:read", "user:read"])]
     private ?string $name = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('dice:read')]
+    private ?string $serverIdentifier = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('dice:read')]
+    private ?string $diceChannelIdentifier = null;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Connection::class, orphanRemoval: true)]
     #[Groups("world:read")]
@@ -90,6 +98,30 @@ class World
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getServerIdentifier(): ?string
+    {
+        return $this->serverIdentifier;
+    }
+
+    public function setServerIdentifier(?string $serverIdentifier): static
+    {
+        $this->serverIdentifier = $serverIdentifier;
+
+        return $this;
+    }
+
+    public function getDiceChannelIdentifier(): ?string
+    {
+        return $this->diceChannelIdentifier;
+    }
+
+    public function setDiceChannelIdentifier(?string $diceChannelIdentifier): static
+    {
+        $this->diceChannelIdentifier = $diceChannelIdentifier;
 
         return $this;
     }

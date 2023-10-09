@@ -71,7 +71,7 @@ class Dice
 
     #[ORM\ManyToOne(inversedBy: 'dices')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups('dice:write')]
+    #[Groups(['dice:read', 'dice:write'])]
     private ?World $world = null;
 
     public function getId(): ?int
