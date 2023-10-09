@@ -147,44 +147,42 @@ import { MusicPlayerRepository } from '../repository/musicplayerRepository';
             this.emitter.on('hasChangedUserVolume', () => {
                 this.changeVolume()
             })
+            
+            this.musicPlayerRepository.findMusicPlayerByWorld(this.getWorld.id).then(res => {
+                this.musicPlayerId = res.id;
+                this.isPlaying = res.isPlaying!;
+                this.isLooping = res.isLooping!;
+                this.currentMusic.title = res.currentMusic!.title;
+                this.currentMusic.link = res.currentMusic!.link;
+                if (this.isPlaying) {
+                    (this.$refs.musicAudio as HTMLAudioElement).load();
+                    (this.$refs.musicAudio as HTMLAudioElement).currentTime = res.currentTimePlay!;
+                    (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
+                        (this.$refs.musicAudio as HTMLAudioElement).play();
+                    }, { once: true});
+                }
 
-            this.emitter.on('isDownload', () => {
-                this.musicPlayerRepository.findMusicPlayerByWorld(this.getWorld.id).then(res => {
-                    this.musicPlayerId = res.id;
-                    this.isPlaying = res.isPlaying!;
-                    this.isLooping = res.isLooping!;
-                    this.currentMusic.title = res.currentMusic!.title;
-                    this.currentMusic.link = res.currentMusic!.link;
-                    if (this.isPlaying) {
+                const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
+                updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/musicplayer');
+
+                const updateEs = new EventSource(updateUrl);
+                updateEs.onmessage = e => {
+                    let data = JSON.parse(e.data);
+                    let mustReload = this.isPlaying != data.isPlaying || this.currentMusic.link != data.currentMusic.link;
+                    this.isPlaying = data.isPlaying;
+                    this.isLooping = data.isLooping;
+                    this.currentMusic.title = data.currentMusic.title;
+                    this.currentMusic.link = data.currentMusic.link;
+                    (this.$refs.musicAudio as HTMLAudioElement).currentTime = data.currentTimePlay;
+                    if (this.isPlaying && mustReload) {
                         (this.$refs.musicAudio as HTMLAudioElement).load();
-                        (this.$refs.musicAudio as HTMLAudioElement).currentTime = res.currentTimePlay!;
                         (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
                             (this.$refs.musicAudio as HTMLAudioElement).play();
                         }, { once: true});
+                    }else if(!this.isPlaying) {
+                        (this.$refs.musicAudio as HTMLAudioElement).pause();
                     }
-
-                    const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
-                    updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/musicplayer');
-
-                    const updateEs = new EventSource(updateUrl);
-                    updateEs.onmessage = e => {
-                        let data = JSON.parse(e.data);
-                        let mustReload = this.isPlaying != data.isPlaying || this.currentMusic.link != data.currentMusic.link;
-                        this.isPlaying = data.isPlaying;
-                        this.isLooping = data.isLooping;
-                        this.currentMusic.title = data.currentMusic.title;
-                        this.currentMusic.link = data.currentMusic.link;
-                        (this.$refs.musicAudio as HTMLAudioElement).currentTime = data.currentTimePlay;
-                        if (this.isPlaying && mustReload) {
-                            (this.$refs.musicAudio as HTMLAudioElement).load();
-                            (this.$refs.musicAudio as HTMLAudioElement).addEventListener('canplay', () => {
-                                (this.$refs.musicAudio as HTMLAudioElement).play();
-                            }, { once: true});
-                        }else if(!this.isPlaying) {
-                            (this.$refs.musicAudio as HTMLAudioElement).pause();
-                        }
-                    }
-                })
+                }
             })
         }
     })
