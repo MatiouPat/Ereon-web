@@ -4,14 +4,14 @@ import { Connection } from "../entity/connection";
 export class ConnectionRepository
 {
 
-    public async findConnectionByWorld(worldId: number): Promise<Connection[]>
+    public async findAllConnectionsByWorld(worldId: number): Promise<Connection[]>
     {
         return axios({
             method: 'GET',
             url: '/api/connections?world.id=' + worldId
         })
         .then(res => {
-            return res.data['hydra:member']
+            return res.data['hydra:member'];
         })
     }
 
@@ -20,6 +20,17 @@ export class ConnectionRepository
         return axios({
             method: 'GET',
             url: '/api/connections?world.id=' + worldId + "&lastConnectionAt[after]=" + lastConnectionAt
+        })
+        .then(response => {
+            return response.data['hydra:member'];
+        })
+    }
+
+    public async findPlayerByWorldAndWhereIsNotGameMaster(worldId: number): Promise<Connection[]>
+    {
+        return axios({
+            method: 'GET',
+            url: '/api/connections?isGameMaster=false&world.id=' + worldId
         })
         .then(response => {
             return response.data['hydra:member'];
