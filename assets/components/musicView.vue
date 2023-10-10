@@ -161,6 +161,7 @@ import { MusicPlayerRepository } from '../repository/musicplayerRepository';
                         (this.$refs.musicAudio as HTMLAudioElement).play();
                     }, { once: true});
                 }
+                this.changeVolume();
 
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/musicplayer');

@@ -37,7 +37,7 @@
                     <div class="parameters-body">
                         <div>
                             <label class="form-label">Volume global</label>
-                            <input class="form-control" type="range" min="0" v-model="globalVolume" max="1" step="0.01" @input="changeUserVolume">
+                            <input type="range" min="0" v-model="globalVolume" max="1" step="0.01" @input="changeUserVolume">
                         </div>
                         <div>
                             <legend class="form-label">Theme</legend>
@@ -161,7 +161,7 @@ import { LightingWallService } from '../services/lightingwallService';
                     this.setPlayers(res)
                     this.emitter.emit("isDownload")
                 })
-                this.isConnected = true
+                this.isConnected = true;
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
 
