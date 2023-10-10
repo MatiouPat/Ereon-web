@@ -27,7 +27,7 @@ export class MapRepository
         })
     }
 
-    public async updateMapPartially(map: Map, connections: string[]): Promise<void>
+    public async updateMapPartially(map: Map, connections: string[] | undefined): Promise<void>
     {
         return axios({
             method: 'PATCH',

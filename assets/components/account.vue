@@ -86,15 +86,15 @@ import { mapActions, mapGetters } from 'vuex';
 import { Connection } from '../entity/connection';
 import { World } from '../entity/world';
 import { UserParameterRepository } from '../repository/userparameterRepository';
-import { UserRepository } from '../repository/userRepository';
 import { LightingWallService } from '../services/lightingwallService';
 import { PersonageService } from '../services/personageService';
+import { ConnectionService } from '../services/connectionService';
 
     export default defineComponent({
         data() {
             return {
                 emitter: inject('emitter') as any,
-                userRepository: new UserRepository as UserRepository,
+                connectionService: new ConnectionService as ConnectionService,
                 userParameterRepository: new UserParameterRepository as UserParameterRepository,
                 personageService: new PersonageService as PersonageService,
                 lightingWallService: new LightingWallService as LightingWallService,
@@ -138,13 +138,12 @@ import { PersonageService } from '../services/personageService';
         },
         methods: {
             ...mapActions('user', [
-                'setUserId',
-                'setUserName',
+                'setUser',
                 'setPlayers',
                 'setConnection',
                 'setWorld',
                 'sendIsConnected',
-                'getAllConnections',
+                'findAllRecentConnections',
                 'setPersonages'
             ]),
             ...mapActions('map', [
@@ -165,18 +164,17 @@ import { PersonageService } from '../services/personageService';
             chooseWorld: function(connection: Connection, world: World) {
                 
                 this.setMap(connection.currentMap.id);
-                this.setUserId(connection.user.id);
-                this.setUserName(connection.user.username);
+                this.setUser(connection.user);
                 this.setConnection(connection);
                 this.setWorld(world);
                 this.sendIsConnected();
-                this.getAllConnections();
+                this.findAllRecentConnections();
                 this.personageService.findPersonagesByWorldAndByUser(world.id, connection.user.id).then(personages => {
                     this.setPersonages(personages);
                     this.loadedParameters++;
                 });
-                this.userRepository.findUserByWorldAndWhereIsNotGameMaster(world.id).then(res => {
-                    this.setPlayers(res);
+                this.connectionService.findPlayerByWorldAndWhereIsNotGameMaster(world.id).then(connections => {
+                    this.setPlayers(connections);
                     this.loadedParameters++;
                 });
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);

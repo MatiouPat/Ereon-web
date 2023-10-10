@@ -1,10 +1,10 @@
 <template>
     <div class="map-box" v-if="isGameMaster" :class="{isDisplayed: isDisplayed}">
         <div class="maps">
-            <div class="map" @click="chooseMap(map.id)" v-for="map in maps" :key="map.id" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
+            <div class="map" @click="chooseMap(map.id)" v-for="(map, key) in maps" :key="key" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
                 <span>{{ map.name }}</span>
                 <ul class="map-actions">
-                    <li><img @click.stop="showMapParameter(map.id)" src="build/images/settings.svg" alt="Paramètres" width="16" height="16"></li>
+                    <li><img @click.stop="showMapParameter(key)" src="build/images/settings.svg" alt="Paramètres" width="16" height="16"></li>
                 </ul>
             </div>
         </div>
@@ -68,14 +68,15 @@ import { defineComponent } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { Connection } from '../entity/connection';
 import { Map } from '../entity/map';
-import { ConnectionRepository } from '../repository/connectionRepository';
-import { MapRepository } from '../repository/mapRepository';
+import { MapService } from '../services/mapService';
+import { ConnectionService } from '../services/connectionService';
+import { User } from '../entity/user';
 
     export default defineComponent({
         data() {
             return {
-                mapRepository: new MapRepository as MapRepository,
-                connectionRepository: new ConnectionRepository as ConnectionRepository,
+                mapService: new MapService as MapService,
+                connectionService: new ConnectionService as ConnectionService,
                 /**
                  * If the maps are displayed
                  */
@@ -132,23 +133,19 @@ import { MapRepository } from '../repository/mapRepository';
             },
             /**
              * Display map parameters by calling the API
-             * @param {*} mapId 
+             * @param {*} key 
              */
-            showMapParameter: function (mapId: number) {
+            showMapParameter: function (key: number) {
                 this.isParametersDisplayed = true
-                this.mapRepository?.findMapById(mapId).then(res => {
-                    this.map = res
+                this.map = this.maps[key];
+                this.connections = [];
+                this.getPlayers.forEach((player: Connection) => {
+                    this.connections.push({
+                        id: player.id,
+                        username: player.user.username,
+                        checked: this.map.id == player.currentMap.id
+                    })
                 });
-                this.connectionRepository.findConnectionByWorld(this.getWorld.id).then(res => {
-                    this.connections = []
-                    res.forEach((connection: Connection) => {
-                        this.connections.push({
-                            id: connection.id,
-                            username: connection.user.username,
-                            checked: this.map?.id == connection.currentMap.id
-                        })
-                    });
-                })
             },
             /**
              * Change map settings after form submission
@@ -160,7 +157,7 @@ import { MapRepository } from '../repository/mapRepository';
                         connections.push('/api/connections/' + connection.id)
                     }
                 });
-                this.mapRepository.updateMapPartially(this.map, connections)
+                this.mapService.updateMapPartially(this.map, connections)
                 this.isParametersDisplayed = false
                 this.isDisplayed = false;
             },
@@ -176,8 +173,8 @@ import { MapRepository } from '../repository/mapRepository';
             }
         },
         mounted() {
-            this.mapRepository.findAllMaps().then(res => {
-                this.maps = res
+            this.mapService.findAllMaps().then(maps => {
+                this.maps = maps;
             })
         }
     })

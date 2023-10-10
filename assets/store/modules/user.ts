@@ -2,24 +2,19 @@ import { World } from "../../entity/world"
 import { User } from "../../entity/user"
 import { Personage } from "../../entity/personage"
 import { Connection } from "../../entity/connection"
-import { PersonageService } from "../../services/personageService"
 import { ConnectionService } from "../../services/connectionService"
 
 let connectionService = new ConnectionService();
 
 const state = {
     /**
-     * The logged-in user id
+     * The logged-in user
      */
-    userId: 0 as number,
+    user: {} as User,
     /**
-     * The name of the logged-in user
+     * The list of players in the world
      */
-    username: "" as string,
-    /**
-     * The list of users in the world
-     */
-    players: [] as User[],
+    players: [] as Connection[],
     /**
      * The connection between the connected user and the world
      */
@@ -43,10 +38,10 @@ const getters = {
         return state.connection.isGameMaster
     },
     getUserId: (state: any) => {
-        return state.userId
+        return state.user.id
     },
     getUsername: (state: any) => {
-        return state.username
+        return state.user.username
     },
     getPlayers: (state: any) => {
         return state.players
@@ -69,15 +64,11 @@ const getters = {
 }
 
 const actions = {
-    setUserId({commit}, userId: number): void
+    setUser({commit}, user: User): void
     {
-        commit('setUserId', userId);
+        commit('setUser', user);
     },
-    setUserName({commit}, username: string): void
-    {
-        commit('setUserName', username);
-    },
-    setPlayers({commit}, players: User[]): void
+    setPlayers({commit}, players: Connection[]): void
     {
         commit('setPlayers', players);
     },
@@ -102,7 +93,7 @@ const actions = {
             dispatch("sendIsConnected")
         }, 20000)
     },
-    getAllConnections({commit, getters, dispatch}): void
+    findAllRecentConnections({commit, getters, dispatch}): void
     {
         let lastConnectionAt = new Date(Date.parse(getters.getConnection.lastConnectionAt) - 18000)
         connectionService.findAllRecentConnectionByWorld(getters.getWorld.id, lastConnectionAt.toJSON())
@@ -110,7 +101,7 @@ const actions = {
                 commit('setConnectedUser', connections)
             })
         setTimeout(() => {
-            dispatch("getAllConnections")
+            dispatch("findAllRecentConnections")
         }, 30000)
     },
     setCurrentMap({commit, getters}, currentMapId: number): void
@@ -125,13 +116,10 @@ const actions = {
 }
 
 const mutations = {
-    setUserId(state: any, userId: number) {
-        state.userId = userId
+    setUser(state: any, user: User) {
+        state.user = user;
     },
-    setUserName(state: any, username: string) {
-        state.username = username
-    },
-    setPlayers(state: any, players: User[]) {
+    setPlayers(state: any, players: Connection[]) {
         state.players = players
     },
     setConnection(state: any, connection: Connection) {
