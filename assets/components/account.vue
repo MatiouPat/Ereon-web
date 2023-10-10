@@ -88,6 +88,7 @@ import { World } from '../entity/world';
 import { UserParameterRepository } from '../repository/userparameterRepository';
 import { UserRepository } from '../repository/userRepository';
 import { LightingWallService } from '../services/lightingwallService';
+import { PersonageService } from '../services/personageService';
 
     export default defineComponent({
         data() {
@@ -95,6 +96,7 @@ import { LightingWallService } from '../services/lightingwallService';
                 emitter: inject('emitter') as any,
                 userRepository: new UserRepository as UserRepository,
                 userParameterRepository: new UserParameterRepository as UserParameterRepository,
+                personageService: new PersonageService as PersonageService,
                 lightingWallService: new LightingWallService as LightingWallService,
                 /**
                  * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
@@ -103,7 +105,8 @@ import { LightingWallService } from '../services/lightingwallService';
                 onParameters: false as boolean,
                 layer: 1 as number,
                 globalVolume: this.connectedUser.userParameter.globalVolume as number,
-                isDarkTheme: this.connectedUser.userParameter.isDarkTheme as boolean
+                isDarkTheme: this.connectedUser.userParameter.isDarkTheme as boolean,
+                loadedParameters: 0 as number
             }
         },
         props: [
@@ -122,6 +125,17 @@ import { LightingWallService } from '../services/lightingwallService';
                 'getOnDrawing'
             ])
         },
+        watch: {
+            loadedParameters: {
+                handler() {
+                    if(this.loadedParameters >= 2) {
+                        this.emitter.emit("isDownload");
+                        this.isConnected = true;
+                    }
+                },
+                flush: 'post'
+            }
+        },
         methods: {
             ...mapActions('user', [
                 'setUserId',
@@ -131,7 +145,7 @@ import { LightingWallService } from '../services/lightingwallService';
                 'setWorld',
                 'sendIsConnected',
                 'getAllConnections',
-                'downloadPersonages'
+                'setPersonages'
             ]),
             ...mapActions('map', [
                 'setMap',
@@ -149,19 +163,22 @@ import { LightingWallService } from '../services/lightingwallService';
              * @param world The selected world
              */
             chooseWorld: function(connection: Connection, world: World) {
-                this.setMap(connection.currentMap.id)
-                this.setUserId(connection.user.id)
-                this.setUserName(connection.user.username)
-                this.setConnection(connection)
-                this.setWorld(world)
-                this.sendIsConnected()
-                this.getAllConnections()
-                this.downloadPersonages()
+                
+                this.setMap(connection.currentMap.id);
+                this.setUserId(connection.user.id);
+                this.setUserName(connection.user.username);
+                this.setConnection(connection);
+                this.setWorld(world);
+                this.sendIsConnected();
+                this.getAllConnections();
+                this.personageService.findPersonagesByWorldAndByUser(world.id, connection.user.id).then(personages => {
+                    this.setPersonages(personages);
+                    this.loadedParameters++;
+                });
                 this.userRepository.findUserByWorldAndWhereIsNotGameMaster(world.id).then(res => {
-                    this.setPlayers(res)
-                    this.emitter.emit("isDownload")
-                })
-                this.isConnected = true;
+                    this.setPlayers(res);
+                    this.loadedParameters++;
+                });
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
 
