@@ -35,7 +35,7 @@ export class PersonageService
     }
 
     /**
-     * Find all characters on chosen world by connected user 
+     * Find all a player's characters on the chosen world
      * @param worldId Id of the chosen world
      * @param userId Id of logged-in user
      * @returns 

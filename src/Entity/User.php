@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
@@ -23,8 +22,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new GetCollection()
     ]
 )]
-#[ApiFilter(BooleanFilter::class, properties: ['connections.isGameMaster'])]
-#[ApiFilter(SearchFilter::class, properties: ['connections.world.id' => 'exact', 'discordIdentifier' => 'exact', 'connections.world.serverIdentifier' => 'exact'])]
+#[ApiFilter(SearchFilter::class, properties: ['discordIdentifier' => 'exact', 'connections.world.serverIdentifier' => 'exact'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]

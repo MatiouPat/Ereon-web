@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
@@ -22,6 +23,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     ]
 )]
 #[ApiFilter(DateFilter::class, properties: ['lastConnectionAt'])]
+#[ApiFilter(BooleanFilter::class, properties: ['isGameMaster'])]
 #[ApiFilter(SearchFilter::class, properties: ['world.id'  => 'exact'])]
 class Connection
 {

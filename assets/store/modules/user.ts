@@ -1,22 +1,20 @@
-import axios from "axios"
 import { World } from "../../entity/world"
 import { User } from "../../entity/user"
 import { Personage } from "../../entity/personage"
 import { Connection } from "../../entity/connection"
+import { ConnectionService } from "../../services/connectionService"
+
+let connectionService = new ConnectionService();
 
 const state = {
     /**
-     * The logged-in user id
+     * The logged-in user
      */
-    userId: 0 as number,
+    user: {} as User,
     /**
-     * The name of the logged-in user
+     * The list of players in the world
      */
-    username: "" as string,
-    /**
-     * The list of users in the world
-     */
-    players: [] as User[],
+    players: [] as Connection[],
     /**
      * The connection between the connected user and the world
      */
@@ -36,115 +34,104 @@ const state = {
 }
 
 const getters = {
-    isGameMaster: (state) => {
+    isGameMaster: (state: any) => {
         return state.connection.isGameMaster
     },
-    getUserId: (state) => {
-        return state.userId
+    getUserId: (state: any) => {
+        return state.user.id
     },
-    getUsername: (state) => {
-        return state.username
+    getUsername: (state: any) => {
+        return state.user.username
     },
-    getPlayers: (state) => {
+    getPlayers: (state: any) => {
         return state.players
     },
-    getConnection: (state) => {
+    getConnection: (state: any) => {
         return state.connection
     },
-    getWorld: (state) => {
+    getWorld: (state: any) => {
         return state.world
     },
-    getConnectedUser: (state) => {
+    getConnectedUser: (state: any) => {
         return state.connectedUser
     },
-    getCurrentMapId: (state) => {
+    getCurrentMapId: (state: any) => {
         return state.connection.currentMap.id
     },
-    getPersonages: (state) => {
+    getPersonages: (state: any) => {
         return state.personages
     }
 }
 
 const actions = {
-    setUserId({commit}, userId) {
-        commit('setUserId', userId);
+    setUser({commit}, user: User): void
+    {
+        commit('setUser', user);
     },
-    setUserName({commit}, username) {
-        commit('setUserName', username);
-    },
-    setPlayers({commit}, players) {
+    setPlayers({commit}, players: Connection[]): void
+    {
         commit('setPlayers', players);
     },
-    setConnection({commit}, connection: Connection) {
+    setConnection({commit}, connection: Connection): void
+    {
         commit('setConnection', connection);
     },
-    setWorld({commit}, world: World) {
+    setWorld({commit}, world: World): void
+    {
         commit('setWorld', world);
     },
-    setLastConnectionAt({commit}, lastConnectionAt) {
+    setLastConnectionAt({commit}, lastConnectionAt: Date): void
+    {
         commit('setLastConnectionAt', lastConnectionAt);
     },
-    sendIsConnected({commit, getters, dispatch}) {
-        commit('setLastConnectionAt', new Date())
-        axios.patch('/api/connections/' + getters.getConnection.id, {
-            lastConnectionAt: getters.getConnection.lastConnectionAt.toJSON()
-        }, {
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+    sendIsConnected({commit, getters, dispatch}): void
+    {
+        const lastConnectionAt = new Date()
+        connectionService.updateLastConnectionAt(getters.getConnection.id, lastConnectionAt.toJSON());
+        commit('setLastConnectionAt', lastConnectionAt)
         setTimeout(() => {
             dispatch("sendIsConnected")
         }, 20000)
     },
-    getAllConnections({commit, getters, dispatch}) {
+    findAllRecentConnections({commit, getters, dispatch}): void
+    {
         let lastConnectionAt = new Date(Date.parse(getters.getConnection.lastConnectionAt) - 18000)
-        axios.get('/api/connections?world.id=' + getters.getWorld.id + "&lastConnectionAt[after]=" + lastConnectionAt.toJSON())
-            .then(response => {
-                commit('setConnectedUser', response.data['hydra:member'])
+        connectionService.findAllRecentConnectionByWorld(getters.getWorld.id, lastConnectionAt.toJSON())
+            .then(connections => {
+                commit('setConnectedUser', connections)
             })
         setTimeout(() => {
-            dispatch("getAllConnections")
+            dispatch("findAllRecentConnections")
         }, 30000)
     },
-    setCurrentMap({commit, getters}, currentMapId) {
-        commit('setCurrentMap', currentMapId)
-        axios.patch('/api/connections/' + getters.getConnection.id, {
-            currentMap: "/api/maps/" + currentMapId
-        }, {
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+    setCurrentMap({commit, getters}, currentMapId: number): void
+    {
+        connectionService.updateCurrentMap(getters.getConnection.id, currentMapId);
+        commit('setCurrentMap', currentMapId);
     },
-    downloadPersonages({commit, getters}) {
-        axios.get('/api/personages?world.id=' + getters.getWorld.id + '&user.id=' + getters.getUserId)
-        .then(response => {
-            commit('setPersonages', response.data['hydra:member'])
-        })
+    setPersonages({commit}, personages: Personage[]): void
+    {
+        commit('setPersonages', personages);
     }
 }
 
 const mutations = {
-    setUserId(state, userId) {
-        state.userId = userId
+    setUser(state: any, user: User) {
+        state.user = user;
     },
-    setUserName(state, username) {
-        state.username = username
-    },
-    setPlayers(state, players) {
+    setPlayers(state: any, players: Connection[]) {
         state.players = players
     },
-    setConnection(state, connection: Connection) {
+    setConnection(state: any, connection: Connection) {
         state.connection = connection
     },
-    setWorld(state, world: World) {
+    setWorld(state: any, world: World) {
         state.world = world
     },
-    setLastConnectionAt(state, lastConnectionAt) {
+    setLastConnectionAt(state: any, lastConnectionAt: Date) {
         state.connection.lastConnectionAt = lastConnectionAt
     },
-    setConnectedUser(state, userConnections) {
+    setConnectedUser(state: any, userConnections: Connection[]) {
         state.connectedUser = []
         userConnections.forEach(userConnection => {
             if(userConnection.id != state.connection.id) {
@@ -154,10 +141,10 @@ const mutations = {
             }
         });
     },
-    setCurrentMap(state, currentMapId) {
+    setCurrentMap(state: any, currentMapId: number) {
         state.connection.currentMap.id = currentMapId
     },
-    setPersonages(state, personages) {
+    setPersonages(state: any, personages: Personage[]) {
         state.personages = personages
     }
 }
