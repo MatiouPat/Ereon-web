@@ -1,9 +1,12 @@
 import { Map } from "../entity/map";
+import { ConnectionRepository } from "../repository/connectionRepository";
 import { MapRepository } from "../repository/mapRepository";
 
 export class MapService
 {
     private mapRepository: MapRepository = new MapRepository();
+
+    private connectionRepository: ConnectionRepository = new ConnectionRepository();
 
     public async findAllMaps(): Promise<Map[]>
     {
@@ -15,13 +18,12 @@ export class MapService
         return this.mapRepository.findMapById(mapId);
     }
 
-    public async updateMapPartially(map: Map, connections: string[]): Promise<void>
+    public async updateMapPartially(map: Map, connections: number[]): Promise<void>
     {
-        if(connections.length === 0) {
-            this.mapRepository.updateMapPartially(map, undefined);
-        }else {
-            this.mapRepository.updateMapPartially(map, connections);
-        }
+        this.mapRepository.updateMapPartially(map);
+        connections.forEach(connection => {
+            this.connectionRepository.updateCurrentMap(connection, map.id);
+        })
     }
 
 }

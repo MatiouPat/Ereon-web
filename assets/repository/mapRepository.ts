@@ -27,7 +27,7 @@ export class MapRepository
         })
     }
 
-    public async updateMapPartially(map: Map, connections: string[] | undefined): Promise<void>
+    public async updateMapPartially(map: Map): Promise<void>
     {
         return axios({
             method: 'PATCH',
@@ -36,8 +36,7 @@ export class MapRepository
                 name: map.name,
                 width: map.width,
                 height: map.height,
-                hasDynamicLight: map.hasDynamicLight,
-                connections: connections
+                hasDynamicLight: map.hasDynamicLight
             },
             headers: {
                 'Content-Type': 'application/merge-patch+json'
