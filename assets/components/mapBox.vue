@@ -70,7 +70,6 @@ import { Connection } from '../entity/connection';
 import { Map } from '../entity/map';
 import { MapService } from '../services/mapService';
 import { ConnectionService } from '../services/connectionService';
-import { User } from '../entity/user';
 
     export default defineComponent({
         data() {
@@ -96,7 +95,7 @@ import { User } from '../entity/user';
                 connections: [] as {
                     id: number
                     username: string
-                    checked: boolean 
+                    checked: boolean
                 }[]
             }
         },
@@ -151,10 +150,10 @@ import { User } from '../entity/user';
              * Change map settings after form submission
              */
             submitForm: function() {
-                let connections: string[] = []
+                let connections: number[] = []
                 this.connections.forEach(connection => {
                     if(connection.checked) {
-                        connections.push('/api/connections/' + connection.id)
+                        connections.push(connection.id);
                     }
                 });
                 this.mapService.updateMapPartially(this.map, connections)
