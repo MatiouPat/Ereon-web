@@ -1,14 +1,9 @@
 <template>
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
-            <div v-if="map.hasDynamicLight && !isGameMaster">
-                <canvas ref="fog" id="fog" :width="map.width" :height="map.height" style="z-index: 15;"></canvas>
-                <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
-            </div>
-            <div v-else>
-                <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height" :style="{zIndex: getLayer === 3 ? 10 : -100}"></canvas>
-                <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
-            </div>
+            <canvas ref="fog" id="fog" :width="map.width" :height="map.height" :style="{zIndex: isGameMaster ? -1 : 15}"></canvas>
+            <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height" :style="{zIndex: getLayer === 3 ? 10 : -100}"></canvas>   
+            <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
         </div>
         <div class="editor-zoom">
             <span class="editor-zoom-ratio">{{(ratio * 100).toFixed(0)}}</span>
@@ -71,7 +66,6 @@ import { Asset } from '../entity/asset';
                  */
                 mapY: 0 as number,
                 fog: null as WebGLRenderingContext | null,
-                dark: null as CanvasRenderingContext2D | null,
                 main: null as CanvasRenderingContext2D | null,
                 drawingWall: {} as LightingWall,
                 lightTexture: {} as WebGLTexture,
@@ -102,8 +96,15 @@ import { Asset } from '../entity/asset';
         watch: {
             map: {
                 handler() {
-                    if (this.map.hasDynamicLight && !this.isGameMaster) {
+                    console.log('map')
+                    if (!this.isGameMaster && this.map.hasDynamicLight) {
+                        this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl");
                         this.draw();
+                        console.log(this.fog)
+                    }else {
+                        this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
+                        console.log(this.main)
+                        this.drawGameMasterVue();
                     }
                 },
                 flush: 'post'
@@ -169,6 +170,8 @@ import { Asset } from '../entity/asset';
                 e.preventDefault();
             },
             draw: async function () {
+                (this.$refs.fog as HTMLCanvasElement).width = this.map.width;
+                (this.$refs.fog as HTMLCanvasElement).height = this.map.height;
                 if(this.map.hasDynamicLight && this.fog && !this.isGameMaster) {
                     let tokens = this.getControllableTokens(this.getUserId);
 
@@ -296,6 +299,7 @@ import { Asset } from '../entity/asset';
                 }
             },
             drawGameMasterVue: function () {
+                console.log(this.main)
                 this.main!.clearRect(0, 0, this.map.width, this.map.height);
                 this.main!.strokeStyle = "red";
                 this.main!.lineWidth = 3;
@@ -366,6 +370,7 @@ import { Asset } from '../entity/asset';
                 })
             }
 
+
             (this.$refs.editorWrapper as HTMLElement).scrollTop = 2048;
             (this.$refs.editorWrapper as HTMLElement).scrollLeft = 2048;
 
@@ -431,7 +436,7 @@ import { Asset } from '../entity/asset';
                         }
                     });
                     
-                }else if(this.isGameMaster && this.map.hasDynamicLight) {
+                }else {
                     this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
                     this.drawGameMasterVue();
                 }
