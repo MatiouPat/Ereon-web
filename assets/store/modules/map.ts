@@ -2,7 +2,6 @@ import { Token } from "../../entity/token"
 import { User } from "../../entity/user"
 import { Map } from "../../entity/map"
 import { TokenService } from "../../services/tokenService"
-import { MapService } from "../../services/mapService"
 import { LightingWall } from "../../entity/lightingwall"
 import { LightingWallService } from "../../services/lightingwallService"
 
@@ -50,12 +49,9 @@ const actions = {
     /**
      * Define current map
      */
-    setMap: async function({commit}, mapId: number): Promise<void>
+    setMap: async function({commit}, map: Map): Promise<void>
     {
-        let mapService = new MapService();
-        mapService.findMapById(mapId).then((res) => {
-            commit('setMap', res)
-        })
+        commit('setMap', map);
     },
     /**
      * Add a token to the map

@@ -89,6 +89,7 @@ import { UserParameterRepository } from '../repository/userparameterRepository';
 import { LightingWallService } from '../services/lightingwallService';
 import { PersonageService } from '../services/personageService';
 import { ConnectionService } from '../services/connectionService';
+import { MapService } from '../services/mapService';
 
     export default defineComponent({
         data() {
@@ -98,6 +99,7 @@ import { ConnectionService } from '../services/connectionService';
                 userParameterRepository: new UserParameterRepository as UserParameterRepository,
                 personageService: new PersonageService as PersonageService,
                 lightingWallService: new LightingWallService as LightingWallService,
+                mapService: new MapService as MapService,
                 /**
                  * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
                  */
@@ -128,9 +130,8 @@ import { ConnectionService } from '../services/connectionService';
         watch: {
             loadedParameters: {
                 handler() {
-                    if(this.loadedParameters >= 2) {
+                    if(this.loadedParameters >= 3) {
                         this.emitter.emit("isDownload");
-                        this.isConnected = true;
                     }
                 },
                 flush: 'post'
@@ -162,13 +163,10 @@ import { ConnectionService } from '../services/connectionService';
              * @param world The selected world
              */
             chooseWorld: function(connection: Connection, world: World) {
-                
-                this.setMap(connection.currentMap.id);
-                this.setUser(connection.user);
-                this.setConnection(connection);
-                this.setWorld(world);
-                this.sendIsConnected();
-                this.findAllRecentConnections();
+                this.mapService.findMapById(connection.currentMap.id).then(map => {
+                    this.setMap(map);
+                    this.loadedParameters++;
+                });
                 this.personageService.findPersonagesByWorldAndByUser(world.id, connection.user.id).then(personages => {
                     this.setPersonages(personages);
                     this.loadedParameters++;
@@ -177,6 +175,11 @@ import { ConnectionService } from '../services/connectionService';
                     this.setPlayers(connections);
                     this.loadedParameters++;
                 });
+                this.setUser(connection.user);
+                this.setConnection(connection);
+                this.setWorld(world);
+                this.sendIsConnected();
+                this.findAllRecentConnections();
                 const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
                 updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
 
@@ -188,6 +191,7 @@ import { ConnectionService } from '../services/connectionService';
                         this.setConnection(data)
                     }
                 }
+                this.isConnected = true;
             },
             changeUserVolume: function() {
                 this.setUserVolume(this.globalVolume);
