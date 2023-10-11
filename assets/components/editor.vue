@@ -96,14 +96,69 @@ import { Asset } from '../entity/asset';
         watch: {
             map: {
                 handler() {
-                    console.log('map')
                     if (!this.isGameMaster && this.map.hasDynamicLight) {
                         this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl");
+                        this.shadowProgram = twgl.createProgramInfo(this.fog!, [shadowVertSrc, shadowFragSrc]);
+                        this.lightProgram = twgl.createProgramInfo(this.fog!, [lightVertSrc, lightFragSrc]);
+                        this.tokenProgram = twgl.createProgramInfo(this.fog!, [tokenVertSrc, tokenFragSrc]);
+                        this.sceneProgram = twgl.createProgramInfo(this.fog!, [sceneVertSrc, sceneFragSrc]);
+                        this.shadowBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
+                            vertex: {
+                                numComponents: 2,
+                                data: [],
+                            },
+                        });
+                        this.quadBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
+                            vertex: {
+                                numComponents: 2,
+                                data: new Float32Array([
+                                    -1, -1, -1, 1, 1, -1,
+                                    -1, 1, 1, -1, 1, 1,
+                                ])
+                            }
+                        });
+                        const attachments = [{
+                            format: this.fog!.RGBA,
+                            type: this.fog!.UNSIGNED_BYTE,
+                            min: this.fog!.LINEAR,
+                            wrap: this.fog!.CLAMP_TO_EDGE
+                        }];
+                        this.shadowFramebuffer = twgl.createFramebufferInfo(this.fog!, attachments),
+                        this.lightFramebuffer = twgl.createFramebufferInfo(this.fog!, attachments)
+                        this.lightTexture = twgl.createTexture(this.fog!, {src: "./build/images/lightsource.png"}, () => {
+                            this.draw()
+                        })
+                        this.map.tokens.forEach((token: Token) => {
+                            let asset = token.asset as Asset;
+                            if(asset.compressedImage) {
+                                this.tokenTextures.push({
+                                    texture: twgl.createTexture(this.fog!, {src: "./uploads/images/asset/" + asset.compressedImage}, () => {
+                                        this.draw();
+                                    }),
+                                    width: token.width!,
+                                    height: token.height!,
+                                    position: {
+                                        x: token.leftPosition!,
+                                        y: token.topPosition!
+                                    }
+                                });
+                            }else {
+                                this.tokenTextures.push({
+                                    texture: twgl.createTexture(this.fog!, {src: "./uploads/images/asset/" + asset.image}, () => {
+                                        this.draw();
+                                    }),
+                                    width: token.width!,
+                                    height: token.height!,
+                                    position: {
+                                        x: token.leftPosition!,
+                                        y: token.topPosition!
+                                    }
+                                });
+                            }
+                        });
                         this.draw();
-                        console.log(this.fog)
                     }else {
                         this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
-                        console.log(this.main)
                         this.drawGameMasterVue();
                     }
                 },
@@ -370,77 +425,8 @@ import { Asset } from '../entity/asset';
                 })
             }
 
-
             (this.$refs.editorWrapper as HTMLElement).scrollTop = 2048;
             (this.$refs.editorWrapper as HTMLElement).scrollLeft = 2048;
-
-            this.emitter.on('isDownload', () => {
-                if (!this.isGameMaster && this.map.hasDynamicLight) {
-                    this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl");
-                    this.shadowProgram = twgl.createProgramInfo(this.fog!, [shadowVertSrc, shadowFragSrc]);
-                    this.lightProgram = twgl.createProgramInfo(this.fog!, [lightVertSrc, lightFragSrc]);
-                    this.tokenProgram = twgl.createProgramInfo(this.fog!, [tokenVertSrc, tokenFragSrc]);
-                    this.sceneProgram = twgl.createProgramInfo(this.fog!, [sceneVertSrc, sceneFragSrc]);
-                    this.shadowBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
-                        vertex: {
-                            numComponents: 2,
-                            data: [],
-                        },
-                    });
-                    this.quadBuffer = twgl.createBufferInfoFromArrays(this.fog!, {
-                        vertex: {
-                            numComponents: 2,
-                            data: new Float32Array([
-                                -1, -1, -1, 1, 1, -1,
-                                -1, 1, 1, -1, 1, 1,
-                            ])
-                        }
-                    });
-                    const attachments = [{
-                        format: this.fog!.RGBA,
-                        type: this.fog!.UNSIGNED_BYTE,
-                        min: this.fog!.LINEAR,
-                        wrap: this.fog!.CLAMP_TO_EDGE
-                    }];
-                    this.shadowFramebuffer = twgl.createFramebufferInfo(this.fog!, attachments),
-                    this.lightFramebuffer = twgl.createFramebufferInfo(this.fog!, attachments)
-                    this.lightTexture = twgl.createTexture(this.fog!, {src: "./build/images/lightsource.png"}, () => {
-                        this.draw()
-                    })
-                    this.map.tokens.forEach((token: Token) => {
-                        let asset = token.asset as Asset;
-                        if(asset.compressedImage) {
-                            this.tokenTextures.push({
-                                texture: twgl.createTexture(this.fog!, {src: "./uploads/images/asset/" + asset.compressedImage}, () => {
-                                    this.draw();
-                                }),
-                                width: token.width!,
-                                height: token.height!,
-                                position: {
-                                    x: token.leftPosition!,
-                                    y: token.topPosition!
-                                }
-                            });
-                        }else {
-                            this.tokenTextures.push({
-                                texture: twgl.createTexture(this.fog!, {src: "./uploads/images/asset/" + asset.image}, () => {
-                                    this.draw();
-                                }),
-                                width: token.width!,
-                                height: token.height!,
-                                position: {
-                                    x: token.leftPosition!,
-                                    y: token.topPosition!
-                                }
-                            });
-                        }
-                    });
-                    
-                }else {
-                    this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
-                    this.drawGameMasterVue();
-                }
-            })
 
             this.emitter.on('isMoving', () => {
                 if (!this.isGameMaster && this.map.hasDynamicLight) {
