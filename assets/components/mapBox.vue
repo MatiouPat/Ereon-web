@@ -126,7 +126,9 @@ import { ConnectionService } from '../services/connectionService';
              * @param {*} mapId 
              */
             chooseMap: function (mapId: number) {
-                this.setMap(mapId)
+                this.mapService.findMapById(mapId).then(map => {
+                    this.setMap(map);
+                })
                 this.setCurrentMap(mapId)
                 this.isDisplayed = false;
             },
