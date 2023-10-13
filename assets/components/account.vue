@@ -187,7 +187,9 @@ import { MapService } from '../services/mapService';
                 updateEs.onmessage = e => {
                     let data = JSON.parse(e.data)
                     if (data.currentMap.id !== this.getCurrentMapId) {
-                        this.setMap(data.currentMap.id)
+                        this.mapService.findMapById(data.currentMap.id).then(map => {
+                            this.setMap(map);
+                        })
                         this.setConnection(data)
                     }
                 }
