@@ -96,7 +96,6 @@ import { Asset } from '../entity/asset';
         watch: {
             map: {
                 handler() {
-                    console.log(this.map);
                     if (!this.isGameMaster && this.map.hasDynamicLight) {
                         this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl");
                         this.shadowProgram = twgl.createProgramInfo(this.fog!, [shadowVertSrc, shadowFragSrc]);
