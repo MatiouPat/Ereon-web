@@ -76,7 +76,6 @@ const actions = {
         if (!mercure) {
             tokenService.deleteToken(token.id)
         }else {
-            console.log(id)
             let index = state.map.tokens.findIndex((token: Token) => {
                 return token.id === id;
             })

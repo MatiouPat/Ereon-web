@@ -1,7 +1,7 @@
 <template>
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
-            <canvas ref="fog" id="fog" :width="map.width" :height="map.height" :style="{zIndex: isGameMaster ? -1 : 15}"></canvas>
+            <canvas ref="fog" id="fog" :width="map.width" :height="map.height" :style="{zIndex: !isGameMaster && map.hasDynamicLight ? 15 : -1}"></canvas>
             <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height" :style="{zIndex: getLayer === 3 ? 10 : -100}"></canvas>   
             <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
         </div>
@@ -354,7 +354,6 @@ import { Asset } from '../entity/asset';
                 }
             },
             drawGameMasterVue: function () {
-                console.log(this.main)
                 this.main!.clearRect(0, 0, this.map.width, this.map.height);
                 this.main!.strokeStyle = "red";
                 this.main!.lineWidth = 3;
