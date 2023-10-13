@@ -14,3 +14,7 @@ This changelog references the relevant changes (bug and security fixes) done in 
  * bug #39 Dynamic light is not initialized on player view
  * bug #40 Impossible to create a wall on the light layer as a GM
  * bug #42 Music PATCH requests don't call the right music player ID
+
+* 0.1.2 (2023-10-13)
+ * bug #55 Impossible to change map
+ * bug #56 Unable to add assets
