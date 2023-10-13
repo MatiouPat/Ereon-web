@@ -1,7 +1,7 @@
 <template>
     <div class="assets-box">
-        <picture v-for="asset in assets" :key="asset.id">
-            <source type="image/webp" v-on="{ dragend: getOnDrawing ? addToken : null }" :srcset="'/uploads/images/asset/' + asset.compressedImage">
+        <picture v-for="asset in assets" :key="asset.id" v-on="{ dragend: getLayer !== 3 ? addToken : null }">
+            <source type="image/webp" :srcset="'/uploads/images/asset/' + asset.compressedImage">
             <img :src="'/uploads/images/asset/' + asset.image" :alt="asset.id.toString()" width="64" height="64">
         </picture>
     </div>
@@ -25,7 +25,7 @@ import { AssetRepository } from '../repository/assetRepository';
         },
         computed: {
             ...mapGetters('map', [
-                'getOnDrawing'
+                'getLayer'
             ])
         },
         methods: {
