@@ -407,7 +407,7 @@ import { Asset } from '../entity/asset';
             canvasToGlCoords: function (x: number, y: number) {
                 return {
                     x: (x / this.map.width) * 2 - 1,
-                    y: -((y / this.map.width) * 2 - 1),
+                    y: -((y / this.map.height) * 2 - 1),
                 };
             }
         },

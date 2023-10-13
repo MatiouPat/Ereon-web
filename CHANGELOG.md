@@ -15,6 +15,6 @@ This changelog references the relevant changes (bug and security fixes) done in 
  * bug #40 Impossible to create a wall on the light layer as a GM
  * bug #42 Music PATCH requests don't call the right music player ID
 
-* 0.1.2 (2023-10-13)
+* 0.1.2 (2023-10-14)
  * bug #55 Impossible to change map
  * bug #56 Unable to add assets
