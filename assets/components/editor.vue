@@ -1,7 +1,7 @@
 <template>
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
         <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
-            <canvas ref="fog" id="fog" :width="map.width" :height="map.height" :style="{zIndex: !isGameMaster && map.hasDynamicLight ? 15 : -1}"></canvas>
+            <canvas ref="fog" id="fog" :width="map.width" :height="map.height" :style="{zIndex: !isGameMaster && map.hasDynamicLight ? 15 : -1, width: map.width + 'px', height: map.height + 'px'}"></canvas>
             <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height" :style="{zIndex: getLayer === 3 ? 10 : -100}"></canvas>   
             <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
         </div>
@@ -97,7 +97,7 @@ import { Asset } from '../entity/asset';
             map: {
                 handler() {
                     if (!this.isGameMaster && this.map.hasDynamicLight) {
-                        this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl");
+                        this.fog = (this.$refs.fog as HTMLCanvasElement).getContext("webgl2");
                         this.shadowProgram = twgl.createProgramInfo(this.fog!, [shadowVertSrc, shadowFragSrc]);
                         this.lightProgram = twgl.createProgramInfo(this.fog!, [lightVertSrc, lightFragSrc]);
                         this.tokenProgram = twgl.createProgramInfo(this.fog!, [tokenVertSrc, tokenFragSrc]);
@@ -128,11 +128,17 @@ import { Asset } from '../entity/asset';
                         this.lightTexture = twgl.createTexture(this.fog!, {src: "./build/images/lightsource.png"}, () => {
                             this.draw()
                         })
+                        this.tokenTextures = [];
                         this.map.tokens.forEach((token: Token) => {
                             let asset = token.asset as Asset;
                             if(asset.compressedImage) {
                                 this.tokenTextures.push({
-                                    texture: twgl.createTexture(this.fog!, {src: "./uploads/images/asset/" + asset.compressedImage}, () => {
+                                    texture: twgl.createTexture(this.fog!, {
+                                        src: "./uploads/images/asset/" + asset.compressedImage,
+                                        min: this.fog!.LINEAR,
+                                        mag: this.fog!.LINEAR,
+                                        wrap: this.fog!.CLAMP_TO_EDGE
+                                    }, () => {
                                         this.draw();
                                     }),
                                     width: token.width!,
@@ -144,7 +150,12 @@ import { Asset } from '../entity/asset';
                                 });
                             }else {
                                 this.tokenTextures.push({
-                                    texture: twgl.createTexture(this.fog!, {src: "./uploads/images/asset/" + asset.image}, () => {
+                                    texture: twgl.createTexture(this.fog!, {
+                                        src: "./uploads/images/asset/" + asset.image,
+                                        min: this.fog!.LINEAR,
+                                        mag: this.fog!.LINEAR,
+                                        wrap: this.fog!.CLAMP_TO_EDGE
+                                    }, () => {
                                         this.draw();
                                     }),
                                     width: token.width!,
@@ -156,7 +167,6 @@ import { Asset } from '../entity/asset';
                                 });
                             }
                         });
-                        this.draw();
                     }else {
                         this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
                         this.drawGameMasterVue();
@@ -284,10 +294,6 @@ import { Asset } from '../entity/asset';
                     this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_MAG_FILTER, this.fog.LINEAR);
                     this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_WRAP_S, this.fog.CLAMP_TO_EDGE);
                     this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_WRAP_T, this.fog.CLAMP_TO_EDGE);
-                    this.fog.texImage2D(this.fog.TEXTURE_2D, 0, this.fog.RGBA, 2, 2, 0, this.fog.RGBA, this.fog.FLOAT, new Float32Array([
-                                    -1, -1, -1, 1, 1, -1,
-                                    -1, 1, 1, -1, 1, 1,
-                                ]));
                     this.fog.copyTexImage2D(this.fog.TEXTURE_2D, 0, this.fog.RGBA, 0, 0, this.map.width, this.map.height, 0);
 
                     // Clear the canvas to black
