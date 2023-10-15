@@ -70,6 +70,7 @@ import { Asset } from '../entity/asset';
                 drawingWall: {} as LightingWall,
                 lightTexture: {} as WebGLTexture,
                 tokenTextures: [] as {texture: WebGLTexture, width: number, height: number, position: {x: number, y: number}}[],
+                sceneTexture: {} as WebGLTexture,
                 shadowProgram: {} as twgl.ProgramInfo,
                 lightProgram: {} as twgl.ProgramInfo,
                 tokenProgram: {} as twgl.ProgramInfo,
@@ -128,6 +129,9 @@ import { Asset } from '../entity/asset';
                         this.lightTexture = twgl.createTexture(this.fog!, {src: "./build/images/lightsource.png"}, () => {
                             this.draw()
                         })
+                        this.tokenTextures.forEach(tokenTexture => {
+                            this.fog?.deleteTexture(tokenTexture.texture);
+                        });
                         this.tokenTextures = [];
                         this.map.tokens.forEach((token: Token) => {
                             let asset = token.asset as Asset;
@@ -235,8 +239,6 @@ import { Asset } from '../entity/asset';
                 e.preventDefault();
             },
             draw: async function () {
-                (this.$refs.fog as HTMLCanvasElement).width = this.map.width;
-                (this.$refs.fog as HTMLCanvasElement).height = this.map.height;
                 if(this.map.hasDynamicLight && this.fog && !this.isGameMaster) {
                     let tokens = this.getControllableTokens(this.getUserId);
 
@@ -288,8 +290,8 @@ import { Asset } from '../entity/asset';
                         twgl.drawBufferInfo(this.fog!, this.quadBuffer);
                     })
 
-                    let sceneTexture = twgl.createTexture(this.fog);
-                    this.fog.bindTexture(this.fog.TEXTURE_2D, sceneTexture);
+                    this.sceneTexture = twgl.createTexture(this.fog);
+                    this.fog.bindTexture(this.fog.TEXTURE_2D, this.sceneTexture);
                     this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_MIN_FILTER, this.fog.LINEAR);
                     this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_MAG_FILTER, this.fog.LINEAR);
                     this.fog.texParameteri(this.fog.TEXTURE_2D, this.fog.TEXTURE_WRAP_S, this.fog.CLAMP_TO_EDGE);
@@ -354,7 +356,7 @@ import { Asset } from '../entity/asset';
                     twgl.setBuffersAndAttributes(this.fog!, this.tokenProgram, this.quadBuffer);
                     twgl.setUniforms(this.sceneProgram, {
                         lightTexture: this.lightFramebuffer.attachments[0],
-                        sceneTexture: sceneTexture
+                        sceneTexture: this.sceneTexture
                     });
                     twgl.drawBufferInfo(this.fog!, this.quadBuffer);
                 }
