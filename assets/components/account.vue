@@ -145,7 +145,8 @@ import { MapService } from '../services/mapService';
                 'setWorld',
                 'sendIsConnected',
                 'findAllRecentConnections',
-                'setPersonages'
+                'setPersonages',
+                'setIsDarkTheme'
             ]),
             ...mapActions('map', [
                 'setMap',
@@ -200,8 +201,10 @@ import { MapService } from '../services/mapService';
                 this.emitter.emit("hasChangedUserVolume")
             },
             changeTheme: function() {
-                this.userParameterRepository.updateTheme(this.connectedUser.id, this.isDarkTheme)
-                this.setThemeTag()
+                this.userParameterRepository.updateTheme(this.connectedUser.id, this.isDarkTheme);
+                this.setIsDarkTheme(this.isDarkTheme);
+                this.setThemeTag();
+                
             },
             setThemeTag: function() {
                 if(this.isDarkTheme) {
@@ -216,6 +219,7 @@ import { MapService } from '../services/mapService';
         mounted() {
             this.setUserParameter(this.connectedUser.userParameter);
             this.setThemeTag();
+            this.setIsDarkTheme(this.isDarkTheme);
         }
     })
 </script>

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ExpenseRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ExpenseRepository::class)]
 class Expense
@@ -14,9 +15,11 @@ class Expense
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(["personage:read"])]
     private ?int $value = null;
 
     #[ORM\ManyToOne(inversedBy: 'expenses')]
+    #[Groups(["personage:read"])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Point $point = null;
 

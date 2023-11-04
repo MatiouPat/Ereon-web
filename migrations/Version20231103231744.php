@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20231009000916 extends AbstractMigration
+final class Version20231103231744 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -33,7 +33,7 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('CREATE SEQUENCE expense_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE image_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE item_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
-        $this->addSql('CREATE SEQUENCE item_information_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
+        $this->addSql('CREATE SEQUENCE item_prefab_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE lighting_wall_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE map_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE money_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
@@ -68,9 +68,9 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_29F773668925311C ON connection (world_id)');
         $this->addSql('CREATE INDEX IDX_29F77366A76ED395 ON connection (user_id)');
         $this->addSql('CREATE INDEX IDX_29F77366540C850A ON connection (current_map_id)');
-        $this->addSql('CREATE TABLE cost (id INT NOT NULL, money_id INT NOT NULL, item_information_id INT NOT NULL, value DOUBLE PRECISION NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE cost (id INT NOT NULL, money_id INT NOT NULL, item_prefab_id INT NOT NULL, value DOUBLE PRECISION NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_182694FCBF29332C ON cost (money_id)');
-        $this->addSql('CREATE INDEX IDX_182694FC3F1D96F5 ON cost (item_information_id)');
+        $this->addSql('CREATE INDEX IDX_182694FC5F5BA534 ON cost (item_prefab_id)');
         $this->addSql('CREATE TABLE currency (id INT NOT NULL, world_id INT NOT NULL, name VARCHAR(255) NOT NULL, acronym VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_6956883F8925311C ON currency (world_id)');
         $this->addSql('CREATE TABLE damage_or_resistance (id INT NOT NULL, type_id INT NOT NULL, weapon_id INT DEFAULT NULL, armor_id INT DEFAULT NULL, spell_id INT DEFAULT NULL, value VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
@@ -90,10 +90,10 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_2D3A8DA6479EC90D ON expense (spell_id)');
         $this->addSql('CREATE TABLE image (id INT NOT NULL, image_name VARCHAR(255) DEFAULT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, PRIMARY KEY(id))');
         $this->addSql('COMMENT ON COLUMN image.updated_at IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE item (id INT NOT NULL, item_information_id INT NOT NULL, personage_id INT NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE INDEX IDX_1F1B251E3F1D96F5 ON item (item_information_id)');
+        $this->addSql('CREATE TABLE item (id INT NOT NULL, personage_id INT NOT NULL, item_prefab_id INT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_1F1B251EEA8E3E4A ON item (personage_id)');
-        $this->addSql('CREATE TABLE item_information (id INT NOT NULL, name VARCHAR(255) NOT NULL, description TEXT DEFAULT NULL, dtype VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE INDEX IDX_1F1B251E5F5BA534 ON item (item_prefab_id)');
+        $this->addSql('CREATE TABLE item_prefab (id INT NOT NULL, name VARCHAR(255) NOT NULL, description TEXT DEFAULT NULL, dtype VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE TABLE lighting_wall (id INT NOT NULL, map_id INT NOT NULL, start_x INT NOT NULL, end_x INT NOT NULL, start_y INT NOT NULL, end_y INT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_B178FD6253C55F64 ON lighting_wall (map_id)');
         $this->addSql('CREATE TABLE map (id INT NOT NULL, world_id INT NOT NULL, name VARCHAR(255) NOT NULL, width INT NOT NULL, height INT NOT NULL, has_dynamic_light BOOLEAN NOT NULL, PRIMARY KEY(id))');
@@ -113,7 +113,7 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('CREATE TABLE number_of_skill (id INT NOT NULL, skill_id INT NOT NULL, personage_id INT NOT NULL, value INT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_615A48165585C142 ON number_of_skill (skill_id)');
         $this->addSql('CREATE INDEX IDX_615A4816EA8E3E4A ON number_of_skill (personage_id)');
-        $this->addSql('CREATE TABLE personage (id INT NOT NULL, image_id INT DEFAULT NULL, user_id INT DEFAULT NULL, world_id INT NOT NULL, name VARCHAR(255) NOT NULL, race VARCHAR(255) DEFAULT NULL, alignment VARCHAR(255) DEFAULT NULL, class VARCHAR(255) DEFAULT NULL, inventory TEXT DEFAULT NULL, biography TEXT DEFAULT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE personage (id INT NOT NULL, image_id INT DEFAULT NULL, user_id INT DEFAULT NULL, world_id INT NOT NULL, name VARCHAR(255) NOT NULL, race VARCHAR(255) DEFAULT NULL, alignment VARCHAR(255) DEFAULT NULL, class VARCHAR(255) DEFAULT NULL, biography TEXT DEFAULT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_E60A6EC53DA5256D ON personage (image_id)');
         $this->addSql('CREATE INDEX IDX_E60A6EC5A76ED395 ON personage (user_id)');
         $this->addSql('CREATE INDEX IDX_E60A6EC58925311C ON personage (world_id)');
@@ -155,13 +155,13 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('ALTER TABLE alteration_change ADD CONSTRAINT FK_4F74B076242F17C7 FOREIGN KEY (alteration_id) REFERENCES alteration (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE alteration_change ADD CONSTRAINT FK_4F74B076B6E62EFA FOREIGN KEY (attribute_id) REFERENCES attribute (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE alteration_change ADD CONSTRAINT FK_4F74B0765585C142 FOREIGN KEY (skill_id) REFERENCES skill (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('ALTER TABLE armor ADD CONSTRAINT FK_BF27FEFCBF396750 FOREIGN KEY (id) REFERENCES item_information (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE armor ADD CONSTRAINT FK_BF27FEFCBF396750 FOREIGN KEY (id) REFERENCES item_prefab (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE attribute ADD CONSTRAINT FK_FA7AEFFB8925311C FOREIGN KEY (world_id) REFERENCES world (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE connection ADD CONSTRAINT FK_29F773668925311C FOREIGN KEY (world_id) REFERENCES world (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE connection ADD CONSTRAINT FK_29F77366A76ED395 FOREIGN KEY (user_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE connection ADD CONSTRAINT FK_29F77366540C850A FOREIGN KEY (current_map_id) REFERENCES map (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE cost ADD CONSTRAINT FK_182694FCBF29332C FOREIGN KEY (money_id) REFERENCES money (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('ALTER TABLE cost ADD CONSTRAINT FK_182694FC3F1D96F5 FOREIGN KEY (item_information_id) REFERENCES item_information (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE cost ADD CONSTRAINT FK_182694FC5F5BA534 FOREIGN KEY (item_prefab_id) REFERENCES item_prefab (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE currency ADD CONSTRAINT FK_6956883F8925311C FOREIGN KEY (world_id) REFERENCES world (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE damage_or_resistance ADD CONSTRAINT FK_17DD25DCC54C8C93 FOREIGN KEY (type_id) REFERENCES damage_or_resistance_type (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE damage_or_resistance ADD CONSTRAINT FK_17DD25DC95B82273 FOREIGN KEY (weapon_id) REFERENCES weapon (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
@@ -174,8 +174,8 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('ALTER TABLE dice ADD CONSTRAINT FK_A10EE2548925311C FOREIGN KEY (world_id) REFERENCES world (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE expense ADD CONSTRAINT FK_2D3A8DA6C028CEA2 FOREIGN KEY (point_id) REFERENCES point (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE expense ADD CONSTRAINT FK_2D3A8DA6479EC90D FOREIGN KEY (spell_id) REFERENCES spell (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('ALTER TABLE item ADD CONSTRAINT FK_1F1B251E3F1D96F5 FOREIGN KEY (item_information_id) REFERENCES item_information (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE item ADD CONSTRAINT FK_1F1B251EEA8E3E4A FOREIGN KEY (personage_id) REFERENCES personage (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE item ADD CONSTRAINT FK_1F1B251E5F5BA534 FOREIGN KEY (item_prefab_id) REFERENCES item_prefab (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE lighting_wall ADD CONSTRAINT FK_B178FD6253C55F64 FOREIGN KEY (map_id) REFERENCES map (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE map ADD CONSTRAINT FK_93ADAABB8925311C FOREIGN KEY (world_id) REFERENCES world (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE money ADD CONSTRAINT FK_B7DF13E438248176 FOREIGN KEY (currency_id) REFERENCES currency (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
@@ -205,7 +205,7 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('ALTER TABLE token_user ADD CONSTRAINT FK_EF97E32B41DEE7B9 FOREIGN KEY (token_id) REFERENCES token (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE token_user ADD CONSTRAINT FK_EF97E32BA76ED395 FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE user_parameter ADD CONSTRAINT FK_2A771CF4A76ED395 FOREIGN KEY (user_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('ALTER TABLE weapon ADD CONSTRAINT FK_6933A7E6BF396750 FOREIGN KEY (id) REFERENCES item_information (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE weapon ADD CONSTRAINT FK_6933A7E6BF396750 FOREIGN KEY (id) REFERENCES item_prefab (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE weapon_attribute ADD CONSTRAINT FK_18B3815D95B82273 FOREIGN KEY (weapon_id) REFERENCES weapon (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE weapon_attribute ADD CONSTRAINT FK_18B3815DB6E62EFA FOREIGN KEY (attribute_id) REFERENCES attribute (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
     }
@@ -227,7 +227,7 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('DROP SEQUENCE expense_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE image_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE item_id_seq CASCADE');
-        $this->addSql('DROP SEQUENCE item_information_id_seq CASCADE');
+        $this->addSql('DROP SEQUENCE item_prefab_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE lighting_wall_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE map_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE money_id_seq CASCADE');
@@ -257,7 +257,7 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('ALTER TABLE connection DROP CONSTRAINT FK_29F77366A76ED395');
         $this->addSql('ALTER TABLE connection DROP CONSTRAINT FK_29F77366540C850A');
         $this->addSql('ALTER TABLE cost DROP CONSTRAINT FK_182694FCBF29332C');
-        $this->addSql('ALTER TABLE cost DROP CONSTRAINT FK_182694FC3F1D96F5');
+        $this->addSql('ALTER TABLE cost DROP CONSTRAINT FK_182694FC5F5BA534');
         $this->addSql('ALTER TABLE currency DROP CONSTRAINT FK_6956883F8925311C');
         $this->addSql('ALTER TABLE damage_or_resistance DROP CONSTRAINT FK_17DD25DCC54C8C93');
         $this->addSql('ALTER TABLE damage_or_resistance DROP CONSTRAINT FK_17DD25DC95B82273');
@@ -270,8 +270,8 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('ALTER TABLE dice DROP CONSTRAINT FK_A10EE2548925311C');
         $this->addSql('ALTER TABLE expense DROP CONSTRAINT FK_2D3A8DA6C028CEA2');
         $this->addSql('ALTER TABLE expense DROP CONSTRAINT FK_2D3A8DA6479EC90D');
-        $this->addSql('ALTER TABLE item DROP CONSTRAINT FK_1F1B251E3F1D96F5');
         $this->addSql('ALTER TABLE item DROP CONSTRAINT FK_1F1B251EEA8E3E4A');
+        $this->addSql('ALTER TABLE item DROP CONSTRAINT FK_1F1B251E5F5BA534');
         $this->addSql('ALTER TABLE lighting_wall DROP CONSTRAINT FK_B178FD6253C55F64');
         $this->addSql('ALTER TABLE map DROP CONSTRAINT FK_93ADAABB8925311C');
         $this->addSql('ALTER TABLE money DROP CONSTRAINT FK_B7DF13E438248176');
@@ -319,7 +319,7 @@ final class Version20231009000916 extends AbstractMigration
         $this->addSql('DROP TABLE expense');
         $this->addSql('DROP TABLE image');
         $this->addSql('DROP TABLE item');
-        $this->addSql('DROP TABLE item_information');
+        $this->addSql('DROP TABLE item_prefab');
         $this->addSql('DROP TABLE lighting_wall');
         $this->addSql('DROP TABLE map');
         $this->addSql('DROP TABLE money');

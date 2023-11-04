@@ -15,9 +15,9 @@ export class DiceRepository
         })
     }
     
-    public async createDice(userId: number, worldId: number, computation: string, personageId: number): Promise<void>
+    public async createDice(userId: number, worldId: number, computation: string, personageId?: number): Promise<void>
     {
-        if(personageId === 0) {
+        if(personageId === undefined) {
             return axios({
                 method: 'POST',
                 url: '/api/dices',

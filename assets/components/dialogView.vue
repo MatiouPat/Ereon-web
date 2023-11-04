@@ -43,7 +43,7 @@
                 <option :key="key" v-for="(personage, key) in getPersonages" :value="personage.id">{{ personage.name }}</option>
             </select>
             <span v-else class="alert alert-danger">Vous n'avez aucun personnage</span>
-            <button type="button" @click="rollDice">Envoyer</button>
+            <button class="btn btn-primary" type="button" @click="rollDice">Envoyer</button>
         </div>
     </div>
 </template>
@@ -176,17 +176,6 @@ import { PersonageRepository } from '../repository/personageRepository';
         height: 100%;
         resize: none;
         border: solid 1px #565656;
-    }
-
-    .textinput button {
-        display: inline-block;
-        border: none;
-        border-radius: 24px;
-        background-color: #D68836;
-        color: #fff;
-        padding: 8px;
-        font-weight: 700;
-        font-size: 1rem;
     }
 
     .dices {
