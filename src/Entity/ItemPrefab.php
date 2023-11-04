@@ -2,16 +2,17 @@
 
 namespace App\Entity;
 
+use App\Repository\ItemPrefabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\InheritanceType;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[Entity]
+#[ORM\Entity(repositoryClass: ItemPrefabRepository::class)]
 #[InheritanceType('JOINED')]
-abstract class ItemInformation
+class ItemPrefab
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -19,23 +20,26 @@ abstract class ItemInformation
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["personage:read"])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["personage:read"])]
     private ?string $description = null;
 
-    #[ORM\OneToMany(mappedBy: 'itemInformation', targetEntity: Item::class, orphanRemoval: true)]
-    private Collection $items;
-
-    #[ORM\OneToMany(mappedBy: 'itemInformation', targetEntity: Cost::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'itemPrefab', targetEntity: Cost::class, orphanRemoval: true)]
+    #[Groups(["personage:read"])]
     private Collection $costs;
+
+    #[ORM\OneToMany(mappedBy: 'itemPrefab', targetEntity: Item::class, orphanRemoval: true)]
+    private Collection $items;
 
     public function __construct()
     {
-        $this->items = new ArrayCollection();
         $this->costs = new ArrayCollection();
+        $this->items = new ArrayCollection();
     }
-    
+
     public function getId(): ?int
     {
         return $this->id;
@@ -66,36 +70,6 @@ abstract class ItemInformation
     }
 
     /**
-     * @return Collection<int, Item>
-     */
-    public function getItems(): Collection
-    {
-        return $this->items;
-    }
-
-    public function addItem(Item $item): static
-    {
-        if (!$this->items->contains($item)) {
-            $this->items->add($item);
-            $item->setItemInformation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeItem(Item $item): static
-    {
-        if ($this->items->removeElement($item)) {
-            // set the owning side to null (unless already changed)
-            if ($item->getItemInformation() === $this) {
-                $item->setItemInformation(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, Cost>
      */
     public function getCosts(): Collection
@@ -107,7 +81,7 @@ abstract class ItemInformation
     {
         if (!$this->costs->contains($cost)) {
             $this->costs->add($cost);
-            $cost->setItemInformation($this);
+            $cost->setItemPrefab($this);
         }
 
         return $this;
@@ -117,8 +91,38 @@ abstract class ItemInformation
     {
         if ($this->costs->removeElement($cost)) {
             // set the owning side to null (unless already changed)
-            if ($cost->getItemInformation() === $this) {
-                $cost->setItemInformation(null);
+            if ($cost->getItemPrefab() === $this) {
+                $cost->setItemPrefab(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Item>
+     */
+    public function getItems(): Collection
+    {
+        return $this->items;
+    }
+
+    public function addItem(Item $item): static
+    {
+        if (!$this->items->contains($item)) {
+            $this->items->add($item);
+            $item->setItemPrefab($this);
+        }
+
+        return $this;
+    }
+
+    public function removeItem(Item $item): static
+    {
+        if ($this->items->removeElement($item)) {
+            // set the owning side to null (unless already changed)
+            if ($item->getItemPrefab() === $this) {
+                $item->setItemPrefab(null);
             }
         }
 

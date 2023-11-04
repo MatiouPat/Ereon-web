@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\CostRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CostRepository::class)]
 class Cost
@@ -14,15 +15,17 @@ class Cost
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(["personage:read"])]
     private ?float $value = null;
 
     #[ORM\ManyToOne(inversedBy: 'costs')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["personage:read"])]
     private ?Money $money = null;
 
     #[ORM\ManyToOne(inversedBy: 'costs')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?ItemInformation $itemInformation = null;
+    private ?ItemPrefab $itemPrefab = null;
 
     public function getId(): ?int
     {
@@ -53,14 +56,14 @@ class Cost
         return $this;
     }
 
-    public function getItemInformation(): ?ItemInformation
+    public function getItemPrefab(): ?ItemPrefab
     {
-        return $this->itemInformation;
+        return $this->itemPrefab;
     }
 
-    public function setItemInformation(?ItemInformation $itemInformation): static
+    public function setItemPrefab(?ItemPrefab $itemPrefab): static
     {
-        $this->itemInformation = $itemInformation;
+        $this->itemPrefab = $itemPrefab;
 
         return $this;
     }

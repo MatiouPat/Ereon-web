@@ -30,7 +30,8 @@ const state = {
     /**
      * The list of characters that can be played by the user
      */
-    personages: [] as Personage[]
+    personages: [] as Personage[],
+    isDarkTheme: false as boolean
 }
 
 const getters = {
@@ -60,6 +61,9 @@ const getters = {
     },
     getPersonages: (state: any) => {
         return state.personages
+    },
+    getIsDarkTheme: (state: any) => {
+        return state.isDarkTheme;
     }
 }
 
@@ -112,6 +116,10 @@ const actions = {
     setPersonages({commit}, personages: Personage[]): void
     {
         commit('setPersonages', personages);
+    },
+    setIsDarkTheme({commit}, isDarkTheme: boolean): void
+    {
+        commit('setIsDarkTheme', isDarkTheme);
     }
 }
 
@@ -146,6 +154,9 @@ const mutations = {
     },
     setPersonages(state: any, personages: Personage[]) {
         state.personages = personages
+    },
+    setIsDarkTheme(state: any, isDarkTheme: boolean) {
+        state.isDarkTheme = isDarkTheme;
     }
 }
 

@@ -56,10 +56,6 @@ class Personage
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(["personage:read", 'personage:write'])]
-    private ?string $inventory = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(["personage:read", 'personage:write'])]
     private ?string $biography = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
@@ -91,9 +87,11 @@ class Personage
     private Collection $dices;
 
     #[ORM\ManyToMany(targetEntity: Spell::class, mappedBy: 'personages')]
+    #[Groups(["personage:read"])]
     private Collection $spells;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Item::class, orphanRemoval: true)]
+    #[Groups(["personage:read"])]
     private Collection $items;
 
     #[ORM\ManyToMany(targetEntity: Alteration::class, mappedBy: 'personages')]
@@ -159,18 +157,6 @@ class Personage
     public function setClass(?string $class): self
     {
         $this->class = $class;
-
-        return $this;
-    }
-
-    public function getInventory(): ?string
-    {
-        return $this->inventory;
-    }
-
-    public function setInventory(?string $inventory): self
-    {
-        $this->inventory = $inventory;
 
         return $this;
     }
