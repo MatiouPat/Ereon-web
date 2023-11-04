@@ -13,4 +13,6 @@ export interface Personage {
   numberOfAttributes?: any;
   numberOfSkills?: any;
   numberOfPoints?: any;
+  items?: any;
+  spells?: any;
 }

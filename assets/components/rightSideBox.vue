@@ -25,7 +25,7 @@
 import DialogView from './dialogView.vue'
 import AssetView from './assetView.vue'
 import MusicView from './musicView.vue'
-import PersonageView from './personageView.vue'
+import PersonageView from './personages/personageView.vue'
 import { mapGetters } from 'vuex'
 import { defineComponent, inject } from 'vue'
 

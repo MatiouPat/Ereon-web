@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\DamageOrResistanceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: DamageOrResistanceRepository::class)]
 class DamageOrResistance
@@ -14,10 +15,12 @@ class DamageOrResistance
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["personage:read"])]
     private ?string $value = null;
 
     #[ORM\ManyToOne(inversedBy: 'damageOrResistances')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["personage:read"])]
     private ?DamageOrResistanceType $type = null;
 
     #[ORM\ManyToOne(inversedBy: 'damages')]

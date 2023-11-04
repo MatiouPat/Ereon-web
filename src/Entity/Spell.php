@@ -6,6 +6,7 @@ use App\Repository\SpellRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: SpellRepository::class)]
 class Spell
@@ -16,15 +17,19 @@ class Spell
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["personage:read"])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["personage:read"])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(["personage:read"])]
     private ?int $scope = null;
 
     #[ORM\ManyToMany(targetEntity: Attribute::class, inversedBy: 'spells')]
+    #[Groups(["personage:read"])]
     private Collection $attributes;
 
     #[ORM\ManyToMany(targetEntity: Personage::class, inversedBy: 'spells')]
@@ -35,9 +40,11 @@ class Spell
     private ?World $world = null;
 
     #[ORM\OneToMany(mappedBy: 'spell', targetEntity: Expense::class, orphanRemoval: true)]
+    #[Groups(["personage:read"])]
     private Collection $expenses;
 
     #[ORM\OneToMany(mappedBy: 'spell', targetEntity: DamageOrResistance::class)]
+    #[Groups(["personage:read"])]
     private Collection $damages;
 
     public function __construct()

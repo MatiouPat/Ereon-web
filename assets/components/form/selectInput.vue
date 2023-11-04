@@ -1,0 +1,88 @@
+<template>
+    <div class="form-group" :class="label ? 'label' : null">
+        <label v-if="label">{{ label }}</label>
+        <select v-if="typeof modelValue == 'string'" v-model="value" @change="$emit('update:modelValue', value)">
+            <option value="-1">Selectioner une valeur</option>
+            <option :key="key" v-for="(choice, key) in choices" :value="choice.id">{{ choice.value }}</option>
+        </select>
+        <select v-if="typeof modelValue == 'number'" v-model.number="value" @change="$emit('update:modelValue', value)">
+            <option value="-1">Selectioner une valeur</option>
+            <option :key="key" v-for="(choice, key) in choices" :value="choice.id">{{ choice.value }}</option>
+        </select>
+    </div>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+    data() {
+        return {
+            value: this.modelValue
+        }
+    },
+    props: {
+        label: {
+            type: String,
+            default: ""
+        },
+        choices: {
+            type: Object,
+            default: []
+        },
+        modelValue: {
+            type: Number,
+            default: 0
+        }
+    },
+    emits: ['update:modelValue']
+})
+</script>
+
+<style scoped>
+.form-group {
+    position: relative;
+    width: 100%;
+    height: 28px;
+}
+
+.form-group.label {
+    height: 48px;
+}
+
+select {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: block;
+    background: none;
+    border: none;
+    padding: 4px;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    width: 100%;
+    font-family: Oswald, sans-serif;
+    -moz-appearance:none; /* Firefox */
+    -webkit-appearance:none; /* Safari and Chrome */
+    appearance:none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem top 50%;
+    background-size: 0.65rem auto;
+}
+
+.dark select {
+    color: #FFFFFF;
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+
+}
+
+.dark select::after {
+    content: "";
+    justify-self: end;
+    width: 0.8em;
+    height: 0.5em;
+    background-color: var(--select-arrow);
+    -webkit-clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+    clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+}
+</style>

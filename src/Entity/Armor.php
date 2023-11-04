@@ -6,11 +6,13 @@ use App\Repository\ArmorRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ArmorRepository::class)]
-class Armor extends ItemInformation
+class Armor extends ItemPrefab
 {
     #[ORM\OneToMany(mappedBy: 'armor', targetEntity: DamageOrResistance::class)]
+    #[Groups(["personage:read"])]
     private Collection $resistances;
 
     public function __construct()
