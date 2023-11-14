@@ -547,10 +547,10 @@ import { Asset } from '../entity/asset';
     }
 
     .dark .editor-wrapper {
-        background-color: #131313;
+        background-color: #090D11;
     }
 
     .dark .editor {
-        background-color: #2b2a33;
+        background-color: #1F262D;
     }
 </style>

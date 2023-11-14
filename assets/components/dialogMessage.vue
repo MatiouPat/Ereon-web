@@ -36,7 +36,6 @@ import { defineComponent } from 'vue';
         display: block;
         margin: 4px 0;
         padding: 8px;
-        background-color: #EFEFEF;
     }
 
     .message-step {
@@ -57,9 +56,5 @@ import { defineComponent } from 'vue';
     .error {
         color: #721c24;
         background-color: #f8d7da;
-    }
-
-    .dark .message {
-        background-color: #2b2a33;
     }
 </style>

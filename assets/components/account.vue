@@ -66,10 +66,7 @@
         <div class="world-layout" v-else v-for="world in worlds" :key="world.id">
             <div v-for="connection in world.connections" :key="connection.id">
                 <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world)">
-                    <picture>
-                        <source>
-                        <img src="build/images/logo/icon_180.png" alt="">
-                    </picture>
+                    <img src="build/images/logo/background.webp" alt="">
                     <div v-if="connection.isGameMaster == 0" class="role">Joueur</div>
                     <div v-else class="role">MJ</div>
                     <h2>{{ world.name }}</h2>
@@ -120,7 +117,7 @@ import { MapService } from '../services/mapService';
                 'getConnectedUser',
                 'getCurrentMapId',
                 'getUsername',
-                'isGameMaster',
+                'isGameMaster'
             ]),
             ...mapGetters('map', [
                 'getLayer',
@@ -411,6 +408,7 @@ import { MapService } from '../services/mapService';
         height: 10dvw;
         max-height: 200px;
         max-width: 200px;
+        background-color: #090D11;
     }
 
     .world:hover > picture {
@@ -421,15 +419,6 @@ import { MapService } from '../services/mapService';
     .world:hover > h2 {
         color: #D68836;
         transition: all .2s ease-in-out;
-    }
-
-    .world picture {
-        display: block;
-        width: 10dvw;
-        height: 10dvw;
-        max-height: 200px;
-        max-width: 200px;
-        background-color: #333333;
     }
 
     .world img {
@@ -456,7 +445,7 @@ import { MapService } from '../services/mapService';
         padding: 4px;
         text-align: center;
         color: #FFFFFF;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: #090D11;
         font-weight: 700;
     }
 
@@ -465,15 +454,15 @@ import { MapService } from '../services/mapService';
     }
 
     .dark .navigation {
-        background-color: #1c1b22;
+        background-color: #1F262D;
     }
 
     .dark .worlds-page {
-        background-color: #1c1b22;
+        background-color: #1F262D;
     }
 
     .dark .parameters-header {
-        background-color: #1c1b22;
+        background-color: #1F262D;
     }
 
     .dark .parameters-body {

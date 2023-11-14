@@ -4,7 +4,7 @@
         <div class="personage-header-info">
             <div class="personage-main-info">
                 <basic-input :model-value="personage.name" :label="'Nom'" @update:model-value="(modelValue) => personage.name = modelValue"></basic-input>
-                <select-input :model-value="personageUser" :choices="userChoices" :label="'Joueur'" @update:model-value="(modelValue) => personageUser = modelValue"></select-input>
+                <select-input :model-value="personageUser" :choices="userChoices" :label="'Joueur'" :background="getIsDarkTheme ? '#4F5A64' : '#FFFFFF'" @update:model-value="(modelValue) => personageUser = modelValue"></select-input>
             </div>
             <div class="personage-points">
                 <div class="personage-point" :key="key" v-for="(numberOfPoint, key) in personage.numberOfPoints">
@@ -14,14 +14,14 @@
                     </div>
                     <div class="personage-point-title">
                         <span>{{ numberOfPoint.point.acronym }}</span>
-                        <img src="build/images/sheets/point.svg" width="80" height="80">
+                        <img :src="getIsDarkTheme ? '/build/images/sheets/point_white.svg' : '/build/images/sheets/point_black.svg'" alt="" width="80" height="80">
                         <div class="point-liquid" :style="{ backgroundColor: (numberOfPoint.point.acronym === 'PV' ? '#e63946' : '#457b9d'), clipPath: 'inset(' + (100 - numberOfPoint.current * 100 / numberOfPoint.max) + '% 0 0 0)'}"></div>
                     </div>
                     <basic-input class="personage-point-form" :is-number="true" :model-value="numberOfPoint.current" @update:model-value="(modelValue) => numberOfPoint.current = modelValue"></basic-input>
                 </div>
                 <div class="personage-shield">
                     <span>Armure</span>
-                    <img src="build/images/sheets/shield.svg" width="80" height="80">
+                    <img :src="getIsDarkTheme ? '/build/images/sheets/shield_white.svg' : '/build/images/sheets/shield_black.svg'" alt="" width="80" height="80">
                 </div>
             </div>
         </div>
@@ -30,16 +30,16 @@
         <h2 class="personage-navigation-title">{{ pages[pageIndex] }}</h2>
         <ul>
             <li :class="pageIndex === 0 ? 'selected' : null" @click="pageIndex = 0">
-                <img src="build/images/sheets/statistics.svg" alt="Statistiques" width="24" height="24">
+                <img :src="getIsDarkTheme ? '/build/images/sheets/statistics_white.svg' : '/build/images/sheets/statistics_black.svg'" alt="Statistiques" width="24" height="24">
             </li>
             <li :class="pageIndex === 1 ? 'selected' : null" @click="pageIndex = 1">
-                <img src="build/images/sheets/inventory.svg" alt="Inventaire" width="24" height="24">
+                <img :src="getIsDarkTheme ? '/build/images/sheets/inventory_white.svg' : '/build/images/sheets/inventory_black.svg'" alt="Inventaire" width="24" height="24">
             </li>
             <li :class="pageIndex === 2 ? 'selected' : null" @click="pageIndex = 2">
-                <img src="build/images/sheets/spells.svg" alt="Sorts" width="20" height="20">
+                <img :src="getIsDarkTheme ? '/build/images/sheets/spells_white.svg' : '/build/images/sheets/spells_black.svg'" alt="Sorts" width="20" height="20">
             </li>
             <li :class="pageIndex === 3 ? 'selected' : null" @click="pageIndex = 3">
-                <img src="build/images/sheets/secondary_information.svg" alt="Informations secondaires" width="24" height="24">
+                <img :src="getIsDarkTheme ? '/build/images/sheets/secondary_information_white.svg' : '/build/images/sheets/secondary_information_black.svg'" alt="Informations secondaires" width="24" height="24">
             </li>
         </ul>
     </div>
@@ -289,19 +289,20 @@ table {
 
 th {
     font-weight: 700;
-    background: #1B2229;
+    background: #D7D9DB;
 }
 
 th, td {
     padding: 8px;
-    border: solid 3px #363D45;
+    border: solid 3px #FFFFFF;
 }
+
 tr {
     margin: 1px 0;
 }
 
 td {
-    background-color: #60676E;
+    background-color: #F3F4F4;
 }
 
 .personage-header {
@@ -372,7 +373,7 @@ td {
     position: relative;
     display: flex;
     align-items: center;
-    background: #0E1318;
+    background: #BBBFC3;
     margin-top: 24px;
     padding: 4px;
 }
@@ -395,8 +396,8 @@ td {
     align-items: center;
     width: 32px;
     height: 32px;
-    background: #0E1318;
-    border: solid 2px #363D45;
+    background: #BBBFC3;
+    border: solid 2px #F3F4F4;
     border-radius: 50%;
 }
 
@@ -423,6 +424,26 @@ td {
 
 .personage-attribute {
     width: 100%;
+}
+
+.dark .personage-navigation {
+    background: #1F262D;
+}
+
+.dark .personage-navigation li {
+    background: #1F262D;
+    border: solid 2px #363D45;
+
+}
+
+.dark th {
+    background: #1B2229;
+    border: solid 3px #4F5A64;
+}
+
+.dark td {
+    background-color: #364049;
+    border: solid 3px #4F5A64;
 }
 
 </style>
