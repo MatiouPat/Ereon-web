@@ -11,7 +11,7 @@
                 </div>
             </div>
         </div>
-        <button class="btn btn-primary" type="button" @click="createPersonage">Ajouter un personnage</button>
+        <button class="btn btn-primary" type="button" @click="createPersonage" v-if="isGameMaster">Ajouter un personnage</button>
         <Teleport to="#content">
             <div class="parameters-wrapper" v-if="isDisplayed">
                 <div class="parameters">
@@ -24,8 +24,9 @@
                     </div>
                     <div class="parameters-footer">
                         <button class="btn btn-secondary" type="button" @click="cancel">Annuler</button>
-                        <button class="btn btn-secondary" type="button" @click="deletePersonage">Supprimer</button>
-                        <button class="btn btn-primary" type="button" @click="updatePersonage">Valider</button>
+                        <button class="btn btn-secondary" type="button" @click="deletePersonage" v-if="isGameMaster">Supprimer le personnage</button>
+                        <button class="btn btn-primary" type="button" @click="updatePersonage" v-if="isModification">Modifier le personnage</button>
+                        <button class="btn btn-primary" type="button" @click="updatePersonage" v-else>Créer le personnage</button>
                     </div>
                 </div>
             </div>
@@ -203,7 +204,7 @@ export default defineComponent({
 
     .personage {
         display: flex;
-        border: solid 1px #565656;
+        border: solid 1px #73808C;
         margin: 8px 0;
     }
 
@@ -263,7 +264,8 @@ export default defineComponent({
         justify-content: space-between;
         align-items: center;
         padding: 8px;
-        border-bottom: solid 1px #565656;
+        border-bottom: solid 1px #73808C;
+        background-color: #BBBFC3;
         height: 40px;
     }
 
@@ -281,7 +283,7 @@ export default defineComponent({
         height: 48px;
         gap: 8px;
         padding: 8px;
-        border-top: solid 1px #565656;
+        border-top: solid 1px #73808C;
     }
 
     h3 {
@@ -290,12 +292,17 @@ export default defineComponent({
         margin-bottom: 8px;
     }
 
+    .dark .personage {
+        border: solid 1px #BBBFC3;
+    }
+
+
     .dark .parameters-header {
         background-color: #0E1318;
     }
 
     .dark .parameters-body, .dark .parameters-footer {
-        background-color: #363D45;
+        background-color: #4F5A64;
     }
 
 </style>
