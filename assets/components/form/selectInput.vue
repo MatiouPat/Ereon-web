@@ -1,12 +1,12 @@
 <template>
     <div class="form-group" :class="label ? 'label' : null">
         <label v-if="label">{{ label }}</label>
-        <select v-if="typeof modelValue == 'string'" v-model="value" @change="$emit('update:modelValue', value)">
-            <option value="-1">Selectioner une valeur</option>
+        <select v-if="typeof modelValue == 'string'" v-model="value" @change="$emit('update:modelValue', value)" :style="{background: background}">
+            <option v-if="hasDefault" value="-1">Selectioner une valeur</option>
             <option :key="key" v-for="(choice, key) in choices" :value="choice.id">{{ choice.value }}</option>
         </select>
-        <select v-if="typeof modelValue == 'number'" v-model.number="value" @change="$emit('update:modelValue', value)">
-            <option value="-1">Selectioner une valeur</option>
+        <select v-if="typeof modelValue == 'number'" v-model.number="value" @change="$emit('update:modelValue', value)" :style="{background: background}">
+            <option v-if="hasDefault" value="-1">Selectioner une valeur</option>
             <option :key="key" v-for="(choice, key) in choices" :value="choice.id">{{ choice.value }}</option>
         </select>
     </div>
@@ -33,6 +33,14 @@ export default defineComponent({
         modelValue: {
             type: Number,
             default: 0
+        },
+        background: {
+            type: String,
+            default: '#090D11'
+        },
+        hasDefault: {
+            type: Boolean,
+            default: true
         }
     },
     emits: ['update:modelValue']
@@ -46,6 +54,23 @@ export default defineComponent({
     height: 28px;
 }
 
+.form-group::after {
+    content: "";
+    position: absolute;
+    bottom: 10px;
+    right: 8px;
+    display: block;
+    width: 0.8em;
+    height: 0.5em;
+    background-color: #090D11;
+    -webkit-clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+    clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+}
+
+.dark .form-group::after {
+    background-color: #F3F4F4;
+}
+
 .form-group.label {
     height: 48px;
 }
@@ -57,7 +82,6 @@ select {
     display: block;
     background: none;
     border: none;
-    padding: 4px;
     box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.3);
     width: 100%;
     font-family: Oswald, sans-serif;
@@ -71,18 +95,8 @@ select {
 }
 
 .dark select {
-    color: #FFFFFF;
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+    color: #F3F4F4;
+    box-shadow: inset 0 -1px 0 #F3F4F4;
 
-}
-
-.dark select::after {
-    content: "";
-    justify-self: end;
-    width: 0.8em;
-    height: 0.5em;
-    background-color: var(--select-arrow);
-    -webkit-clip-path: polygon(100% 0%, 0 0%, 50% 100%);
-    clip-path: polygon(100% 0%, 0 0%, 50% 100%);
 }
 </style>

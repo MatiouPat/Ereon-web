@@ -95,8 +95,8 @@ input:focus {
 }
 
 .dark input {
-    color: #FFFFFF;
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+    color: #F3F4F4;
+    box-shadow: inset 0 -1px 0 #F3F4F4;
 }
 
 .dark .form-group:has(> input:focus) {

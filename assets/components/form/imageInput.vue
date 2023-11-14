@@ -75,7 +75,7 @@ export default defineComponent({
     .file-wrapper {
         position: relative;
         display: block;
-        background: #1B2229;
+        background: #BBBFC3;
     }
 
     .file-image {
@@ -117,5 +117,9 @@ export default defineComponent({
 
     .file-input input[type=file] {
         display: none;
+    }
+
+    .dark .file-wrapper {
+        background: #1B2229;
     }
 </style>

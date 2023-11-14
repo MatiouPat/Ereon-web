@@ -273,7 +273,7 @@ import { ConnectionService } from '../services/connectionService';
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: #565656;
+        background-color: #73808C;
         width: 128px;
         height: 128px;
     }
@@ -308,11 +308,11 @@ import { ConnectionService } from '../services/connectionService';
     }
 
     .dark .map-box {
-        background-color: #1c1b22;
+        background-color: #1F262D;
     }
 
     .dark .modal-box {
-        background-color: #2b2a33;
+        background-color: #364049;
     }
 
 </style>
