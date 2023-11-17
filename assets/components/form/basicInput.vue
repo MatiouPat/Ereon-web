@@ -100,7 +100,7 @@ input:focus {
 }
 
 .dark .form-group:has(> input:focus) {
-    background: #1c1b22;
+    background: #1F262D;
 }
 
 </style>

@@ -244,7 +244,7 @@ export default defineComponent({
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 100dvw;
+        width: 100%;
         height: 100dvh;
         background-color: rgba(0, 0, 0, 0.8);
     }
@@ -295,7 +295,6 @@ export default defineComponent({
     .dark .personage {
         border: solid 1px #BBBFC3;
     }
-
 
     .dark .parameters-header {
         background-color: #0E1318;

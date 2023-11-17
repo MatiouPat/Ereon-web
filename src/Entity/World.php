@@ -70,6 +70,9 @@ class World
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: DamageOrResistanceType::class, orphanRemoval: true)]
     private Collection $damageOrResistanceTypes;
 
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: ItemPrefab::class, orphanRemoval: true)]
+    private Collection $itemPrefabs;
+
     public function __construct()
     {
         $this->connections = new ArrayCollection();
@@ -83,6 +86,7 @@ class World
         $this->currencies = new ArrayCollection();
         $this->alterations = new ArrayCollection();
         $this->damageOrResistanceTypes = new ArrayCollection();
+        $this->itemPrefabs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -472,6 +476,36 @@ class World
             // set the owning side to null (unless already changed)
             if ($damageOrResistanceType->getWorld() === $this) {
                 $damageOrResistanceType->setWorld(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ItemPrefab>
+     */
+    public function getItemPrefabs(): Collection
+    {
+        return $this->itemPrefabs;
+    }
+
+    public function addItemPrefab(ItemPrefab $itemPrefab): static
+    {
+        if (!$this->itemPrefabs->contains($itemPrefab)) {
+            $this->itemPrefabs->add($itemPrefab);
+            $itemPrefab->setWorld($this);
+        }
+
+        return $this;
+    }
+
+    public function removeItemPrefab(ItemPrefab $itemPrefab): static
+    {
+        if ($this->itemPrefabs->removeElement($itemPrefab)) {
+            // set the owning side to null (unless already changed)
+            if ($itemPrefab->getWorld() === $this) {
+                $itemPrefab->setWorld(null);
             }
         }
 

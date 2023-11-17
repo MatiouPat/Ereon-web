@@ -90,8 +90,8 @@ class Personage
     #[Groups(["personage:read"])]
     private Collection $spells;
 
-    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Item::class, orphanRemoval: true)]
-    #[Groups(["personage:read"])]
+    #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Item::class, orphanRemoval: true, cascade: ["persist", "remove"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private Collection $items;
 
     #[ORM\ManyToMany(targetEntity: Alteration::class, mappedBy: 'personages')]

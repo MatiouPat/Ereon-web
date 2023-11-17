@@ -84,6 +84,7 @@
                         </tr>
                     </tbody>
                 </table>
+                <button class="btn btn-primary table-action" @click="addItem(1)">Lier une arme</button>
             </div>
             <div>
                 <h3>Armures</h3>
@@ -105,6 +106,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    <button class="btn btn-primary table-action" @click="addItem(2)">Ajouter une armure</button>
                 </div>
             </div>
             <div>
@@ -125,6 +127,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    <button class="btn btn-primary table-action" @click="addItem(3)">Ajouter un objet</button>
                 </div>
             </div>
         </div>
@@ -152,15 +155,18 @@
                     </tr>
                 </tbody>
             </table>
-            <button class="btn btn-primary">Ajouter un sort</button>
+            <button class="btn btn-primary table-action" @click="addItem(4)">Ajouter un sort</button>
         </div>
         <div v-show="pageIndex === 3">
             <basic-input :label="'Race'"></basic-input>
             <basic-input :label="'Classe'"></basic-input>
             <basic-input :label="'Alignement'"></basic-input>
-            <text-input></text-input>
+            <text-input :label="'Biographie'"></text-input>
         </div>
     </div>
+    <Teleport to="#content">
+        <item-list v-if="isItemAdd" :item-type="itemType" @close="isItemAdd = false" @add:item="(item) => linkItem(item)"></item-list>
+    </Teleport>
 </template>
 
 <script lang="ts">
@@ -173,9 +179,10 @@ import SelectInput from '../form/selectInput.vue';
 import { mapGetters } from 'vuex';
 import { Connection } from '../../entity/connection';
 import { Item } from '../../entity/item';
-import { Weapon } from '../../entity/weapon';
 import { Armor } from '../../entity/armor';
 import { DiceService } from '../../services/diceService';
+import ItemList from './itemList.vue';
+import { WeaponPrefab } from '../../entity/weaponprefab';
 
 export default defineComponent({
     data() {
@@ -193,7 +200,9 @@ export default defineComponent({
                 "INFORMATIONS SECONDAIRES"
             ],
             isInitialize: false as boolean,
-            personageUser : -1 as number
+            personageUser: -1 as number,
+            isItemAdd: false as boolean,
+            itemType: 0 as number
         }
     },
     watch: {
@@ -244,22 +253,35 @@ export default defineComponent({
     methods: {
         rollDice: function(computation: string) {
             this.diceService.createDice(this.getUserId, this.getWorld.id, computation, 0);
+        },
+        addItem: function(item: number) {
+            this.itemType = item;
+            this.isItemAdd = true;
+        },
+        linkItem: function(itemPrefab: any) {
+            let item: Item = {
+                itemPrefab: itemPrefab
+            }
+            this.weapons.push(item);
+            this.personage.items.push(item);
+            this.isItemAdd = false;
         }
     },
     components: {
         BasicInput,
         ImageInput,
         TextInput,
-        SelectInput
+        SelectInput,
+        ItemList
     },
     emits: ['update:personage'],
     mounted() {
         this.personage = JSON.parse(JSON.stringify(this.currentPersonage));
         if(this.personage.items) {
             this.personage.items.forEach((item: Item) => {
-                if(item.itemPrefab['@type'] === 'Weapon') {
-                    this.weapons.push(item as Weapon);
-                }else if(item.itemPrefab['@type'] === 'Armor') {
+                if(item.itemPrefab['@type'] === 'WeaponPrefab') {
+                    this.weapons.push(item as WeaponPrefab);
+                }else if(item.itemPrefab['@type'] === 'ArmorPrefab') {
                     this.armors.push(item as Armor);
                 }else {
                     this.items.push(item);
@@ -401,10 +423,6 @@ td {
     border-radius: 50%;
 }
 
-.personage-navigation li.selected {
-    border: solid 2px #D68836;
-}
-
 .personage-body {
     padding-top: 16px;
 }
@@ -426,6 +444,10 @@ td {
     width: 100%;
 }
 
+.table-action {
+    margin: 8px 4px 8px auto;
+}
+
 .dark .personage-navigation {
     background: #1F262D;
 }
@@ -433,7 +455,10 @@ td {
 .dark .personage-navigation li {
     background: #1F262D;
     border: solid 2px #363D45;
+}
 
+.personage-navigation li.selected {
+    border: solid 2px #D68836;
 }
 
 .dark th {
@@ -445,5 +470,4 @@ td {
     background-color: #364049;
     border: solid 3px #4F5A64;
 }
-
-</style>
+</style>../../entity/weaponprefab
