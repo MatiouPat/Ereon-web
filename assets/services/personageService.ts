@@ -1,4 +1,5 @@
 import { Image } from "../entity/image";
+import { Item } from "../entity/item";
 import { NumberOfAttribute } from "../entity/numberofattribute";
 import { NumberOfPoint } from "../entity/numberofpoint";
 import { Personage } from "../entity/personage";
@@ -68,6 +69,9 @@ export class PersonageService
             req.numberOfPoints?.forEach((numberOfPoint: NumberOfPoint) => {
                 numberOfPoint.point = numberOfPoint.point['@id'];
             })
+            req.items.forEach((item: Item) => {
+                item.itemPrefab = '/api/item_prefabs/' + item.itemPrefab.id;
+            })
             return this.personageRepository.createPersonage(req);
         })
     }
@@ -87,7 +91,7 @@ export class PersonageService
      */
     public async updatePersonagePartially(personage: Personage): Promise<void>
     {
-        let req = JSON.parse(JSON.stringify(personage));
+        let req: Personage = JSON.parse(JSON.stringify(personage));
         this.uploadImage(personage.image).then((image) => {
             personage.image = image;
             if (image.id) {
@@ -104,6 +108,9 @@ export class PersonageService
                 numberOfPoint.point = numberOfPoint.point['@id'];
                 this.numberOfPointRepository.updateNumberOfPointPartially(numberOfPoint);
                 req.numberOfPoints[index] = numberOfPoint['@id'];
+            })
+            req.items.forEach((item: Item) => {
+                item.itemPrefab = '/api/item_prefabs/' + item.itemPrefab.id;
             })
             this.personageRepository.updatePersonagePartially(req);
         })

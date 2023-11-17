@@ -1,5 +1,5 @@
 export interface Armor {
     "@id"?: string;
-    id: number;
+    id?: number;
     name?: string;
 }

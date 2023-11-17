@@ -2,27 +2,27 @@
 
 namespace App\Repository;
 
-use App\Entity\Weapon;
+use App\Entity\WeaponPrefab;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Weapon>
+ * @extends ServiceEntityRepository<WeaponPrefab>
  *
- * @method Weapon|null find($id, $lockMode = null, $lockVersion = null)
- * @method Weapon|null findOneBy(array $criteria, array $orderBy = null)
- * @method Weapon[]    findAll()
- * @method Weapon[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method WeaponPrefab|null find($id, $lockMode = null, $lockVersion = null)
+ * @method WeaponPrefab|null findOneBy(array $criteria, array $orderBy = null)
+ * @method WeaponPrefab[]    findAll()
+ * @method WeaponPrefab[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class WeaponRepository extends ServiceEntityRepository
+class WeaponPrefabRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Weapon::class);
+        parent::__construct($registry, WeaponPrefab::class);
     }
 
 //    /**
-//     * @return Weapon[] Returns an array of Weapon objects
+//     * @return WeaponPrefab[] Returns an array of WeaponPrefab objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -36,7 +36,7 @@ class WeaponRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Weapon
+//    public function findOneBySomeField($value): ?WeaponPrefab
 //    {
 //        return $this->createQueryBuilder('w')
 //            ->andWhere('w.exampleField = :val')

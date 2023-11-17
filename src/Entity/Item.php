@@ -2,11 +2,18 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
 use App\Repository\ItemRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ItemRepository::class)]
+#[ApiResource(
+    operations: [
+        new Post
+    ]
+)]
 class Item
 {
     #[ORM\Id]
@@ -19,9 +26,9 @@ class Item
     #[ORM\JoinColumn(nullable: false)]
     private ?Personage $personage = null;
 
-    #[ORM\ManyToOne(inversedBy: 'items')]
+    #[ORM\ManyToOne(inversedBy: 'items', cascade: ["persist", "remove"])]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private ?ItemPrefab $itemPrefab = null;
 
     public function getId(): ?int

@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
 use App\Repository\DamageOrResistanceTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -9,6 +11,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: DamageOrResistanceTypeRepository::class)]
+#[ApiResource(
+    operations: [
+        new Post()
+    ]
+)]
 class DamageOrResistanceType
 {
     #[ORM\Id]
@@ -17,7 +24,7 @@ class DamageOrResistanceType
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'weaponPrefab:read'])]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'type', targetEntity: DamageOrResistance::class, orphanRemoval: true)]

@@ -15,12 +15,12 @@ class Cost
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
     private ?float $value = null;
 
     #[ORM\ManyToOne(inversedBy: 'costs')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
     private ?Money $money = null;
 
     #[ORM\ManyToOne(inversedBy: 'costs')]

@@ -2,11 +2,18 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
 use App\Repository\DamageOrResistanceRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: DamageOrResistanceRepository::class)]
+#[ApiResource(
+    operations: [
+        new Post()
+    ]
+)]
 class DamageOrResistance
 {
     #[ORM\Id]
@@ -15,22 +22,22 @@ class DamageOrResistance
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
     private ?string $value = null;
 
     #[ORM\ManyToOne(inversedBy: 'damageOrResistances')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
     private ?DamageOrResistanceType $type = null;
 
     #[ORM\ManyToOne(inversedBy: 'damages')]
-    private ?Weapon $weapon = null;
-
-    #[ORM\ManyToOne(inversedBy: 'resistances')]
-    private ?Armor $armor = null;
+    private ?Spell $spell = null;
 
     #[ORM\ManyToOne(inversedBy: 'damages')]
-    private ?Spell $spell = null;
+    private ?WeaponPrefab $weaponPrefab = null;
+
+    #[ORM\ManyToOne(inversedBy: 'resistances')]
+    private ?ArmorPrefab $armorPrefab = null;
 
     public function getId(): ?int
     {
@@ -61,30 +68,6 @@ class DamageOrResistance
         return $this;
     }
 
-    public function getWeapon(): ?Weapon
-    {
-        return $this->weapon;
-    }
-
-    public function setWeapon(?Weapon $weapon): static
-    {
-        $this->weapon = $weapon;
-
-        return $this;
-    }
-
-    public function getArmor(): ?Armor
-    {
-        return $this->armor;
-    }
-
-    public function setArmor(?Armor $armor): static
-    {
-        $this->armor = $armor;
-
-        return $this;
-    }
-
     public function getSpell(): ?Spell
     {
         return $this->spell;
@@ -93,6 +76,30 @@ class DamageOrResistance
     public function setSpell(?Spell $spell): static
     {
         $this->spell = $spell;
+
+        return $this;
+    }
+
+    public function getWeaponPrefab(): ?WeaponPrefab
+    {
+        return $this->weaponPrefab;
+    }
+
+    public function setWeaponPrefab(?WeaponPrefab $weaponPrefab): static
+    {
+        $this->weaponPrefab = $weaponPrefab;
+
+        return $this;
+    }
+
+    public function getArmorPrefab(): ?ArmorPrefab
+    {
+        return $this->armorPrefab;
+    }
+
+    public function setArmorPrefab(?ArmorPrefab $armorPrefab): static
+    {
+        $this->armorPrefab = $armorPrefab;
 
         return $this;
     }
