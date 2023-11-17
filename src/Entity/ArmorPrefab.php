@@ -2,17 +2,25 @@
 
 namespace App\Entity;
 
-use App\Repository\ArmorRepository;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use App\Repository\ArmorPrefabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: ArmorRepository::class)]
-class Armor extends ItemPrefab
+#[ORM\Entity(repositoryClass: ArmorPrefabRepository::class)]
+#[ApiResource(
+    operations: [
+        new GetCollection(),
+        new Post()
+    ]
+)]
+class ArmorPrefab extends ItemPrefab
 {
-    #[ORM\OneToMany(mappedBy: 'armor', targetEntity: DamageOrResistance::class)]
-    #[Groups(["personage:read"])]
+
+    #[ORM\OneToMany(mappedBy: 'armorPrefab', targetEntity: DamageOrResistance::class)]
     private Collection $resistances;
 
     public function __construct()
@@ -32,7 +40,7 @@ class Armor extends ItemPrefab
     {
         if (!$this->resistances->contains($resistance)) {
             $this->resistances->add($resistance);
-            $resistance->setArmor($this);
+            $resistance->setArmorPrefab($this);
         }
 
         return $this;
@@ -42,8 +50,8 @@ class Armor extends ItemPrefab
     {
         if ($this->resistances->removeElement($resistance)) {
             // set the owning side to null (unless already changed)
-            if ($resistance->getArmor() === $this) {
-                $resistance->setArmor(null);
+            if ($resistance->getArmorPrefab() === $this) {
+                $resistance->setArmorPrefab(null);
             }
         }
 

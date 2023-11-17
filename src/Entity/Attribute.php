@@ -33,7 +33,7 @@ class Attribute
     private ?string $name = null;
 
     #[ORM\Column(length: 3)]
-    #[Groups(["attribute:read", "personage:read"])]
+    #[Groups(["attribute:read", "personage:read", 'weaponPrefab:read'])]
     private ?string $acronym = null;
 
     #[ORM\ManyToOne(inversedBy: 'attributes')]
@@ -52,11 +52,11 @@ class Attribute
     #[ORM\ManyToMany(targetEntity: Spell::class, mappedBy: 'attributes')]
     private Collection $spells;
 
-    #[ORM\ManyToMany(targetEntity: Weapon::class, mappedBy: 'attributes')]
-    private Collection $weapons;
-
     #[ORM\OneToMany(mappedBy: 'attribute', targetEntity: AlterationChange::class)]
     private Collection $alterationChanges;
+
+    #[ORM\ManyToMany(targetEntity: WeaponPrefab::class, mappedBy: 'attributes')]
+    private Collection $weaponPrefabs;
 
     public function __construct()
     {
@@ -64,8 +64,8 @@ class Attribute
         $this->dices = new ArrayCollection();
         $this->skills = new ArrayCollection();
         $this->spells = new ArrayCollection();
-        $this->weapons = new ArrayCollection();
         $this->alterationChanges = new ArrayCollection();
+        $this->weaponPrefabs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -227,33 +227,6 @@ class Attribute
     }
 
     /**
-     * @return Collection<int, Weapon>
-     */
-    public function getWeapons(): Collection
-    {
-        return $this->weapons;
-    }
-
-    public function addWeapon(Weapon $weapon): static
-    {
-        if (!$this->weapons->contains($weapon)) {
-            $this->weapons->add($weapon);
-            $weapon->addAttribute($this);
-        }
-
-        return $this;
-    }
-
-    public function removeWeapon(Weapon $weapon): static
-    {
-        if ($this->weapons->removeElement($weapon)) {
-            $weapon->removeAttribute($this);
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, AlterationChange>
      */
     public function getAlterationChanges(): Collection
@@ -278,6 +251,33 @@ class Attribute
             if ($alterationChange->getAttribute() === $this) {
                 $alterationChange->setAttribute(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, WeaponPrefab>
+     */
+    public function getWeaponPrefabs(): Collection
+    {
+        return $this->weaponPrefabs;
+    }
+
+    public function addWeaponPrefab(WeaponPrefab $weaponPrefab): static
+    {
+        if (!$this->weaponPrefabs->contains($weaponPrefab)) {
+            $this->weaponPrefabs->add($weaponPrefab);
+            $weaponPrefab->addAttribute($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWeaponPrefab(WeaponPrefab $weaponPrefab): static
+    {
+        if ($this->weaponPrefabs->removeElement($weaponPrefab)) {
+            $weaponPrefab->removeAttribute($this);
         }
 
         return $this;

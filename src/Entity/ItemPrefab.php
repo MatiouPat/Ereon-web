@@ -2,37 +2,54 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
 use App\Repository\ItemPrefabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\DiscriminatorColumn;
+use Doctrine\ORM\Mapping\DiscriminatorMap;
 use Doctrine\ORM\Mapping\InheritanceType;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ItemPrefabRepository::class)]
 #[InheritanceType('JOINED')]
+#[DiscriminatorColumn(name:"item", type: "string")]
+#[DiscriminatorMap(["item" => ItemPrefab::class, "armor" => ArmorPrefab::class, "weapon" => WeaponPrefab::class])]
+#[ApiResource(
+    operations: [
+        new Post()
+    ]
+)]
 class ItemPrefab
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['weaponPrefab:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
     private ?string $description = null;
 
     #[ORM\OneToMany(mappedBy: 'itemPrefab', targetEntity: Cost::class, orphanRemoval: true)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
     private Collection $costs;
 
     #[ORM\OneToMany(mappedBy: 'itemPrefab', targetEntity: Item::class, orphanRemoval: true)]
     private Collection $items;
+
+    #[ORM\ManyToOne(inversedBy: 'itemPrefabs')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['weaponPrefab:write'])]
+    private ?World $world = null;
 
     public function __construct()
     {
@@ -125,6 +142,18 @@ class ItemPrefab
                 $item->setItemPrefab(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getWorld(): ?World
+    {
+        return $this->world;
+    }
+
+    public function setWorld(?World $world): static
+    {
+        $this->world = $world;
 
         return $this;
     }

@@ -2,25 +2,40 @@
 
 namespace App\Entity;
 
-use App\Repository\WeaponRepository;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use App\Repository\WeaponPrefabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: WeaponRepository::class)]
-class Weapon extends ItemPrefab
+#[ORM\Entity(repositoryClass: WeaponPrefabRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['weaponPrefab:read']],
+    denormalizationContext: ['groups' => ['weaponPrefab:write']],
+    operations: [
+        new GetCollection(),
+        new Post()
+    ]
+)]
+#[ApiFilter(SearchFilter::class, properties: ['world.id' => 'exact'])]
+class WeaponPrefab extends ItemPrefab
 {
-    #[ORM\Column]
-    #[Groups(["personage:read"])]
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
     private ?int $scope = null;
 
-    #[ORM\OneToMany(mappedBy: 'weapon', targetEntity: DamageOrResistance::class)]
-    #[Groups(["personage:read"])]
+    #[ORM\OneToMany(mappedBy: 'weaponPrefab', targetEntity: DamageOrResistance::class, cascade: ['persist', 'remove'])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
     private Collection $damages;
 
-    #[ORM\ManyToMany(targetEntity: Attribute::class, inversedBy: 'weapons')]
-    #[Groups(["personage:read"])]
+    #[ORM\ManyToMany(targetEntity: Attribute::class, inversedBy: 'weaponPrefabs')]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
     private Collection $attributes;
 
     public function __construct()
@@ -34,7 +49,7 @@ class Weapon extends ItemPrefab
         return $this->scope;
     }
 
-    public function setScope(int $scope): static
+    public function setScope(?int $scope): static
     {
         $this->scope = $scope;
 
@@ -53,7 +68,7 @@ class Weapon extends ItemPrefab
     {
         if (!$this->damages->contains($damage)) {
             $this->damages->add($damage);
-            $damage->setWeapon($this);
+            $damage->setWeaponPrefab($this);
         }
 
         return $this;
@@ -63,8 +78,8 @@ class Weapon extends ItemPrefab
     {
         if ($this->damages->removeElement($damage)) {
             // set the owning side to null (unless already changed)
-            if ($damage->getWeapon() === $this) {
-                $damage->setWeapon(null);
+            if ($damage->getWeaponPrefab() === $this) {
+                $damage->setWeaponPrefab(null);
             }
         }
 
