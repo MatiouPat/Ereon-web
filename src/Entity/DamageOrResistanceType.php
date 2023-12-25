@@ -24,7 +24,7 @@ class DamageOrResistanceType
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read", 'weaponPrefab:read'])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'armorPrefab:read'])]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'type', targetEntity: DamageOrResistance::class, orphanRemoval: true)]

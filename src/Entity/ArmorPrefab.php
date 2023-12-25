@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
@@ -9,18 +11,23 @@ use App\Repository\ArmorPrefabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ArmorPrefabRepository::class)]
 #[ApiResource(
+    normalizationContext: ['groups' => ['armorPrefab:read']],
+    denormalizationContext: ['groups' => ['armorPrefab:write']],
     operations: [
         new GetCollection(),
         new Post()
     ]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['world.id' => 'exact'])]
 class ArmorPrefab extends ItemPrefab
 {
 
-    #[ORM\OneToMany(mappedBy: 'armorPrefab', targetEntity: DamageOrResistance::class)]
+    #[ORM\OneToMany(mappedBy: 'armorPrefab', targetEntity: DamageOrResistance::class, cascade: ['persist', 'remove'])]
+    #[Groups(["personage:read", 'armorPrefab:read', 'armorPrefab:write'])]
     private Collection $resistances;
 
     public function __construct()

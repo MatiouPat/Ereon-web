@@ -46,14 +46,14 @@ a {
 }
 
 .btn-primary {
-    background-color: #D68836;
+    background-color: #D87D40;
     color: #F3F4F4;
 }
 
 .btn-secondary {
     background: none;
     color: #090D11;
-    border: solid 1px #D68836;
+    border: solid 1px #D87D40;
 }
 
 .dark .btn-secondary {
@@ -72,3 +72,14 @@ a {
     background-color: #f8d7da;
     border-color: #f5c6cb;
 }
+
+textarea {
+    overflow: auto;
+    accent-color: #D87D40;
+}
+
+input[type="range"] {
+    display: block;
+    width: 100%;
+    accent-color: #D87D40;
+  }

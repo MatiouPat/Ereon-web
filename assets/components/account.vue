@@ -276,7 +276,7 @@ import { MapService } from '../services/mapService';
     }
 
     .navigation .layer.selected {
-        background-color: #D68836;
+        background-color: #D87D40;
         outline: solid 2px #565656;
         border-radius: 20%;
     }
@@ -412,12 +412,12 @@ import { MapService } from '../services/mapService';
     }
 
     .world:hover > picture {
-        outline: solid 4px #D68836;
+        outline: solid 4px #D87D40;
         transition: all 40ms ease-in-out;
     }
 
     .world:hover > h2 {
-        color: #D68836;
+        color: #D87D40;
         transition: all .2s ease-in-out;
     }
 
