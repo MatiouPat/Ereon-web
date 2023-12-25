@@ -82,4 +82,12 @@ input[type="range"] {
     display: block;
     width: 100%;
     accent-color: #D87D40;
-  }
+}
+
+strong {
+    font-weight: 700;
+}
+
+em {
+    font-style: italic;
+}

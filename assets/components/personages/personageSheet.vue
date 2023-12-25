@@ -154,7 +154,7 @@
                         <td style="text-align: left;">{{ spell.name }}</td>
                         <td style="text-align: left;">{{ spell.attributes[0].acronym }}</td>
                         <td style="text-align: right;">{{ spell.scope }}</td>
-                        <td style="text-align: left;">{{ spell.description }}</td>
+                        <td style="text-align: left;" v-html="spell.description"></td>
                         <td style="text-align: left;">{{ spell.expenses[0].value }} {{ spell.expenses[0].point.acronym }}</td>
                         <td style="text-align: left;"><img v-if="spell.damages[0]" @click="rollDice(spell.damages[0].value)" width="16" height="16" :src="getIsDarkTheme ? '/build/images/d6_white.svg' : '/build/images/d6_black.svg'" alt="d6"><span v-else>NaN</span></td>
                     </tr>
