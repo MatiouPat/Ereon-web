@@ -121,6 +121,8 @@ export default defineComponent({
             personage.biography = '';
             personage.image = {} as Image;
             personage.world = '/api/worlds/' + this.getWorld.id;
+            personage.items = [];
+            personage.spells = [];
             this.attributeRepository.findAttributeByWorld(this.getWorld.id).then((attributes) => {
                 personage.numberOfAttributes = [];
                 attributes.forEach((attribute: Attribute) => {
@@ -270,10 +272,11 @@ export default defineComponent({
     }
 
     .parameters-body {
+        display: flex;
+        flex-direction: column;
         height: calc(100% - 88px);
         width: 100%;
         padding: 24px;
-        overflow-y: scroll;
     }
 
     .parameters-footer {

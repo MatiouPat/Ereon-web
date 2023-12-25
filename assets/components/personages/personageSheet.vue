@@ -14,14 +14,19 @@
                     </div>
                     <div class="personage-point-title">
                         <span>{{ numberOfPoint.point.acronym }}</span>
-                        <img :src="getIsDarkTheme ? '/build/images/sheets/point_white.svg' : '/build/images/sheets/point_black.svg'" alt="" width="80" height="80">
-                        <div class="point-liquid" :style="{ backgroundColor: (numberOfPoint.point.acronym === 'PV' ? '#e63946' : '#457b9d'), clipPath: 'inset(' + (100 - numberOfPoint.current * 100 / numberOfPoint.max) + '% 0 0 0)'}"></div>
+                        <div class="personage-point-group">
+                            <img :src="getIsDarkTheme ? '/build/images/sheets/point_white.svg' : '/build/images/sheets/point_black.svg'" alt="" width="80" height="80">
+                            <div class="point-liquid" :style="{ backgroundColor: (numberOfPoint.point.acronym === 'PV' ? '#e63946' : '#457b9d'), clipPath: 'inset(' + (100 - numberOfPoint.current * 100 / numberOfPoint.max) + '% 0 0 0)'}"></div>
+                        </div>
                     </div>
                     <basic-input class="personage-point-form" :is-number="true" :model-value="numberOfPoint.current" @update:model-value="(modelValue) => numberOfPoint.current = modelValue"></basic-input>
                 </div>
                 <div class="personage-shield">
                     <span>Armure</span>
-                    <img :src="getIsDarkTheme ? '/build/images/sheets/shield_white.svg' : '/build/images/sheets/shield_black.svg'" alt="" width="80" height="80">
+                    <div class="personage-shield-wrapper">
+                        <span class="personage-shield-value">{{ armorsStat }}</span>
+                        <img :src="getIsDarkTheme ? '/build/images/sheets/shield_white.svg' : '/build/images/sheets/shield_black.svg'" alt="" width="80" height="80">
+                    </div>
                 </div>
             </div>
         </div>
@@ -60,7 +65,7 @@
                 </div>
             </section>
         </div>
-        <div v-show="pageIndex === 1">
+        <div v-show="pageIndex === 1" class="personage-body-sections">
             <div>
                 <h3>Armes</h3>
                 <table>
@@ -98,15 +103,15 @@
                         </thead>
                         <tbody>
                             <tr :key="key" v-for="(armor, key) in armors">
-                                <td style="text-align: right;">{{ armor.itemPrefab.name }}</td>
-                                <td></td>
+                                <td style="text-align: left;">{{ armor.itemPrefab.name }}</td>
+                                <td style="text-align: right;">{{ armor.itemPrefab.resistances[0].value }}</td>
                             </tr>
                             <tr v-if="!armors.length">
                                 <td colspan="2" style="text-align: center;">Le personage ne possède aucune armure</td>
                             </tr>
                         </tbody>
                     </table>
-                    <button class="btn btn-primary table-action" @click="addItem(2)">Ajouter une armure</button>
+                    <button class="btn btn-primary table-action" @click="addItem(2)">Lier une armure</button>
                 </div>
             </div>
             <div>
@@ -127,11 +132,11 @@
                             </tr>
                         </tbody>
                     </table>
-                    <button class="btn btn-primary table-action" @click="addItem(3)">Ajouter un objet</button>
+                    <button class="btn btn-primary table-action" @click="addItem(3)">Lier un objet</button>
                 </div>
             </div>
         </div>
-        <div v-show="pageIndex === 2">
+        <div v-show="pageIndex === 2" class="personage-body-sections">
             <h3>Sorts</h3>
             <table>
                 <thead>
@@ -145,7 +150,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr :key="key" v-for="(spell, key) in personage.spells">
+                    <tr :key="key" v-for="(spell, key) in spells">
                         <td style="text-align: left;">{{ spell.name }}</td>
                         <td style="text-align: left;">{{ spell.attributes[0].acronym }}</td>
                         <td style="text-align: right;">{{ spell.scope }}</td>
@@ -155,17 +160,19 @@
                     </tr>
                 </tbody>
             </table>
-            <button class="btn btn-primary table-action" @click="addItem(4)">Ajouter un sort</button>
+            <button class="btn btn-primary table-action" @click="addItem(4)">Lier un sort</button>
         </div>
-        <div v-show="pageIndex === 3">
-            <basic-input :label="'Race'"></basic-input>
-            <basic-input :label="'Classe'"></basic-input>
-            <basic-input :label="'Alignement'"></basic-input>
+        <div v-show="pageIndex === 3" class="personage-body-sections">
+            <div class="secondary-columns-3">
+                <basic-input :label="'Race'"></basic-input>
+                <basic-input :label="'Classe'"></basic-input>
+                <basic-input :label="'Alignement'"></basic-input>
+            </div>
             <text-input :label="'Biographie'"></text-input>
         </div>
     </div>
     <Teleport to="#content">
-        <item-list v-if="isItemAdd" :item-type="itemType" @close="isItemAdd = false" @add:item="(item) => linkItem(item)"></item-list>
+        <item-list v-if="isItemAdd" :item-type="itemType" @close="isItemAdd = false" @add:item="(item) => linkItem(item)" @add:spell="(spell) => linkSpell(spell)"></item-list>
     </Teleport>
 </template>
 
@@ -179,10 +186,11 @@ import SelectInput from '../form/selectInput.vue';
 import { mapGetters } from 'vuex';
 import { Connection } from '../../entity/connection';
 import { Item } from '../../entity/item';
-import { Armor } from '../../entity/armor';
 import { DiceService } from '../../services/diceService';
 import ItemList from './itemList.vue';
 import { WeaponPrefab } from '../../entity/weaponprefab';
+import { ArmorPrefab } from '../../entity/armorprefab';
+import { Spell } from '../../entity/spell';
 
 export default defineComponent({
     data() {
@@ -192,6 +200,7 @@ export default defineComponent({
             weapons: [] as Item[],
             armors: [] as Item[],
             items: [] as Item[],
+            spells: [] as Spell[],
             pageIndex: 0 as number,
             pages: [
                 "STATISTIQUES",
@@ -248,6 +257,14 @@ export default defineComponent({
                 });
             });
             return choices;
+        },
+        armorsStat: function()
+        {
+            let armorStat = 0;
+            this.armors.forEach((armor: Item) => {
+                armorStat = armorStat + parseInt(armor.itemPrefab.resistances[0].value) 
+            })
+            return armorStat
         }
     },
     methods: {
@@ -262,8 +279,20 @@ export default defineComponent({
             let item: Item = {
                 itemPrefab: itemPrefab
             }
-            this.weapons.push(item);
             this.personage.items.push(item);
+            if(this.itemType === 1) {
+                this.weapons.push(item);
+            }else if(this.itemType === 2) {
+                this.armors.push(item);
+            }else if(this.itemType === 3) {
+                this.items.push(item);
+            }
+            this.isItemAdd = false;
+        },
+        linkSpell: function(spell: Spell)
+        {
+            this.personage.spells.push(spell);
+            this.spells.push(spell);
             this.isItemAdd = false;
         }
     },
@@ -282,11 +311,14 @@ export default defineComponent({
                 if(item.itemPrefab['@type'] === 'WeaponPrefab') {
                     this.weapons.push(item as WeaponPrefab);
                 }else if(item.itemPrefab['@type'] === 'ArmorPrefab') {
-                    this.armors.push(item as Armor);
+                    this.armors.push(item as ArmorPrefab);
                 }else {
                     this.items.push(item);
                 }
             });
+            this.personage.spells.forEach((spell: Spell) => {
+                this.spells.push(spell);
+            })
         }
         if(this.personage.user) {
             this.personageUser = this.personage.user.id;
@@ -357,18 +389,28 @@ td {
 .personage-point-max-label {
     position: absolute;
     top: calc(50% - 7px);
-    left: 0;
+    left: 32px;
 }
 
 .personage-point-title {
-    position: relative;
     display: flex;
+    justify-content: center;
     align-items: center;
     gap: 8px;
     margin: 8px 0;
 }
 
+.personage-point-group {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin-left: 24px;
+}
+
 .personage-point-title img {
+    position: absolute;
+    top: 0;
+    left: 0;
     z-index: 2;
 }
 
@@ -379,8 +421,8 @@ td {
 
 .point-liquid {
     position: absolute;
-    bottom: 2px;
-    right: 8px;
+    top: 8px;
+    left: 2px;
     width: 70px;
     height: 70px;
     border-radius: 70px;
@@ -389,6 +431,19 @@ td {
 .personage-shield {
     display: flex;
     align-items: center;
+}
+
+.personage-shield-wrapper {
+    position: relative;
+}
+
+.personage-shield-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 700;
+    font-size: 1.25rem;
 }
 
 .personage-navigation {
@@ -425,12 +480,15 @@ td {
 
 .personage-body {
     padding-top: 16px;
+    overflow-y: scroll;
 }
 
 .personage-body-sections {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    width: 100%;
+    padding-right: 8px;
 }
 
 .personage-attributes {
@@ -446,6 +504,14 @@ td {
 
 .table-action {
     margin: 8px 4px 8px auto;
+}
+
+.secondary-columns-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 16px;
+    row-gap: 8px;
+    margin-bottom: 8px;
 }
 
 .dark .personage-navigation {
@@ -470,4 +536,4 @@ td {
     background-color: #364049;
     border: solid 3px #4F5A64;
 }
-</style>../../entity/weaponprefab
+</style>

@@ -22,12 +22,12 @@ class DamageOrResistance
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write', 'armorPrefab:read', 'armorPrefab:write', 'spell:read', 'spell:write'])]
     private ?string $value = null;
 
     #[ORM\ManyToOne(inversedBy: 'damageOrResistances')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write', 'armorPrefab:read', 'armorPrefab:write', 'spell:read', 'spell:write'])]
     private ?DamageOrResistanceType $type = null;
 
     #[ORM\ManyToOne(inversedBy: 'damages')]

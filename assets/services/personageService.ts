@@ -3,6 +3,7 @@ import { Item } from "../entity/item";
 import { NumberOfAttribute } from "../entity/numberofattribute";
 import { NumberOfPoint } from "../entity/numberofpoint";
 import { Personage } from "../entity/personage";
+import { Spell } from "../entity/spell";
 import { ImageRepository } from "../repository/imageRepository";
 import { NumberOfAttributeRepository } from "../repository/numberofattributeRepository";
 import { NumberOfPointRepository } from "../repository/numberofpointRepository";
@@ -72,6 +73,9 @@ export class PersonageService
             req.items.forEach((item: Item) => {
                 item.itemPrefab = '/api/item_prefabs/' + item.itemPrefab.id;
             })
+            req.spells.forEach((spell: Spell, index: number) => {
+                req.spells[index] = '/api/spells/' + spell.id;
+            })
             return this.personageRepository.createPersonage(req);
         })
     }
@@ -109,8 +113,15 @@ export class PersonageService
                 this.numberOfPointRepository.updateNumberOfPointPartially(numberOfPoint);
                 req.numberOfPoints[index] = numberOfPoint['@id'];
             })
-            req.items.forEach((item: Item) => {
-                item.itemPrefab = '/api/item_prefabs/' + item.itemPrefab.id;
+            req.items.forEach((item: Item, index: number) => {
+                if(item.id){
+                    req.items[index] = '/api/items/' + item.id;
+                }else {
+                    item.itemPrefab = '/api/item_prefabs/' + item.itemPrefab.id;
+                }
+            })
+            req.spells.forEach((spell: Spell, index: number) => {
+                req.spells[index] = '/api/spells/' + spell.id;
             })
             this.personageRepository.updatePersonagePartially(req);
         })

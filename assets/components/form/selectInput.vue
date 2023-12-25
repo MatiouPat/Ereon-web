@@ -1,5 +1,5 @@
 <template>
-    <div class="form-group" :class="label ? 'label' : null">
+    <div class="form-group">
         <label v-if="label">{{ label }}</label>
         <select v-if="typeof modelValue == 'string'" v-model="value" @change="$emit('update:modelValue', value)" :style="{background: background}">
             <option v-if="hasDefault" value="-1">Selectioner une valeur</option>
@@ -51,7 +51,6 @@ export default defineComponent({
 .form-group {
     position: relative;
     width: 100%;
-    height: 28px;
 }
 
 .form-group::after {
@@ -71,18 +70,18 @@ export default defineComponent({
     background-color: #F3F4F4;
 }
 
-.form-group.label {
-    height: 48px;
+label {
+    display: block;
+    max-width: 100%;
+    padding: 6px 0;
+    transition: all .1s ease;
 }
 
 select {
-    position: absolute;
-    bottom: 0;
-    left: 0;
     display: block;
     background: none;
     border: none;
-    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    border: solid 1px #090D11;
     width: 100%;
     font-family: Oswald, sans-serif;
     -moz-appearance:none; /* Firefox */
@@ -93,10 +92,9 @@ select {
     background-position: right 0.7rem top 50%;
     background-size: 0.65rem auto;
 }
-
 .dark select {
     color: #F3F4F4;
-    box-shadow: inset 0 -1px 0 #F3F4F4;
+    border: solid 1px #F3F4F4;
 
 }
 </style>

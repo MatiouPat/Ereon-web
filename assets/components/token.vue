@@ -557,7 +557,7 @@ import { User } from '../entity/user';
     h3 {
         font-size: 1.2rem;
         font-weight: 700;
-        color: #D68836;
+        color: #090D11;
         margin-bottom: 4px;
     }
 
@@ -571,5 +571,9 @@ import { User } from '../entity/user';
 
     .dark .modal-box {
         background-color: #2b2a33;
+    }
+
+    .dark h3 {
+        color: #F3F4F4;
     }
 </style>

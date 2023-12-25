@@ -53,30 +53,17 @@ export default defineComponent({
 
 <style>
 
-    .form-group {
-        height: 100%;
-    }
-
-    .form-group.label .ql-toolbar {
-        top: 20px;
-    }
-
-    .form-group:hover {
-        background: rgba(0, 0, 0, .04);
-    }
-
     .text-label {
         display: block;
         max-width: 100%;
-        padding: 4px;
+        padding: 6px 0;
         transition: all .1s ease;
     }
 
     .ql-toolbar {
         color: #333333;
         background: #FFFFFF;
-        border: none !important;
-        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+        border: solid 1px rgba(0, 0, 0, 0.3);
         border-style: inset;
         transition: all .05s ease;
     }
@@ -85,15 +72,21 @@ export default defineComponent({
         /*background: #1c1b22;*/
         background: none;
         color: #b3b3b3;
-        box-shadow: inset 0 -1px 0 #F3F4F4;
     }
 
     .dark .form-group:has(.ql-editor:focus) .ql-toolbar {
-        box-shadow: inset 0 -2px 0 rgb(214, 136, 54) !important;
+        border: solid 1px #D87D40 !important;
+        background: #1c1b22;
     }
 
-    .dark .form-group:has(.ql-editor:focus) {
+    .dark .form-group:has(.ql-editor:focus) .html-editor {
+        border: solid 1px #D87D40 !important;
+        border-top: none !important;
         background: #1c1b22;
+    }
+
+    .dark .form-group:has(.ql-editor:focus) .text-label {
+        color: #D87D40;
     }
 
     .dark .ql-fill {
@@ -105,8 +98,9 @@ export default defineComponent({
     }
 
     .html-editor {
-        border: none !important;
-        height: 100%;
+        border: solid 1px rgba(0, 0, 0, 0.3);
+        border-top: none;
+        height: auto;
         transition: all .15s ease;
     }
 

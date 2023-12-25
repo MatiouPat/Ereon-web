@@ -33,7 +33,7 @@ class Attribute
     private ?string $name = null;
 
     #[ORM\Column(length: 3)]
-    #[Groups(["attribute:read", "personage:read", 'weaponPrefab:read'])]
+    #[Groups(["attribute:read", "personage:read", 'weaponPrefab:read', 'spell:read'])]
     private ?string $acronym = null;
 
     #[ORM\ManyToOne(inversedBy: 'attributes')]

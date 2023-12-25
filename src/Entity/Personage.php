@@ -87,7 +87,7 @@ class Personage
     private Collection $dices;
 
     #[ORM\ManyToMany(targetEntity: Spell::class, mappedBy: 'personages')]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'personage:write'])]
     private Collection $spells;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Item::class, orphanRemoval: true, cascade: ["persist", "remove"])]

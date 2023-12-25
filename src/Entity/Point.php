@@ -29,7 +29,7 @@ class Point
     private ?int $id = null;
 
     #[ORM\Column(length: 3)]
-    #[Groups(['point:read', "personage:read"])]
+    #[Groups(['point:read', "personage:read", 'spell:read'])]
     private ?string $acronym = null;
 
     #[ORM\ManyToOne(inversedBy: 'points')]
