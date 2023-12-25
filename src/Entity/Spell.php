@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Post;
 use App\Repository\SpellRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -35,7 +36,7 @@ class Spell
     #[Groups(["personage:read", 'spell:read', 'spell:write'])]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(["personage:read", 'spell:read', 'spell:write'])]
     private ?string $description = null;
 

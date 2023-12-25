@@ -129,7 +129,7 @@
                                 <td style="text-align: left;">{{ spell.name }}</td>
                                 <td style="text-align: left;">{{ spell.attributes[0].acronym }}</td>
                                 <td style="text-align: right;">{{ spell.scope }}</td>
-                                <td style="text-align: left;">{{ spell.description }}</td>
+                                <td style="text-align: left;" v-html="spell.description"></td>
                                 <td style="text-align: left;">{{ spell.expenses[0].value }} {{ spell.expenses[0].point.acronym }}</td>
                             </tr>
                         </tbody>
@@ -149,7 +149,7 @@
                                     <select-input :label="'Point'" :model-value="newSpell.expenses[0].point.id" :choices="pointsChoice" :background="getIsDarkTheme ? '#4F5A64' : '#FFFFFF'" @update:model-value="(modelValue) => newSpell.expenses[0].point = '/api/points/' + modelValue"></select-input>
                                 </div>
                             </div>
-                            <basic-input :label="'Description'" :model-value="newSpell.description" @update:model-value="modelValue => newSpell.description = modelValue"></basic-input>
+                            <text-input :label="'Description'" :model-value="newSpell.description" @update:model-value="modelValue => newSpell.description = modelValue"></text-input>
                         </div>
                     </div>
                     <button class="btn btn-primary" @click="createItemAndLink">Créer et lier le sort</button>
