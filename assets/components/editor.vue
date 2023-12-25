@@ -507,7 +507,7 @@ import { Asset } from '../entity/asset';
         font-weight: 700;
         font-size: 1.2rem;
         color: #FFF;
-        background-color: #D68836;
+        background-color: #D87D40;
         border: none;
         border-radius: 0;
         cursor: pointer;
@@ -529,7 +529,7 @@ import { Asset } from '../entity/asset';
         font-weight: 700;
         text-align: center;
         color: #FFF;
-        background-color: #D68836;
+        background-color: #D87D40;
         margin-bottom: 4px;
     }
 

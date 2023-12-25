@@ -239,7 +239,7 @@ h2 {
 }
 
 .music-controls-loop.active {
-    fill: #D68836;
+    fill: #D87D40;
     transform: rotate(360deg);
 }
 

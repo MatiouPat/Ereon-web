@@ -204,7 +204,7 @@ import { ConnectionService } from '../services/connectionService';
         left: 80%;
         width: 40px;
         height: 40px;
-        background-color: #D68836;
+        background-color: #D87D40;
         border: none;
         cursor: pointer;
         padding: 4px;

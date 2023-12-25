@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Repository\ItemPrefabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -19,28 +22,32 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[DiscriminatorColumn(name:"item", type: "string")]
 #[DiscriminatorMap(["item" => ItemPrefab::class, "armor" => ArmorPrefab::class, "weapon" => WeaponPrefab::class])]
 #[ApiResource(
+    normalizationContext: ['groups' => ['itemPrefab:read']],
+    denormalizationContext: ['groups' => ['itemPrefab:write']],
     operations: [
+        new GetCollection(),
         new Post()
     ]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['world.id' => 'exact'])]
 class ItemPrefab
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['weaponPrefab:read'])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'armorPrefab:read', 'itemPrefab:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write', 'armorPrefab:read', 'armorPrefab:write', 'itemPrefab:read', 'itemPrefab:write'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write', 'armorPrefab:read', 'armorPrefab:write', 'itemPrefab:read', 'itemPrefab:write'])]
     private ?string $description = null;
 
     #[ORM\OneToMany(mappedBy: 'itemPrefab', targetEntity: Cost::class, orphanRemoval: true)]
-    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write'])]
+    #[Groups(["personage:read", 'weaponPrefab:read', 'weaponPrefab:write', 'armorPrefab:read', 'armorPrefab:write', 'itemPrefab:read', 'itemPrefab:write'])]
     private Collection $costs;
 
     #[ORM\OneToMany(mappedBy: 'itemPrefab', targetEntity: Item::class, orphanRemoval: true)]
@@ -48,7 +55,7 @@ class ItemPrefab
 
     #[ORM\ManyToOne(inversedBy: 'itemPrefabs')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['weaponPrefab:write'])]
+    #[Groups(['weaponPrefab:write', 'armorPrefab:write', 'itemPrefab:write'])]
     private ?World $world = null;
 
     public function __construct()

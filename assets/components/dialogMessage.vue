@@ -48,7 +48,7 @@ import { defineComponent } from 'vue';
 
     .message-result {
         display: inline-block;
-        border: 1px solid #D68836;
+        border: 1px solid #D87D40;
         padding: 4px;
         font-weight: 700;
     }

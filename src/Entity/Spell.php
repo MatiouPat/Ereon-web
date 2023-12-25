@@ -2,6 +2,11 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\Repository\SpellRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -9,27 +14,37 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: SpellRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['spell:read']],
+    denormalizationContext: ['groups' => ['spell:write']],
+    operations: [
+        new GetCollection(),
+        new Post()
+    ]
+)]
+#[ApiFilter(SearchFilter::class, properties: ['world.id' => 'exact'])]
 class Spell
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["personage:read", 'spell:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'spell:read', 'spell:write'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'spell:read', 'spell:write'])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'spell:read', 'spell:write'])]
     private ?int $scope = null;
 
     #[ORM\ManyToMany(targetEntity: Attribute::class, inversedBy: 'spells')]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'spell:read', 'spell:write'])]
     private Collection $attributes;
 
     #[ORM\ManyToMany(targetEntity: Personage::class, inversedBy: 'spells')]
@@ -37,14 +52,15 @@ class Spell
 
     #[ORM\ManyToOne(inversedBy: 'spells')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['spell:write'])]
     private ?World $world = null;
 
-    #[ORM\OneToMany(mappedBy: 'spell', targetEntity: Expense::class, orphanRemoval: true)]
-    #[Groups(["personage:read"])]
+    #[ORM\OneToMany(mappedBy: 'spell', targetEntity: Expense::class, orphanRemoval: true, cascade: ["persist", "remove"])]
+    #[Groups(["personage:read", 'spell:read', 'spell:write'])]
     private Collection $expenses;
 
     #[ORM\OneToMany(mappedBy: 'spell', targetEntity: DamageOrResistance::class)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'spell:read', 'spell:write'])]
     private Collection $damages;
 
     public function __construct()

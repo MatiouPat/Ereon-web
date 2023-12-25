@@ -15,11 +15,11 @@ class Expense
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'spell:read', 'spell:write'])]
     private ?int $value = null;
 
     #[ORM\ManyToOne(inversedBy: 'expenses')]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", 'spell:read', 'spell:write'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Point $point = null;
 
