@@ -4,7 +4,7 @@
             <div class="map" @click="chooseMap(map.id)" v-for="(map, key) in maps" :key="key" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
                 <span>{{ map.name }}</span>
                 <ul class="map-actions">
-                    <li><img @click.stop="showMapParameter(key)" src="build/images/settings.svg" alt="Paramètres" width="16" height="16"></li>
+                    <li><img @click.stop="showMapParameter(key)" :src="getIsDarkTheme ? '/build/images/icons/settings_white.svg' : '/build/images/icons/settings_black.svg'" alt="Paramètres" width="16" height="16"></li>
                 </ul>
             </div>
         </div>
@@ -16,47 +16,43 @@
             </svg>
         </button>
         <Teleport to="#editor">
-            <div v-if="isParametersDisplayed" class="modal-wrapper">
-                <div class="modal-box">
-                    <form>
-                        <div class="form-part">
+            <div class="modal-wrapper" v-if="isParametersDisplayed">
+                <div class="modal">
+                    <div class="modal-header">
+                            <h2>Informations carte</h2>
+                            <img width="24" height="24" @click="isParametersDisplayed = false" src="build/images/icons/close.svg" alt="Fermer">
+                    </div>   
+                    <div class="modal-body">
+                        <div>
                             <h3>Positionnement</h3>
-                            <div class="row">
-                                <div class="field">
-                                    <label>Name</label>
-                                    <input v-model="map.name" type="text">
+                            <div class="form-part">
+                                <basic-input :model-value="map.name" :label="'Nom'"  @update:model-value="(modelValue) => map.name = modelValue"></basic-input>
+                                <div class="row">
+                                    <div class="field">
+                                        <label>Dynamic light</label>
+                                        <input v-model="map.hasDynamicLight" type="checkbox">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="field">
-                                    <label>Dynamic light</label>
-                                    <input v-model="map.hasDynamicLight" type="checkbox">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="field">
-                                    <label>Width</label>
-                                    <input v-model="map.width" type="number">
-                                </div>
-                                <div class="field">
-                                    <label>Height</label>
-                                    <input v-model="map.height" type="number">
-                                </div>
+                                <basic-input :is-number="true" :model-value="map.width" :label="'Largeur'"  @update:model-value="(modelValue) => map.width = modelValue"></basic-input>
+                                <basic-input :is-number="true" :model-value="map.height" :label="'Hauteur'"  @update:model-value="(modelValue) => map.height = modelValue"></basic-input>
                             </div>
                         </div>
-                        <div class="form-part" v-if="connections.length">
-                            <h3>Sur map</h3>
+                        <div v-if="connections.length">
+                            <h3>Joueurs</h3>
                             <div v-for="connection in connections" :key="connection.id">
-                                <label>{{ connection.username }}</label>
-                                <input type="checkbox" v-model="connection.checked" :checked="connection.checked">
+                                <label>{{ connection.user.username }}</label>
+                                <input type="checkbox" :value="connection" :checked="isChecked(connection)" @change.prevent="updateConnection(connection)">
                             </div>
                         </div>
-                        <div class="form-part" v-else >
-                            <h3>Sur map</h3>
+                        <div v-else >
+                            <h3>Joueurs</h3>
                             <span>Aucun joueur présent sur cette partie</span>
                         </div>
-                        <button type="button" class="btn btn-primary" @click="submitForm">Valider</button>
-                    </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" @click="cancel">Annuler</button>
+                        <button type="button" class="btn btn-primary" @click="submitForm">Modifier la carte</button>
+                    </div>
                 </div>
             </div>
         </Teleport>
@@ -70,8 +66,10 @@ import { Connection } from '../entity/connection';
 import { Map } from '../entity/map';
 import { MapService } from '../services/mapService';
 import { ConnectionService } from '../services/connectionService';
+import basicInput from './form/basicInput.vue';
 
     export default defineComponent({
+  components: { basicInput },
         data() {
             return {
                 mapService: new MapService as MapService,
@@ -92,11 +90,7 @@ import { ConnectionService } from '../services/connectionService';
                 /**
                  * The list of connections between this world and the various users
                  */
-                connections: [] as {
-                    id: number
-                    username: string
-                    checked: boolean
-                }[]
+                connections: [] as Connection[]
             }
         },
         computed: {
@@ -104,7 +98,8 @@ import { ConnectionService } from '../services/connectionService';
                 'isGameMaster',
                 'getCurrentMapId',
                 'getPlayers',
-                "getWorld"
+                "getWorld",
+                'getIsDarkTheme'
             ]),
         },
         methods: {
@@ -141,26 +136,36 @@ import { ConnectionService } from '../services/connectionService';
                 this.map = this.maps[key];
                 this.connections = [];
                 this.getPlayers.forEach((player: Connection) => {
-                    this.connections.push({
-                        id: player.id,
-                        username: player.user.username,
-                        checked: this.map.id == player.currentMap.id
-                    })
+                    this.connections.push(player)
                 });
+            },
+            isChecked: function(searchConnection: Connection) {
+                return this.map.connections.some(
+                    (connection: Connection) => connection.id === searchConnection.id
+                );
+            },
+            updateConnection: function(connection: Connection) {
+                if(!this.isChecked(connection)) {
+                    this.map.connections.push(connection)
+                }
+                return
+            },
+            cancel: function() {
+                this.isParametersDisplayed = false;
+                this.mapService.findAllMaps().then(maps => {
+                    this.maps = maps;
+                })
             },
             /**
              * Change map settings after form submission
              */
             submitForm: function() {
-                let connections: number[] = []
-                this.connections.forEach(connection => {
-                    if(connection.checked) {
-                        connections.push(connection.id);
-                    }
-                });
-                this.mapService.updateMapPartially(this.map, connections)
+                this.mapService.updateMapPartially(this.map)
                 this.isParametersDisplayed = false
                 this.isDisplayed = false;
+                this.mapService.findAllMaps().then(maps => {
+                    this.maps = maps;
+                })
             },
             /**
              * Hide context box when clicked outside it
@@ -182,6 +187,10 @@ import { ConnectionService } from '../services/connectionService';
 </script>
 
 <style scoped>
+
+    h3 {
+        font-size: 1.2rem;
+    }
 
     .map-box {
         position: absolute;
@@ -292,27 +301,75 @@ import { ConnectionService } from '../services/connectionService';
         position: fixed;
         top: 0;
         left: 0;
-        z-index: 10;
+        z-index: 5;
         display: flex;
+        justify-content: center;
+        align-items: center;
         width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.75);
+        height: 100dvh;
+        background-color: rgba(0, 0, 0, 0.8);
     }
 
-    .modal-box {
+    .modal {
         display: block;
-        width: 400px;
-        margin: auto;
-        padding: 16px;
-        background-color: #FFF;
+        min-width: 256px;
+        width: 800px;
+        min-height: 256px;
+        height: 100%;
+        max-height: 480px;
+        background-color: #FFFFFF;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border-bottom: solid 1px #73808C;
+        background-color: #BBBFC3;
+        height: 40px;
+    }
+
+    .modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        height: calc(100% - 88px);
+        width: 100%;
+        padding: 24px;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        height: 48px;
+        gap: 8px;
+        padding: 8px;
+        border-top: solid 1px #73808C;
+    }
+
+    .form-part {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 16px;
+        row-gap: 8px;
     }
 
     .dark .map-box {
         background-color: #1F262D;
     }
 
-    .dark .modal-box {
+    .dark .map {
         background-color: #364049;
+    }
+
+    .dark .modal-header {
+        background-color: #0E1318;
+    }
+
+    .dark .modal-body, .dark .modal-footer {
+        background-color: #4F5A64;
     }
 
 </style>

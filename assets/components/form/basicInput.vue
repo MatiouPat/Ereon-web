@@ -48,8 +48,8 @@ export default defineComponent({
 label {
     display: block;
     max-width: 100%;
-    padding: 6px 0;
     transition: all .1s ease;
+    line-height: 28px;
 }
 
 input {

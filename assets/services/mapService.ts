@@ -1,3 +1,4 @@
+import { Connection } from "../entity/connection";
 import { Map } from "../entity/map";
 import { ConnectionRepository } from "../repository/connectionRepository";
 import { MapRepository } from "../repository/mapRepository";
@@ -18,12 +19,14 @@ export class MapService
         return this.mapRepository.findMapById(mapId);
     }
 
-    public async updateMapPartially(map: Map, connections: number[]): Promise<void>
+    public async updateMapPartially(map: Map): Promise<void>
     {
-        this.mapRepository.updateMapPartially(map);
-        connections.forEach(connection => {
-            this.connectionRepository.updateCurrentMap(connection, map.id);
+        let req: Map = JSON.parse(JSON.stringify(map));
+        req.connections.forEach((connection: Connection, key: number) => {
+            this.connectionRepository.updateCurrentMap(connection.id, map.id);
+            req.connections[key] = '/api/connections/' + connection.id
         })
+        this.mapRepository.updateMapPartially(map);
     }
 
 }

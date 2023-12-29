@@ -17,7 +17,7 @@
 
             </ul>
             <ul>
-                <li title="Paramètres" @click="onParameters = true"><img src="build/images/icons/settings.svg" width="20" height="20" alt="Paramètres"></li>
+                <li title="Paramètres" @click="onParameters = true"><img :src="getIsDarkTheme ? '/build/images/icons/settings_white.svg' : '/build/images/icons/settings_black.svg'" width="20" height="20" alt="Paramètres"></li>
                 <li title="Se déconnecter"><a href="/logout"><img src="build/images/icons/logout.svg" width="20" height="20" alt="Se déconnecter"></a></li>
             </ul>
         </nav>
@@ -117,7 +117,8 @@ import { MapService } from '../services/mapService';
                 'getConnectedUser',
                 'getCurrentMapId',
                 'getUsername',
-                'isGameMaster'
+                'isGameMaster',
+                'getIsDarkTheme'
             ]),
             ...mapGetters('map', [
                 'getLayer',
