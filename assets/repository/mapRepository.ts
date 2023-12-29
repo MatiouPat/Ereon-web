@@ -9,7 +9,10 @@ export class MapRepository
     {
         return axios({
             method: 'GET',
-            url: '/api/maps'
+            url: '/api/maps',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
         .then(res => {
             return res.data['hydra:member']
