@@ -1,7 +1,9 @@
 <template>
-    <div class="form-group">  
+    <div class="form-group" :class="hasError ? 'error' : ''">  
         <label v-if="label">{{ label }}</label>
-        <input v-if="!isNumber" v-model="value" :class="value ? 'value' : null" placeholder="&nbsp;">
+        <div v-if="hasError" class="form-error"><span class="form-error-prefix">ERREUR</span><span>{{ messageEroor }}</span></div>
+        <input v-if="isPassword" type="password" v-model="value" :autocomplete="autocomplete">
+        <input v-else-if="!isNumber" v-model="value">
         <input v-else v-model.number="value">
     </div>
 </template>
@@ -10,18 +12,31 @@
 import { defineComponent } from 'vue';
 
 export default defineComponent({
+    data() {
+        return {
+            hasError: false as boolean,
+            messageEroor: "" as string
+        }
+    },
     props: {
         label: {
             type: String,
             default: ""
         },
         modelValue: {
-            type: [String, Number],
-            default: ""
+            type: [String, Number]
         },
         isNumber: {
             type: Boolean,
             default: false
+        },
+        isPassword: {
+            type: Boolean,
+            default: false
+        },
+        autocomplete: {
+            type: String,
+            default: 'off'
         }
     },
     computed: {
@@ -32,6 +47,12 @@ export default defineComponent({
             set(value: string | number) {
                 this.$emit('update:modelValue', value)
             }
+        }
+    },
+    methods: {
+        setError: function(message: string) {
+            this.messageEroor = message;
+            this.hasError = true;
         }
     },
     emits: ['update:modelValue']
@@ -73,6 +94,24 @@ input:hover {
 
 .form-group:has(> input:focus) label {
     color: #D87D40;
+}
+
+.form-group.error input {
+    border-color: #CB2D2A;
+}
+
+.form-error {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.form-error-prefix {
+    color: #F3F4F4;
+    background-color: #CB2D2A;
+    border-radius: 4px;
+    padding: 0 4px;
+    margin-right: 4px;
+    font-size: 12px;
 }
 
 .dark input {
