@@ -24,11 +24,11 @@ class UserParameter
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups("user:read")]
+    #[Groups(["user:read", "user:write"])]
     private ?bool $isDarkTheme = null;
 
     #[ORM\Column]
-    #[Groups("user:read")]
+    #[Groups(["user:read", "user:write"])]
     #[Range(
         min: 0,
         max: 1,

@@ -6,7 +6,10 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\UserRepository;
+use App\State\UserPasswordHasher;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -18,8 +21,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Table(name:"`user`")]
 #[ApiResource(
     normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
     operations: [
-        new GetCollection()
+        new GetCollection(),
+        new Post(processor: UserPasswordHasher::class),
+        new Patch(processor: UserPasswordHasher::class)
     ]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['discordIdentifier' => 'exact', 'connections.world.serverIdentifier' => 'exact'])]
@@ -32,7 +38,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(["world:read", "user:read", "connection:read", "map:read", "dice:read"])]
+    #[Groups(["user:read", "user:write", "world:read", "connection:read", "map:read", "dice:read"])]
     private ?string $username = null;
 
     #[ORM\Column]
@@ -44,8 +50,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[Groups("user:write")]
+    private ?string $plainPassword = null;
+
     #[ORM\Column(length: 255)]
-    #[Groups("dice:read")]
+    #[Groups(["user:read", "user:write", "dice:read", "world:read"])]
     private ?string $discordIdentifier = null;
 
     #[ORM\ManyToMany(targetEntity: Token::class, mappedBy: 'users')]
@@ -60,7 +69,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $personages;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
-    #[Groups("user:read")]
+    #[Groups("user:read", "user:write")]
     private ?UserParameter $userParameter = null;
 
     #[ORM\OneToMany(mappedBy: 'launcher', targetEntity: Dice::class, orphanRemoval: true)]
@@ -131,6 +140,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
 
         return $this;
     }
