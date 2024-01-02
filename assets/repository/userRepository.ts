@@ -15,4 +15,16 @@ export class UserRepository
         })
     }
 
+    public async updateUserPartially(user: User): Promise<void>
+    {
+        axios({
+            method: 'PATCH',
+            url: '/api/users/' + user.id,
+            data: user,
+            headers: {
+                'Content-Type': 'application/merge-patch+json'
+            }
+        })
+    }
+
 }
