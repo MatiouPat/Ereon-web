@@ -35,7 +35,9 @@
 
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
                     <input type="hidden" name="_target_path" value="/">
-                    
+                    {% if error %}
+                        <div class="form-error"><span class="form-error-prefix">ERREUR</span><span>{{ error.message }}</span></div>
+                    {% endif %}
                     <button class="btn btn-primary" type="submit">SE CONNECTER</button>
                 </form>
             </div>

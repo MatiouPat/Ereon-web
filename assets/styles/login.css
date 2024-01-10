@@ -31,6 +31,16 @@ body {
     object-fit: cover;
 }
 
+.login-background::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .2);
+}
+
 .login-wrapper {
     display: flex;
     flex-direction: column;
@@ -53,44 +63,47 @@ h1 {
 }
 
 .form-group {
-    position: relative;
     width: 100%;
-    height: 48px;
-}
-
-.form-group:hover {
-    background: rgba(0, 0, 0, .04);
-    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .5)
 }
 
 label {
-    position: absolute;
-    top: 0;
-    left: 0;
     display: block;
     max-width: 100%;
-    margin: 4px;
     transition: all .1s ease;
+    line-height: 28px;
 }
 
 input {
-    position: absolute;
-    bottom: 0;
-    left: 0;
     color: #333333;
     background: none;
-    border: none;
-    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    border: solid 1px #090D11;
     width: 100%;
     padding: 0 4px;
-    line-height: 28px;
     transition: all .15s ease;
     font-family: Oswald, sans-serif;
+    line-height: 28px;
 }
 
 input:focus {
     outline: none;
-    box-shadow: inset 0 -2px 0 #D87D40;
+    border: solid 1px #D87D40 !important;
+}
+
+input:hover {
+    background: rgba(0, 0, 0, .04);
+}
+
+.form-group:has(> input:focus) label {
+    color: #D87D40;
+}
+
+.form-error-prefix {
+    color: #F3F4F4;
+    background-color: #CB2D2A;
+    border-radius: 4px;
+    padding: 0 4px;
+    margin-right: 4px;
+    font-size: 12px;
 }
 
 .login-box button {
@@ -111,7 +124,11 @@ input:focus {
 
     input {
         color: #F3F4F4;
-        box-shadow: inset 0 -1px 0 #F3F4F4;
+        border: solid 1px #F3F4F4;
+    }
+    
+    input:focus {
+        background: #1F262D;
     }
 
     .login-wrapper {
