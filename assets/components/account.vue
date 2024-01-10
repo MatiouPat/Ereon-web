@@ -57,7 +57,10 @@
                             <div v-show="pageIndex == 1" class="parameters-account">
                                 <div>
                                     <label class="form-label">Volume global</label>
-                                    <input type="range" min="0" v-model="globalVolume" max="1" step="0.01" @input="changeUserVolume">
+                                    <div>
+                                        <input type="range" min="0" v-model="globalVolume" max="1" step="0.01" @input="changeUserVolume">
+                                        <span>{{ Math.round(globalVolume * 100) }} %</span>
+                                    </div>
                                 </div>
                                 <div>
                                     <legend class="form-label">Theme</legend>
@@ -650,6 +653,13 @@ import { UserService } from '../services/userService';
         color: #FFFFFF;
         background-color: #090D11;
         font-weight: 700;
+    }
+
+    .form-label {
+        display: block;
+        max-width: 100%;
+        transition: all .1s ease;
+        line-height: 28px;
     }
 
     .worlds-page .btn {
