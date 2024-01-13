@@ -40,19 +40,26 @@
                             <li :class="pageIndex == 1 ? 'is-select' : ''" @click="pageIndex = 1">Audio / Graphisme</li>
                         </ul>
                         <div>
-                            <div v-show="pageIndex == 0" class="parameters-account">
-                                <basic-input :model-value="getUser.username" :label="'Nom d\'utilisateur'" @update:model-value="(modelValue) => user.username = modelValue"></basic-input>
-                                <basic-input :model-value="getUser.discordIdentifier" :label="'Identifiant Discord'" @update:model-value="(modelValue) => user.discordIdentifier = modelValue"></basic-input>
-                                <div>
-                                    <basic-input ref="newPassword" :isPassword="true" :autocomplete="'new-password'" :model-value="newPassword" :label="'Nouveau mot de passe'" @update:model-value="(modelValue) => newPassword = modelValue"></basic-input>
-                                    <ul class="password-requirements">
-                                        <li :class="(newPasswordConstraint & 0b10000) == 0b10000 ? 'is-valid' : ''">Un caractère majuscule</li>
-                                        <li :class="(newPasswordConstraint & 0b01000) == 0b01000 ? 'is-valid' : ''">Un chiffre</li>
-                                        <li :class="(newPasswordConstraint & 0b00100) == 0b00100 ? 'is-valid' : ''">Un caractère spécial</li>
-                                        <li :class="(newPasswordConstraint & 0b00010) == 0b00010 ? 'is-valid' : ''">8 caractères minimum</li>
-                                    </ul>
+                            <div v-show="pageIndex == 0">
+                                <div class="parameters-line">
+                                    <basic-input ref="username" :model-value="getUser.username" :is-required="true" :label="'Nom d\'utilisateur'" @update:model-value="(modelValue) => user.username = modelValue"></basic-input>
+                                    <basic-input :model-value="getUser.discordIdentifier" :label="'Identifiant Discord'" @update:model-value="(modelValue) => user.discordIdentifier = modelValue"></basic-input>
                                 </div>
-                                <basic-input ref="newPasswordCopy" :isPassword="true" :autocomplete="'new-password'" :model-value="newPasswordCopy" :label="'Confirmation du nouveau mot de passe'" @update:model-value="(modelValue) => newPasswordCopy = modelValue"></basic-input>
+                                <div class="parameters-account-password">
+                                    <h3>Changement de mot de passe</h3>
+                                    <div class="parameters-line">
+                                        <div>
+                                            <basic-input ref="newPassword" :isPassword="true" :autocomplete="'new-password'" :model-value="newPassword" :label="'Nouveau mot de passe'" @update:model-value="(modelValue) => newPassword = modelValue"></basic-input>
+                                            <ul class="password-requirements">
+                                                <li :class="(newPasswordConstraint & 0b10000) == 0b10000 ? 'is-valid' : ''">Un caractère majuscule</li>
+                                                <li :class="(newPasswordConstraint & 0b01000) == 0b01000 ? 'is-valid' : ''">Un chiffre</li>
+                                                <li :class="(newPasswordConstraint & 0b00100) == 0b00100 ? 'is-valid' : ''">Un caractère spécial</li>
+                                                <li :class="(newPasswordConstraint & 0b00010) == 0b00010 ? 'is-valid' : ''">8 caractères minimum</li>
+                                            </ul>
+                                        </div>
+                                        <basic-input ref="newPasswordCopy" :isPassword="true" :autocomplete="'new-password'" :model-value="newPasswordCopy" :label="'Confirmation du nouveau mot de passe'" @update:model-value="(modelValue) => newPasswordCopy = modelValue"></basic-input>
+                                    </div>
+                                </div>
                             </div>
                             <div v-show="pageIndex == 1" class="parameters-account">
                                 <div>
@@ -280,18 +287,28 @@ import { UserService } from '../services/userService';
             },
             submitForm: function() {
                 let validationStatus = this.isValidPassword();
+                let isError = false;
+                if(this.user.username === "") {
+                    (this.$refs.username as any).setError("Cette valeur ne peut pas être vide");
+                    isError = true;
+                }
                 if(this.newPassword != "") {
                     if((validationStatus & 0b11110) != 0b11110) {
-                        (this.$refs.newPassword as any).setError("Cette valeur ne respecte pas les contraintes ci-dessous")
+                        (this.$refs.newPassword as any).setError("Cette valeur ne respecte pas les contraintes ci-dessous");
+                    isError = true;
                     }
                     else if((validationStatus & 0b00001) != 0b00001) {
-                        (this.$refs.newPasswordCopy as any).setError("Cette valeur n'est pas identique")
+                        (this.$refs.newPasswordCopy as any).setError("Cette valeur n'est pas identique");
+                        isError = true;
                     }
                     else {
                         this.user.plainPassword = this.newPassword;
                     }
                 }
-                this.userService.updateUserPartially(this.user)
+                if(!isError) {
+                    this.userService.updateUserPartially(this.user);
+                    this.onParameters = false;
+                }
             }
         },
         mounted() {
@@ -524,11 +541,20 @@ import { UserService } from '../services/userService';
         border-radius: 0;
     }
 
-    .parameters-account {
+    .parameters-account, .parameters-line {
         display: grid;
         grid-template-columns: 1fr 1fr;
         column-gap: 16px;
         row-gap: 8px;
+        width: 100%;
+    }
+
+    .parameters-account-password {
+        padding-top: 16px;
+    }
+
+    .parameters-account-password h3 {
+        font-size: 1.2rem;
     }
 
     .password-requirements {

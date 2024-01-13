@@ -1,6 +1,6 @@
 <template>
     <div class="form-group" :class="hasError ? 'error' : ''">  
-        <label v-if="label">{{ label }}</label>
+        <label v-if="label">{{ label }}<i v-if="isRequired">*</i></label>
         <div v-if="hasError" class="form-error"><span class="form-error-prefix">ERREUR</span><span>{{ messageEroor }}</span></div>
         <input v-if="isPassword" type="password" v-model="value" :autocomplete="autocomplete">
         <input v-else-if="!isNumber" v-model="value">
@@ -37,6 +37,10 @@ export default defineComponent({
         autocomplete: {
             type: String,
             default: 'off'
+        },
+        isRequired: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {
@@ -121,6 +125,10 @@ input:hover {
 
 .dark input:focus {
     background: #1F262D;
+}
+
+i {
+    color: #D87D40;
 }
 
 </style>
