@@ -1,0 +1,7 @@
+<h1>Bienvenue sur Ereon</h1>
+
+<p>
+    Pouvez-vous confirmer votre adresse mail via le lien suivant: <br><br>
+    <a href="{{ signedUrl|raw }}">Confirmer mon adresse</a>.
+    Le lien expirera dans {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
+</p>

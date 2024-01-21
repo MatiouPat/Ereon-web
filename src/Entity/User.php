@@ -13,6 +13,7 @@ use App\State\UserPasswordHasher;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -30,6 +31,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
     ]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['discordIdentifier' => 'exact', 'connections.world.serverIdentifier' => 'exact'])]
+#[UniqueEntity(fields: ['username'], message: 'There is already an account with this username')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -42,6 +44,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[NotBlank]
     #[Groups(["user:read", "user:write", "world:read", "connection:read", "map:read", "dice:read"])]
     private ?string $username = null;
+    
+    #[ORM\Column(length: 255)]
+    private ?string $email = null;
 
     #[ORM\Column]
     private array $roles = [];
@@ -55,7 +60,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups("user:write")]
     private ?string $plainPassword = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["user:read", "user:write", "dice:read", "world:read"])]
     private ?string $discordIdentifier = null;
 
@@ -76,6 +81,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: 'launcher', targetEntity: Dice::class, orphanRemoval: true)]
     private Collection $dices;
+
+    #[ORM\Column(type: 'boolean')]
+    private $isVerified = false;
 
     public function __construct()
     {
@@ -98,6 +106,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): self
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
 
         return $this;
     }
@@ -309,6 +329,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $dice->setLauncher(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
 
         return $this;
     }

@@ -1,0 +1,22 @@
+{% extends 'security/base.html.twig' %}
+
+{% block body %}
+    <div class="login-box">
+        {% for flash_error in app.flashes('verify_email_error') %}
+            <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+        {% endfor %}
+
+        <h1>Ereon</h1>
+
+        {{ form_errors(registrationForm) }}
+
+        {{ form_start(registrationForm) }}
+            {{ form_row(registrationForm.username) }}
+            {{ form_row(registrationForm.email) }}
+            {{ form_row(registrationForm.discordIdentifier) }}
+            {{ form_row(registrationForm.plainPassword) }}
+
+            <button type="submit">Créer un compte</button>
+        {{ form_end(registrationForm) }}
+    </div>
+{% endblock %}

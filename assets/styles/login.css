@@ -9,10 +9,21 @@ body {
     overflow: hidden;
 }
 
+a {
+    color: #090D11;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 .main {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 16px;
     height: 100%;
 }
 
@@ -41,10 +52,8 @@ body {
     background-color: rgba(0, 0, 0, .2);
 }
 
-.login-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
+.login-box {
+    width: 280px;
     background-color: #FFFFFF;
     border: solid 1px #D7D9DB;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
@@ -54,16 +63,14 @@ body {
 h1 {
     font-size: 2rem;
     font-weight: 700;
-}
-
-.login-box {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    text-align: center;
+    padding-bottom: 8px;
 }
 
 .form-group {
+    position: relative;
     width: 100%;
+    margin: 8px 0;
 }
 
 label {
@@ -77,7 +84,7 @@ input {
     color: #333333;
     background: none;
     border: solid 1px #090D11;
-    width: 100%;
+    width: 96%;
     padding: 0 4px;
     transition: all .15s ease;
     font-family: Oswald, sans-serif;
@@ -97,6 +104,12 @@ input:hover {
     color: #D87D40;
 }
 
+.password-forget-label {
+    position: absolute;
+    top: 8px;
+    right: 0;
+}
+
 .form-error-prefix {
     color: #F3F4F4;
     background-color: #CB2D2A;
@@ -107,8 +120,9 @@ input:hover {
 }
 
 .login-box button {
+    width: 100%;
     border: none;
-    border-radius: 24px;
+    border-radius: 8px;
     background-color: #D87D40;
     color: #fff;
     padding: 8px;
@@ -117,22 +131,32 @@ input:hover {
     margin-top: 16px;
 }
 
+footer {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+}
+
 @media (prefers-color-scheme: dark) {
     html {
         color: #F3F4F4;
     }
 
+    a {
+        color: #F3F4F4;
+    }
+
     input {
         color: #F3F4F4;
-        border: solid 1px #F3F4F4;
+        border-color: #F3F4F4;
     }
     
     input:focus {
         background: #1F262D;
     }
 
-    .login-wrapper {
+    .login-box {
         background-color: #1F262D;
-        border: solid 1px #364049;
+        border-color: #364049;
     }
 }
