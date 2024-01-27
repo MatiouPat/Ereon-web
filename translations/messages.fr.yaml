@@ -1,5 +1,4 @@
-registration:
+registrationForm:
   username: Nom d'utilisateur
   email: Email
-  discordIdentifier: Identifiant discord
   plainPassword: Mot de passe
