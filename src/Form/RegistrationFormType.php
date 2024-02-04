@@ -9,6 +9,9 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class RegistrationFormType extends AbstractType
 {
@@ -23,7 +26,24 @@ class RegistrationFormType extends AbstractType
             ])
             ->add('plainPassword', PasswordType::class, [
                 'label' => 'registrationForm.plainPassword',
-                'attr' => ['autocomplete' => 'new-password']
+                // instead of being set onto the object directly,
+                // this is read and encoded in the controller
+                'attr' => ['autocomplete' => 'new-password'],
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'registration.plainPassword.notblank',
+                    ]),
+                    new Length([
+                        'min' => 8,
+                        'minMessage' => 'registration.plainPassword.length',
+                        // max length allowed by Symfony for security reasons
+                        'max' => 4096,
+                    ]),
+                    new Regex([
+                        'pattern' => '^(?=.*\d)(?=.*[a-z]*)(?=.*[A-Z])(?=.*[#~?!:=;.@$%\^&*\/+-]).{8,}^',
+                        'message' => 'registration.plainPassword.regex'
+                    ])
+                ],
             ])
         ;
     }

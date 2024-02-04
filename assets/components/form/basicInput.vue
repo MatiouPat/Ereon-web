@@ -74,7 +74,6 @@ label {
     display: block;
     max-width: 100%;
     transition: all .1s ease;
-    line-height: 28px;
 }
 
 input {

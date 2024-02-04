@@ -1,7 +1,27 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    line-height: 24px;
+    text-rendering: optimizeLegibility;
+}
+*:before,
+*:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
 html {
     font-family: Oswald, sans-serif;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
     font-size: 14px;
     color: #090D11;
+}
+
+html.dark {
+    color: #F3F4F4;
 }
 
 body {
@@ -53,7 +73,7 @@ a:hover {
 }
 
 .login-box {
-    width: 280px;
+    width: 400px;
     background-color: #FFFFFF;
     border: solid 1px #D7D9DB;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
@@ -77,14 +97,13 @@ label {
     display: block;
     max-width: 100%;
     transition: all .1s ease;
-    line-height: 28px;
 }
 
 input {
     color: #333333;
     background: none;
     border: solid 1px #090D11;
-    width: 96%;
+    width: 100%;
     padding: 0 4px;
     transition: all .15s ease;
     font-family: Oswald, sans-serif;
@@ -106,7 +125,7 @@ input:hover {
 
 .password-forget-label {
     position: absolute;
-    top: 8px;
+    top: 0;
     right: 0;
 }
 
