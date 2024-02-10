@@ -1,11 +1,10 @@
-CHANGELOG for 0.1.x
+CHANGELOG for 0.x
 
-This changelog references the relevant changes (bug and security fixes) done in beta version minor versions.
+This changelog references the relevant changes (bug and security fixes) done in beta version.
 
 * 0.1.0 (2023-10-09)
-
- * feature #29 Add the ability to search for a user by their discord ID
  * feature #5 Add dynamic lighting to the map
+ * feature #29 Add the ability to search for a user by their discord ID
  * feature #32 Switch completely to typescript
 
 * 0.1.1 (2023-10-11)
@@ -18,3 +17,9 @@ This changelog references the relevant changes (bug and security fixes) done in 
 * 0.1.2 (2023-10-14)
  * bug #55 Impossible to change map
  * bug #56 Unable to add assets
+
+* 0.2.0 (2024-02-10)
+ * feature #6 Add the possibility for users to change their personal information (password, etc...)
+ * feature #46 Extending the character sheet with weapons/armor
+ * bug #57 Changing a player's map is not taken into account locally
+ * bug #63 Empty texture cache when changing map
