@@ -36,6 +36,7 @@ a {
 
 .btn {
     display: block;
+    width: fit-content;
     border: none;
     border-radius: 8px;
     padding: 2px 8px;
@@ -43,6 +44,10 @@ a {
     font-size: 1rem;
     line-height: 28px;
     cursor: pointer;
+}
+
+.btn:hover {
+    text-decoration: none;
 }
 
 .btn-primary {

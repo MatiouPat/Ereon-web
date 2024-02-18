@@ -147,16 +147,38 @@ input:hover {
     display: inline-block;
 }
 
-.login-box button {
-    width: 100%;
+.btn {
+    display: block;
+    width: fit-content;
     border: none;
     border-radius: 8px;
-    background-color: #D87D40;
-    color: #fff;
-    padding: 8px;
+    padding: 2px 8px;
     font-weight: 700;
     font-size: 1rem;
-    margin-top: 16px;
+    line-height: 28px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: #D87D40;
+    color: #F3F4F4;
+}
+
+.btn-secondary {
+    background: none;
+    color: #090D11;
+    border: solid 1px #D87D40;
+}
+
+.form-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 footer {
@@ -186,5 +208,9 @@ footer {
     .login-box {
         background-color: #1F262D;
         border-color: #364049;
+    }
+    
+    .btn-secondary {
+        color: #F3F4F4;
     }
 }

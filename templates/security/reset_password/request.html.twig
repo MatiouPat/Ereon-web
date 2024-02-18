@@ -16,8 +16,10 @@
                     Saisissez votre adresse électronique et nous vous enverrons un lien pour réinitialiser votre mot de passe.
                 </small>
             </div>
-
-            <button>Réinitialiser le mot de passe</button>
+            <div class="form-footer">
+                <a href="{{ path('app_login') }}" class="btn btn-secondary">Retour</a>
+                <button class="btn btn-primary">Réinitialiser le mot de passe</button>
+            </div>
         {{ form_end(requestForm) }}
     </div>
 {% endblock %}
