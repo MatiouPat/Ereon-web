@@ -35,6 +35,13 @@
         {% endblock %}
     </head>
     <body>
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
         <div class="content" id="content">
             <account :connected-user="{{ app.user|serialize('json', { groups: 'user:read'}) }}" :worlds={{ worlds }}></account>
             {% block body %}{% endblock %}

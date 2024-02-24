@@ -69,6 +69,7 @@ a {
     position: relative;
     padding: .75rem 1.25rem;
     margin-bottom: 1rem;
+    z-index: 15;
     border: 1px solid transparent;
 }
 
@@ -76,6 +77,12 @@ a {
     color: #721c24;
     background-color: #f8d7da;
     border-color: #f5c6cb;
+}
+
+.alert-success {
+    color: #84D637;
+    background-color: #D2FFA8;
+    border-color: #D2FFA8;
 }
 
 textarea {
