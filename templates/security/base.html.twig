@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="content-language" content="fr-FR">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Ereon{% endblock %}</title>
+        <meta name="description" content="Ereon, l'application pour vos parties de JDR.">
+        {{ encore_entry_link_tags('reset') }}
+        {{ encore_entry_link_tags('login') }}
+        <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+        {% block javascripts %}
+        {% endblock %}
+    </head>
+    <body>
+        <main class="main">
+            <picture class="login-background">
+                <source type="image/webp" srcset="{{ asset('build/images/logo/background.webp') }}, {{ asset('build/images/logo/background@2x.webp') }} 2x">
+                <source type="image/png" srcset="{{ asset('build/images/logo/background.png') }}, {{ asset('build/images/logo/background@2x.png') }} 2x">
+                <img decoding="async" src="{{ asset('build/images/logo/background.png') }}" alt="">
+            </picture>
+            {% block body %}{% endblock %}
+        </main>
+        <footer>
+            <span>{{ app_version }}</span>
+        </footer>
+    </body>
+</html>

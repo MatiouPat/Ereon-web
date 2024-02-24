@@ -274,7 +274,7 @@ import { UserService } from '../services/userService';
                 if(new RegExp('[0-9]').test(this.newPassword)) {
                     constraints = constraints | 0b01000
                 }
-                if(new RegExp('[#~?!:=;.@$%^&*/+-]').test(this.newPassword)) {
+                if(new RegExp('[#~?!:=;.@$%\^&*\/+-]').test(this.newPassword)) {
                     constraints = constraints | 0b00100
                 }
                 if(new RegExp('.{8,}').test(this.newPassword)) {

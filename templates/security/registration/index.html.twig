@@ -1,0 +1,41 @@
+{% extends 'security/base.html.twig' %}
+
+{% block body %}
+    <div class="login-box">
+        {% for flash_error in app.flashes('verify_email_error') %}
+            <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+        {% endfor %}
+
+        <h1>Créer un compte</h1>
+
+        {{ form_errors(registrationForm) }}
+
+        {{ form_start(registrationForm) }}
+            <div class="form-group">
+                {{ form_label(registrationForm.username) }}
+                {% if form_errors(registrationForm.username) %}
+                    <div class="form-error"><span class="form-error-prefix">ERREUR</span><span>{{ form_errors(registrationForm.username) }}</span></div>
+                {% endif %}
+                {{ form_widget(registrationForm.username) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(registrationForm.email) }}
+                {% if form_errors(registrationForm.email) %}
+                    <div class="form-error"><span class="form-error-prefix">ERREUR</span><span>{{ form_errors(registrationForm.email) }}</span></div>
+                {% endif %}
+                {{ form_widget(registrationForm.email) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(registrationForm.plainPassword) }}
+                {% if form_errors(registrationForm.plainPassword) %}
+                    <div class="form-error"><span class="form-error-prefix">ERREUR</span><span>{{ form_errors(registrationForm.plainPassword) }}</span></div>
+                {% endif %}
+                {{ form_widget(registrationForm.plainPassword) }}
+            </div>
+            <button class="btn btn-primary" type="submit">Créer un compte</button>
+        {{ form_end(registrationForm) }}
+    </div>
+    <div class="login-box">
+        <span>Vous avez déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></span>
+    </div>
+{% endblock %}

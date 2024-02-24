@@ -2,7 +2,7 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    line-height: 28px;
+    line-height: 24px;
     text-rendering: optimizeLegibility;
 }
 *:before,
@@ -36,6 +36,7 @@ a {
 
 .btn {
     display: block;
+    width: fit-content;
     border: none;
     border-radius: 8px;
     padding: 2px 8px;
@@ -43,6 +44,10 @@ a {
     font-size: 1rem;
     line-height: 28px;
     cursor: pointer;
+}
+
+.btn:hover {
+    text-decoration: none;
 }
 
 .btn-primary {
@@ -64,6 +69,7 @@ a {
     position: relative;
     padding: .75rem 1.25rem;
     margin-bottom: 1rem;
+    z-index: 15;
     border: 1px solid transparent;
 }
 
@@ -71,6 +77,12 @@ a {
     color: #721c24;
     background-color: #f8d7da;
     border-color: #f5c6cb;
+}
+
+.alert-success {
+    color: #84D637;
+    background-color: #D2FFA8;
+    border-color: #D2FFA8;
 }
 
 textarea {

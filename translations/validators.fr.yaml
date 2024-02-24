@@ -1,0 +1,10 @@
+user:
+  username:
+    uniqueEntity: Il existe déjà un compte avec ce nom d'utilisateur
+  email:
+    uniqueEntity: Il existe déjà un compte avec cet email
+  plainPassword:
+    length:
+      min: Cette chaîne est trop courte. Elle doit avoir au minimum {{ limit }} caractères.
+      max: Cette chaîne est trop longue. Elle doit avoir au maximum {{ limit }} caractères.
+    regex: Cette valeur n'est pas valide.

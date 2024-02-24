@@ -1,0 +1,4 @@
+registrationForm:
+  username: Nom d'utilisateur
+  email: Email
+  plainPassword: Mot de passe

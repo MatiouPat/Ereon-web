@@ -74,7 +74,6 @@ label {
     display: block;
     max-width: 100%;
     transition: all .1s ease;
-    line-height: 28px;
 }
 
 input {
@@ -113,9 +112,13 @@ input:hover {
     color: #F3F4F4;
     background-color: #CB2D2A;
     border-radius: 4px;
-    padding: 0 4px;
+    padding: 1px 4px 2px 4px;
     margin-right: 4px;
     font-size: 12px;
+}
+
+.form-error span {
+    display: inline-block;
 }
 
 .dark input {
