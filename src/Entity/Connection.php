@@ -13,6 +13,7 @@ use App\Repository\ConnectionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: ConnectionRepository::class)]
 #[ApiResource(
@@ -54,6 +55,7 @@ class Connection
     #[ORM\ManyToOne(inversedBy: 'connections')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(["connection:read", "world:read", "map:read"])]
+    #[MaxDepth(1)]
     private ?Map $currentMap = null;
 
     public function getId(): ?int
