@@ -181,6 +181,20 @@ input:hover {
     margin-top: 8px;
 }
 
+.alert {
+    position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    z-index: 15;
+    border: 1px solid transparent;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
 footer {
     position: absolute;
     bottom: 8px;
