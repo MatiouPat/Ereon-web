@@ -19,6 +19,16 @@ export class MapService
         return this.mapRepository.findMapById(mapId);
     }
 
+    public async createMap(map: Map): Promise<void>
+    {
+        let req: Map = JSON.parse(JSON.stringify(map));
+        req.connections.forEach((connection: Connection, key: number) => {
+            this.connectionRepository.updateCurrentMap(connection.id, map.id);
+            req.connections[key] = '/api/connections/' + connection.id
+        })
+        this.mapRepository.createMap(req);
+    }
+
     public async updateMapPartially(map: Map): Promise<void>
     {
         let req: Map = JSON.parse(JSON.stringify(map));
@@ -26,7 +36,7 @@ export class MapService
             this.connectionRepository.updateCurrentMap(connection.id, map.id);
             req.connections[key] = '/api/connections/' + connection.id
         })
-        this.mapRepository.updateMapPartially(map);
+        this.mapRepository.updateMapPartially(req);
     }
 
 }

@@ -7,6 +7,9 @@
                     <li><img @click.stop="showMapParameter(key)" :src="getIsDarkTheme ? '/build/images/icons/settings_white.svg' : '/build/images/icons/settings_black.svg'" alt="Paramètres" width="16" height="16"></li>
                 </ul>
             </div>
+            <div class="map new-map" @click="createMap()">
+                <span>Nouvelle carte</span>
+            </div>
         </div>
         <button class="map-open" name="menu" type="button" :class="{isDisplayed: isDisplayed}" @click="display">
             <svg width="32" height="32" viewBox="0 0 100 100">
@@ -46,12 +49,12 @@
                         </div>
                         <div v-else >
                             <h3>Joueurs</h3>
-                            <span>Aucun joueur présent sur cette partie</span>
+                            <span>Aucun joueur n'est présent sur cette partie</span>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" type="button" @click="cancel">Annuler</button>
-                        <button type="button" class="btn btn-primary" @click="submitForm">Modifier la carte</button>
+                        <button type="button" class="btn btn-primary" @click="submitForm" v-html="onCreation ? 'Créer la carte' : 'Modifier la carte'"></button>
                     </div>
                 </div>
             </div>
@@ -90,7 +93,8 @@ import basicInput from './form/basicInput.vue';
                 /**
                  * The list of connections between this world and the various users
                  */
-                connections: [] as Connection[]
+                connections: [] as Connection[],
+                onCreation: false as boolean
             }
         },
         computed: {
@@ -132,12 +136,22 @@ import basicInput from './form/basicInput.vue';
              * @param {*} key 
              */
             showMapParameter: function (key: number) {
-                this.isParametersDisplayed = true
+                this.onCreation = false;
                 this.map = this.maps[key];
                 this.connections = [];
                 this.getPlayers.forEach((player: Connection) => {
                     this.connections.push(player)
                 });
+                this.isParametersDisplayed = true;
+            },
+            createMap: function() {
+                this.onCreation = true;
+                this.map = {name: '', width: 0, height: 0, hasDynamicLight: false, connections: [], world: '/api/worlds/' + this.getWorld.id};
+                this.connections = [];
+                this.getPlayers.forEach((player: Connection) => {
+                    this.connections.push(player)
+                });
+                this.isParametersDisplayed = true;
             },
             isChecked: function(searchConnection: Connection) {
                 return this.map.connections.some(
@@ -160,8 +174,12 @@ import basicInput from './form/basicInput.vue';
              * Change map settings after form submission
              */
             submitForm: function() {
-                this.mapService.updateMapPartially(this.map)
-                this.isParametersDisplayed = false
+                if(this.onCreation) {
+                    this.mapService.createMap(this.map);
+                }else {
+                    this.mapService.updateMapPartially(this.map);
+                }
+                this.isParametersDisplayed = false;
                 this.isDisplayed = false;
                 this.mapService.findAllMaps().then(maps => {
                     this.maps = maps;
@@ -285,6 +303,11 @@ import basicInput from './form/basicInput.vue';
         background-color: #73808C;
         width: 128px;
         height: 128px;
+        cursor: pointer;
+    }
+
+    .new-map {
+        background-color: #D87D40;
     }
 
     .map-actions {
@@ -362,6 +385,10 @@ import basicInput from './form/basicInput.vue';
 
     .dark .map {
         background-color: #364049;
+    }
+
+    .dark .new-map {
+        background-color: #D87D40;
     }
 
     .dark .modal-header {
