@@ -29,6 +29,11 @@ export class MapService
         this.mapRepository.createMap(req);
     }
 
+    public async deleteMap(mapId: number): Promise<void>
+    {
+        this.mapRepository.deleteMap(mapId);
+    }
+
     public async updateMapPartially(map: Map): Promise<void>
     {
         let req: Map = JSON.parse(JSON.stringify(map));

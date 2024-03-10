@@ -42,6 +42,14 @@ export class MapRepository
         })
     }
 
+    public async deleteMap(mapId: number): Promise<void>
+    {
+        return axios({
+            method: 'DELETE',
+            url: 'api/maps/' + mapId
+        })
+    }
+
     public async updateMapPartially(map: Map): Promise<void>
     {
         return axios({

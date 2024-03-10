@@ -10,7 +10,7 @@
                 <ul class="tools">
                     <li title="Click" @click="setOnDrawing(false)"><div class="tool" :class="!getOnDrawing ? 'selected' : ''"><img src="build/images/icons/mouse.svg" width="20" height="20" alt="Click"></div></li>
                     <li title="Light" @click="setOnDrawing(true); setLayer(3)"><div class="tool" :class="getOnDrawing ? 'selected' : ''"><img src="build/images/icons/line.svg" width="20" height="20" alt="Light"></div></li>
-                    <li title="Supprimer tous les murs" @click="deleteAllLightingWalls(); emitter.emit('drawWall')"><div class="tool"><img src="build/images/icons/delete.svg" width="20" height="20" alt="Supprimer tous les murs"></div></li>
+                    <li title="Supprimer tous les murs" @click="deleteAllLightingWalls(); emitter.emit('drawWall')"><div class="tool"><img :src="getIsDarkTheme ? '/build/images/icons/delete_white.svg' : '/build/images/icons/delete_black.svg'" width="20" height="20" alt="Supprimer tous les murs"></div></li>
                 </ul>
             </ul>
             <ul v-else>

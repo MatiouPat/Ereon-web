@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
@@ -20,6 +21,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new GetCollection(),
         new Get(),
         new Post(),
+        new Delete(),
         new Patch()
     ],
     normalizationContext: ['groups' => ['map:read'], "enable_max_depth" => true],

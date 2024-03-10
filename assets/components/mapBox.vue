@@ -4,6 +4,7 @@
             <div class="map" @click="chooseMap(map.id)" v-for="(map, key) in maps" :key="key" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
                 <span>{{ map.name }}</span>
                 <ul class="map-actions">
+                    <li><img @click.stop="showMapDelete(key)" :src="getIsDarkTheme ? '/build/images/icons/delete_white.svg' : '/build/images/icons/delete_black.svg'" alt="Supprimer" width="16" height="16"></li>
                     <li><img @click.stop="showMapParameter(key)" :src="getIsDarkTheme ? '/build/images/icons/settings_white.svg' : '/build/images/icons/settings_black.svg'" alt="Paramètres" width="16" height="16"></li>
                 </ul>
             </div>
@@ -58,7 +59,19 @@
                     </div>
                 </div>
             </div>
+            <div class="modal-wrapper" v-if="isDeleteDisplayed">
+                <div class="modal">
+                    <div class="modal-body">
+                        <span>Voulez-vous supprimer cette carte ?</span>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" @click="isDeleteDisplayed = false">Annuler</button>
+                        <button type="button" class="btn btn-primary" @click="deleteMap">Supprimer la carte</button>
+                    </div>
+                </div>
+            </div>
         </Teleport>
+        
     </div>
 </template>
 
@@ -85,6 +98,7 @@ import basicInput from './form/basicInput.vue';
                  * If the map parameters box is displayed
                  */
                 isParametersDisplayed: false as boolean,
+                isDeleteDisplayed: false as boolean,
                 /**
                  * The map parameters related to the form
                  */
@@ -94,7 +108,8 @@ import basicInput from './form/basicInput.vue';
                  * The list of connections between this world and the various users
                  */
                 connections: [] as Connection[],
-                onCreation: false as boolean
+                onCreation: false as boolean,
+                chosenKey: 0 as number
             }
         },
         computed: {
@@ -143,6 +158,11 @@ import basicInput from './form/basicInput.vue';
                     this.connections.push(player)
                 });
                 this.isParametersDisplayed = true;
+            },
+            showMapDelete: function(key: number) {
+                this.isDeleteDisplayed = true;
+                this.map = this.maps[key];
+                this.chosenKey = key;
             },
             createMap: function() {
                 this.onCreation = true;
@@ -194,6 +214,15 @@ import basicInput from './form/basicInput.vue';
                     window.removeEventListener('click', this.clickOutside)
                     this.isDisplayed = false;
                 }
+            },
+            deleteMap: function() {
+                if(this.chosenKey - 1 > 0){
+                    this.map = this.maps[this.chosenKey-1];
+                    this.mapService.deleteMap(this.map.id);
+                    this.maps.splice(this.chosenKey, 1);
+                    console.log(this.map);
+                }
+                this.isDeleteDisplayed = false;
             }
         },
         mounted() {
@@ -310,10 +339,22 @@ import basicInput from './form/basicInput.vue';
         background-color: #D87D40;
     }
 
+    .map:hover .map-actions {
+        width: 40px;
+    }
+
     .map-actions {
         position: absolute;
-        left: calc(50% - 8px);
+        left: calc(50% - 16px);
         bottom: 0;
+        display: flex;
+        gap: 4px;
+        width: 0;
+        overflow: hidden;
+        -webkit-transition: width 100ms ease-in-out;
+        -moz-transition: width 100ms ease-in-out;
+        -o-transition: width 100ms ease-in-out;
+        transition: width 100ms ease-in-out;
     }
 
     .map-actions li {
