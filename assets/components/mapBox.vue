@@ -19,59 +19,52 @@
                 <path class="line line3" d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
             </svg>
         </button>
-        <Teleport to="#editor">
-            <div class="modal-wrapper" v-if="isParametersDisplayed">
-                <div class="modal">
-                    <div class="modal-header">
-                            <h2>Informations carte</h2>
-                            <img width="24" height="24" @click="isParametersDisplayed = false" src="build/images/icons/close.svg" alt="Fermer">
-                    </div>   
-                    <div class="modal-body">
-                        <div>
-                            <h3>Positionnement</h3>
-                            <div class="form-part">
-                                <basic-input :model-value="map.name" :label="'Nom'"  @update:model-value="(modelValue) => map.name = modelValue"></basic-input>
-                                <div class="row">
-                                    <div class="field">
-                                        <label>Dynamic light</label>
-                                        <input v-model="map.hasDynamicLight" type="checkbox">
-                                    </div>
-                                </div>
-                                <basic-input :is-number="true" :model-value="map.width" :label="'Largeur'"  @update:model-value="(modelValue) => map.width = modelValue"></basic-input>
-                                <basic-input :is-number="true" :model-value="map.height" :label="'Hauteur'"  @update:model-value="(modelValue) => map.height = modelValue"></basic-input>
+        <modal
+            :isDisplayed="isParametersDisplayed"
+            :modalTitleMessage="'Informations carte'"
+            :modalValidationMessage="onCreation ? 'Créer la carte' : 'Modifier la carte'"
+            @modal:close="isParametersDisplayed = false"
+            @modal:validation="submitForm"
+        >
+            <template v-slot:modal-body>
+                <div>
+                    <h3>Positionnement</h3>
+                    <div class="form-part">
+                        <basic-input :model-value="map.name" :label="'Nom'"  @update:model-value="(modelValue) => map.name = modelValue"></basic-input>
+                        <div class="row">
+                            <div class="field">
+                                <label>Dynamic light</label>
+                                <input v-model="map.hasDynamicLight" type="checkbox">
                             </div>
                         </div>
-                        <div v-if="connections.length">
-                            <h3>Joueurs</h3>
-                            <div v-for="connection in connections" :key="connection.id">
-                                <label>{{ connection.user.username }}</label>
-                                <input type="checkbox" :value="connection" :checked="isChecked(connection)" @change.prevent="updateConnection(connection)">
-                            </div>
-                        </div>
-                        <div v-else >
-                            <h3>Joueurs</h3>
-                            <span>Aucun joueur n'est présent sur cette partie</span>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" type="button" @click="cancel">Annuler</button>
-                        <button type="button" class="btn btn-primary" @click="submitForm" v-html="onCreation ? 'Créer la carte' : 'Modifier la carte'"></button>
+                        <basic-input :is-number="true" :model-value="map.width" :label="'Largeur'"  @update:model-value="(modelValue) => map.width = modelValue"></basic-input>
+                        <basic-input :is-number="true" :model-value="map.height" :label="'Hauteur'"  @update:model-value="(modelValue) => map.height = modelValue"></basic-input>
                     </div>
                 </div>
-            </div>
-            <div class="modal-wrapper" v-if="isDeleteDisplayed">
-                <div class="modal">
-                    <div class="modal-body">
-                        <span>Voulez-vous supprimer cette carte ?</span>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" type="button" @click="isDeleteDisplayed = false">Annuler</button>
-                        <button type="button" class="btn btn-primary" @click="deleteMap">Supprimer la carte</button>
+                <div v-if="connections.length">
+                    <h3>Joueurs</h3>
+                    <div v-for="connection in connections" :key="connection.id">
+                        <label>{{ connection.user.username }}</label>
+                        <input type="checkbox" :value="connection" :checked="isChecked(connection)" @change.prevent="updateConnection(connection)">
                     </div>
                 </div>
-            </div>
-        </Teleport>
-        
+                <div v-else >
+                    <h3>Joueurs</h3>
+                    <span>Aucun joueur n'est présent sur cette partie</span>
+                </div>
+            </template>
+        </modal>
+        <modal
+            :isDisplayed="isDeleteDisplayed"
+            :type="'popup'"
+            :modalValidationMessage="'Supprimer la carte'"
+            @modal:close="isDeleteDisplayed = false"
+            @modal:validation="deleteMap"
+        >
+            <template v-slot:modal-body>
+                <span>Voulez-vous supprimer la carte ?</span>
+            </template>
+        </modal>
     </div>
 </template>
 
@@ -83,9 +76,9 @@ import { Map } from '../entity/map';
 import { MapService } from '../services/mapService';
 import { ConnectionService } from '../services/connectionService';
 import basicInput from './form/basicInput.vue';
+import Modal from './modal/modal.vue';
 
     export default defineComponent({
-  components: { basicInput },
         data() {
             return {
                 mapService: new MapService as MapService,
@@ -121,6 +114,7 @@ import basicInput from './form/basicInput.vue';
                 'getIsDarkTheme'
             ]),
         },
+        components: { basicInput, Modal },
         methods: {
             ...mapActions('user', [
                 'setCurrentMap'
@@ -340,7 +334,7 @@ import basicInput from './form/basicInput.vue';
     }
 
     .map:hover .map-actions {
-        width: 40px;
+        opacity: 1;
     }
 
     .map-actions {
@@ -349,68 +343,16 @@ import basicInput from './form/basicInput.vue';
         bottom: 0;
         display: flex;
         gap: 4px;
-        width: 0;
-        overflow: hidden;
-        -webkit-transition: width 100ms ease-in-out;
-        -moz-transition: width 100ms ease-in-out;
-        -o-transition: width 100ms ease-in-out;
-        transition: width 100ms ease-in-out;
+        opacity: 0;
+        width: 40px;
+        -webkit-transition: opacity 100ms ease-in-out;
+        -moz-transition: opacity 100ms ease-in-out;
+        -o-transition: opacity 100ms ease-in-out;
+        transition: opacity 100ms ease-in-out;
     }
 
     .map-actions li {
         cursor: pointer;
-    }
-
-    .modal-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 5;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 100dvh;
-        background-color: rgba(0, 0, 0, 0.8);
-    }
-
-    .modal {
-        display: block;
-        min-width: 256px;
-        width: 800px;
-        min-height: 256px;
-        height: 100%;
-        max-height: 480px;
-        background-color: #FFFFFF;
-    }
-
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px;
-        border-bottom: solid 1px #73808C;
-        background-color: #BBBFC3;
-        height: 40px;
-    }
-
-    .modal-body {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        height: calc(100% - 88px);
-        width: 100%;
-        padding: 24px;
-    }
-
-    .modal-footer {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        height: 48px;
-        gap: 8px;
-        padding: 8px;
-        border-top: solid 1px #73808C;
     }
 
     .form-part {
@@ -430,14 +372,6 @@ import basicInput from './form/basicInput.vue';
 
     .dark .new-map {
         background-color: #D87D40;
-    }
-
-    .dark .modal-header {
-        background-color: #0E1318;
-    }
-
-    .dark .modal-body, .dark .modal-footer {
-        background-color: #4F5A64;
     }
 
 </style>

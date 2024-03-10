@@ -2,7 +2,6 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    line-height: 24px;
     text-rendering: optimizeLegibility;
 }
 *:before,
@@ -24,6 +23,10 @@ html.dark {
     color: #F3F4F4;
 }
 
+body {
+    line-height: 24px;
+}
+
 a {
     color: #090D11;
     text-decoration: none;
@@ -39,10 +42,9 @@ a {
     width: fit-content;
     border: none;
     border-radius: 8px;
-    padding: 2px 8px;
-    font-weight: 700;
+    padding: 6px 8px;
+    font-weight: 400;
     font-size: 1rem;
-    line-height: 28px;
     cursor: pointer;
 }
 
