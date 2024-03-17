@@ -4,7 +4,7 @@
             <picture class="file-image">
                 <img :src="'/uploads/images/personages/' + image.imageName" :alt="image.imageName" ref="image">
             </picture>
-            <img width="24" height="24" src="/build/images/icons/delete.svg" alt="Supprimer l'image" class="file-delete-icon" @click="deleteImage">
+            <img width="24" height="24" src="/build/images/icons/delete_white.svg" alt="Supprimer l'image" class="file-delete-icon" @click="deleteImage">
         </div>
         <div class="file-input" v-else>
             <label for="imageFile">Charger une image</label>

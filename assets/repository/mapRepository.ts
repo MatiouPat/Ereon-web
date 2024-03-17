@@ -30,17 +30,32 @@ export class MapRepository
         })
     }
 
+    public async createMap(map: Map): Promise<void>
+    {
+        return axios({
+            method: 'POST',
+            url: 'api/maps',
+            data: map,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+    }
+
+    public async deleteMap(mapId: number): Promise<void>
+    {
+        return axios({
+            method: 'DELETE',
+            url: 'api/maps/' + mapId
+        })
+    }
+
     public async updateMapPartially(map: Map): Promise<void>
     {
         return axios({
             method: 'PATCH',
             url: 'api/maps/' + map.id,
-            data: {
-                name: map.name,
-                width: map.width,
-                height: map.height,
-                hasDynamicLight: map.hasDynamicLight
-            },
+            data: map,
             headers: {
                 'Content-Type': 'application/merge-patch+json'
             }

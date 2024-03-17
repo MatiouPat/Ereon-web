@@ -3,10 +3,12 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\Controller\DeleteMapController;
 use App\Repository\MapRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -20,9 +22,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new GetCollection(),
         new Get(),
         new Post(),
+        new Delete(
+            controller: DeleteMapController::class
+        ),
         new Patch()
     ],
-    normalizationContext: ['groups' => ['map:read']],
+    normalizationContext: ['groups' => ['map:read'], "enable_max_depth" => true],
     paginationEnabled: false
 )]
 class Map

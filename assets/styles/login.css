@@ -2,7 +2,6 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    line-height: 24px;
     text-rendering: optimizeLegibility;
 }
 *:before,
@@ -27,6 +26,7 @@ html.dark {
 body {
     height: 100vh;
     overflow: hidden;
+    line-height: 24px;
 }
 
 a {
@@ -152,8 +152,8 @@ input:hover {
     width: fit-content;
     border: none;
     border-radius: 8px;
-    padding: 2px 8px;
-    font-weight: 700;
+    padding: 6px 8px;
+    font-weight: 400;
     font-size: 1rem;
     line-height: 28px;
     cursor: pointer;

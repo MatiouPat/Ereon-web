@@ -1,6 +1,6 @@
 export interface Map {
   "@id"?: string;
-  id: number;
+  id?: number;
   name?: string;
   width?: number;
   height?: number;
