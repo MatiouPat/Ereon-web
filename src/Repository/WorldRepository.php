@@ -56,6 +56,18 @@ class WorldRepository extends ServiceEntityRepository
         ;
     }
 
+    public function findById(int $id): World
+    {
+        return $this->createQueryBuilder('w')
+            ->join('w.maps', 'm')
+            ->addSelect('m')
+            ->andWhere('w.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
 //    /**
 //     * @return World[] Returns an array of World objects
 //     */

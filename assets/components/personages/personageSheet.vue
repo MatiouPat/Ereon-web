@@ -452,7 +452,7 @@ td {
     align-items: center;
     background: #BBBFC3;
     margin-top: 24px;
-    padding: 4px;
+    padding-left: 4px;
 }
 
 .personage-navigation-title {

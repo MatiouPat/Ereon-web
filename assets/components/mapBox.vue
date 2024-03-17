@@ -210,11 +210,14 @@ import Modal from './modal/modal.vue';
                 }
             },
             deleteMap: function() {
-                if(this.chosenKey - 1 > 0){
-                    this.map = this.maps[this.chosenKey-1];
+                if(this.maps.length > 1){
+                    if(this.chosenKey == 0) {
+                        this.setMap(this.maps[1]);
+                    }else {
+                        this.setMap(this.maps[0]);
+                    }
                     this.mapService.deleteMap(this.map.id);
                     this.maps.splice(this.chosenKey, 1);
-                    console.log(this.map);
                 }
                 this.isDeleteDisplayed = false;
             }
