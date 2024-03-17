@@ -106,6 +106,9 @@ import Modal from './modal/modal.vue';
             }
         },
         computed: {
+            ...mapGetters('map', {
+                getMap: 'map'
+            }),
             ...mapGetters('user', [
                 'isGameMaster',
                 'getCurrentMapId',
@@ -211,10 +214,12 @@ import Modal from './modal/modal.vue';
             },
             deleteMap: function() {
                 if(this.maps.length > 1){
-                    if(this.chosenKey == 0) {
-                        this.setMap(this.maps[1]);
-                    }else {
-                        this.setMap(this.maps[0]);
+                    if(this.maps[this.chosenKey].id === this.getMap.id) {
+                        if(this.chosenKey == 0) {
+                            this.setMap(this.maps[1]);
+                        }else {
+                            this.setMap(this.maps[0]);
+                        }
                     }
                     this.mapService.deleteMap(this.map.id);
                     this.maps.splice(this.chosenKey, 1);
