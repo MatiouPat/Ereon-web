@@ -252,7 +252,7 @@ import { UserService } from '../services/userService';
                 this.emitter.emit("hasChangedUserVolume")
             },
             changeTheme: function() {
-                this.userParameterRepository.updateTheme(this.connectedUser.id, this.isDarkTheme);
+                this.userParameterRepository.updateTheme(this.connectedUser.userParameter.id, this.isDarkTheme);
                 this.setIsDarkTheme(this.isDarkTheme);
                 this.setThemeTag();
                 
