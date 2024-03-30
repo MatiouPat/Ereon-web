@@ -200,8 +200,14 @@ export default defineComponent({
 <style scoped>
 
     .personages-box {
+        display: flex;
+        flex-direction: column;
         height: 100%;
         overflow-y: scroll;
+    }
+
+    .personages {
+        flex-grow: 1;
     }
 
     .personage {
@@ -305,6 +311,10 @@ export default defineComponent({
 
     .dark .parameters-body, .dark .parameters-footer {
         background-color: #4F5A64;
+    }
+
+    .btn {
+        width: 100%;
     }
 
 </style>

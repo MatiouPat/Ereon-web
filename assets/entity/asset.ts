@@ -1,6 +1,6 @@
 export interface Asset {
   "@id"?: string;
-  id: number;
+  id?: number;
   image?: any;
   tokens?: string[];
 }

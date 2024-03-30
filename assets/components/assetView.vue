@@ -1,9 +1,9 @@
 <template>
     <div class="assets-box">
-        <button class="btn btn-primary" @click="openAssetPage">Ajouter un asset</button>
         <div class="assets">
             <img v-for="asset in assets" :key="asset.id" v-on="{ dragend: getLayer !== 3 ? addToken : null }" :src="'/uploads/images/' + asset.image.imageName" :alt="asset.id.toString()" width="64" height="64">
         </div>
+        <button class="btn btn-primary" @click="openAssetPage">Ajouter un asset</button>
         <modal
             :isDisplayed="isAdditionDisplayed"
             :modalTitleMessage="'Ajouter un asset'"
@@ -12,7 +12,7 @@
             @modal:validation="addAsset"
         >
             <template v-slot:modal-body>
-                <image-input :modelImage="asset.image" :width="192" :height="192" @update:modelImage="(modelImage) => asset.image = modelImage"></image-input>
+                <image-input v-if="isAdditionDisplayed" :modelImage="newAsset.image" :width="192" :height="192" @update:modelImage="(modelImage) => newAsset.image = modelImage"></image-input>
             </template>
         </modal>
     </div>
@@ -34,7 +34,7 @@ import Modal from './modal/modal.vue';
                  * The list of all assets
                  */
                 assets: [] as Asset[],
-                asset: {} as Asset,
+                newAsset: {} as Asset,
                 isAdditionDisplayed: false as boolean
             }
         },
@@ -61,19 +61,18 @@ import Modal from './modal/modal.vue';
                 }
             },
             openAssetPage: function() {
-                this.asset = {};
                 this.isAdditionDisplayed = true;
             },
             addAsset: function() {
-                this.assetService.createAsset(this.asset).then((asset: Asset) => {
+                this.assetService.createAsset(this.newAsset).then((asset: Asset) => {
                     this.assets.push(asset);
                 })
+                this.newAsset = {};
                 this.isAdditionDisplayed = false;
             }
         },
         mounted: function() {
-            this.assetService.findAllAssets().then(res => {
-                console.log(res)
+            this.assetService.findAllAssets().then((res: Asset[]) => {
                 this.assets = res;
             })
         }
@@ -81,9 +80,22 @@ import Modal from './modal/modal.vue';
 </script>
 
 <style scoped>
+    .assets-box {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
     .assets {
         display: flex;
+        align-content: flex-start;
         flex-wrap: wrap;
+        flex-grow: 1;
         gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .btn {
+        width: 100%;
     }
 </style>

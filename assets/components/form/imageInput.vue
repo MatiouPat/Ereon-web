@@ -25,8 +25,8 @@ export default defineComponent({
     },
     props: {
         modelImage: {
-            type: Object,
-            default: {}
+            type: Object as () => Image,
+            default: {} as Image
         },
         width: {
             type: Number,

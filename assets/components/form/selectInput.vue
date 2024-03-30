@@ -90,6 +90,7 @@ select {
     background-repeat: no-repeat;
     background-position: right 0.7rem top 50%;
     background-size: 0.65rem auto;
+    padding: 2px 4px;
 }
 .dark select {
     color: #F3F4F4;
