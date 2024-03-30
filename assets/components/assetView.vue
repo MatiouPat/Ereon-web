@@ -1,9 +1,20 @@
 <template>
     <div class="assets-box">
-        <picture v-for="asset in assets" :key="asset.id" v-on="{ dragend: getLayer !== 3 ? addToken : null }">
-            <source type="image/webp" :srcset="'/uploads/images/asset/' + asset.compressedImage">
-            <img :src="'/uploads/images/asset/' + asset.image" :alt="asset.id.toString()" width="64" height="64">
-        </picture>
+        <button class="btn btn-primary" @click="openAssetPage">Ajouter un asset</button>
+        <div class="assets">
+            <img v-for="asset in assets" :key="asset.id" v-on="{ dragend: getLayer !== 3 ? addToken : null }" :src="'/uploads/images/' + asset.image.imageName" :alt="asset.id.toString()" width="64" height="64">
+        </div>
+        <modal
+            :isDisplayed="isAdditionDisplayed"
+            :modalTitleMessage="'Ajouter un asset'"
+            :modalValidationMessage="'Ajouter l\'asset'"
+            @modal:close="isAdditionDisplayed = false"
+            @modal:validation="addAsset"
+        >
+            <template v-slot:modal-body>
+                <image-input :modelImage="asset.image" :width="192" :height="192" @update:modelImage="(modelImage) => asset.image = modelImage"></image-input>
+            </template>
+        </modal>
     </div>
 </template>
 
@@ -11,16 +22,20 @@
 import { defineComponent } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { Asset } from '../entity/asset';
-import { AssetRepository } from '../repository/assetRepository';
+import { AssetService } from '../services/assetService';
+import ImageInput from './form/imageInput.vue';
+import Modal from './modal/modal.vue';
 
     export default defineComponent({
         data() {
             return {
-                assetRepository: new AssetRepository as AssetRepository,
+                assetService: new AssetService as AssetService,
                 /**
                  * The list of all assets
                  */
-                assets: [] as Asset[]
+                assets: [] as Asset[],
+                asset: {} as Asset,
+                isAdditionDisplayed: false as boolean
             }
         },
         computed: {
@@ -28,6 +43,7 @@ import { AssetRepository } from '../repository/assetRepository';
                 'getLayer'
             ])
         },
+        components: { Modal, ImageInput },
         methods: {
             ...mapActions('map', [
                 'addTokenOnMap'
@@ -43,10 +59,21 @@ import { AssetRepository } from '../repository/assetRepository';
                         data: Number((e.target as HTMLImageElement).alt),
                     })
                 }
+            },
+            openAssetPage: function() {
+                this.asset = {};
+                this.isAdditionDisplayed = true;
+            },
+            addAsset: function() {
+                this.assetService.createAsset(this.asset).then((asset: Asset) => {
+                    this.assets.push(asset);
+                })
+                this.isAdditionDisplayed = false;
             }
         },
         mounted: function() {
-            this.assetRepository.findAllAssets().then(res => {
+            this.assetService.findAllAssets().then(res => {
+                console.log(res)
                 this.assets = res;
             })
         }
@@ -54,7 +81,7 @@ import { AssetRepository } from '../repository/assetRepository';
 </script>
 
 <style scoped>
-    .assets-box {
+    .assets {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;

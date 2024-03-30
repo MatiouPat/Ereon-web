@@ -15,4 +15,19 @@ export class AssetRepository
         })
     }
 
+    public async createAsset(asset: Asset): Promise<Asset>
+    {
+        return axios({
+            method: 'POST',
+            url: '/api/assets',
+            data: asset,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            return res.data
+        })
+    }
+
 }

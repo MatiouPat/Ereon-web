@@ -2,7 +2,7 @@
     <div class="personages-box">
         <div class="personages">
             <div class="personage" :key="key" v-for="(personage, key) in personages" @click="viewPersonage(personage, key)">
-                <img v-if="personage.image" :src="'/uploads/images/personages/' + personage.image.imageName" alt="" width="64">
+                <img v-if="personage.image" :src="'/uploads/images/' + personage.image.imageName" alt="" width="64">
                 <div class="personage-info">
                     <span class="personage-name">{{ personage.name }}</span>
                     <span class="personage-category me" v-if="personage.user && personage.user.id === getUserId">MOI</span>

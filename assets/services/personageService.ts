@@ -1,13 +1,12 @@
-import { Image } from "../entity/image";
 import { Item } from "../entity/item";
 import { NumberOfAttribute } from "../entity/numberofattribute";
 import { NumberOfPoint } from "../entity/numberofpoint";
 import { Personage } from "../entity/personage";
 import { Spell } from "../entity/spell";
-import { ImageRepository } from "../repository/imageRepository";
 import { NumberOfAttributeRepository } from "../repository/numberofattributeRepository";
 import { NumberOfPointRepository } from "../repository/numberofpointRepository";
 import { PersonageRepository } from "../repository/personageRepository";
+import { ImageService } from "./imageService";
 
 /**
  * @author Matthieu Pays <pays.matthieuic@gmail.com>
@@ -22,7 +21,7 @@ export class PersonageService
 
     private numberOfPointRepository: NumberOfPointRepository = new NumberOfPointRepository();
 
-    private imageRepository: ImageRepository = new ImageRepository();
+    private imageService: ImageService = new ImageService();
 
     /**
      * Find all the characters in a world
@@ -57,7 +56,7 @@ export class PersonageService
     public async createPersonage(personage: Personage): Promise<Personage>
     {
         let req = JSON.parse(JSON.stringify(personage));
-        return this.uploadImage(personage.image).then((image) => {
+        return this.imageService.uploadImage(personage.image).then((image) => {
             personage.image = image;
             if (image.id) {
                 req.image = 'api/images/' + image.id
@@ -96,7 +95,7 @@ export class PersonageService
     public async updatePersonagePartially(personage: Personage): Promise<void>
     {
         let req: Personage = JSON.parse(JSON.stringify(personage));
-        this.uploadImage(personage.image).then((image) => {
+        this.imageService.uploadImage(personage.image).then((image) => {
             personage.image = image;
             if (image.id) {
                 req.image = 'api/images/' + image.id
@@ -125,23 +124,6 @@ export class PersonageService
             })
             this.personageRepository.updatePersonagePartially(req);
         })
-    }
-
-    /**
-     * Call the image service if an image is uploaded via the form in the character component.
-     * @param image 
-     */
-    private async uploadImage(image: Image): Promise<Image>
-    {
-        if(!image.imageFile) {
-            return image;
-        }
-
-        if(image.id) {
-            return await this.imageRepository.updateImagePartially(image);
-        }else {
-            return await this.imageRepository.createImage(image);
-        }
     }
 
 }

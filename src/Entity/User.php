@@ -197,7 +197,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->discordIdentifier;
     }
 
-    public function setDiscordIdentifier(string $discordIdentifier): self
+    public function setDiscordIdentifier(?string $discordIdentifier): self
     {
         $this->discordIdentifier = $discordIdentifier;
 

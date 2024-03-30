@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\Repository\AssetRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,8 +13,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AssetRepository::class)]
 #[ApiResource(
+    normalizationContext: ['groups' => ['asset:read']],
+    denormalizationContext: ['groups' => ['asset:write']],
     operations: [
-        new GetCollection()
+        new GetCollection(),
+        new Post()
     ],
     paginationEnabled: false
 )]
@@ -22,14 +26,15 @@ class Asset
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["asset:read"])]
     private ?int $id = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(["map:read", "token:read"])]
-    private ?string $image = null;
 
     #[ORM\OneToMany(mappedBy: 'asset', targetEntity: Token::class)]
     private Collection $tokens;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[Groups(["map:read", "token:read", "asset:read", "asset:write"])]
+    private ?Image $image = null;
 
     public function __construct()
     {
@@ -39,30 +44,6 @@ class Asset
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getImage(): ?string
-    {
-        return $this->image . '.png';
-    }
-
-    public function setImage(string $image): static
-    {
-
-        $this->image = explode('.', $image)[0];
-
-        return $this;
-    }
-
-    #[Groups(["map:read", "token:read"])]
-    public function getCompressedImage(): ?string
-    {
-        return $this->image . '.webp';
-    }
-
-    public function setCompressedImage(string $image): static
-    {
-        return $this;
     }
 
     /**
@@ -91,6 +72,18 @@ class Asset
                 $token->setAsset(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getImage(): ?Image
+    {
+        return $this->image;
+    }
+
+    public function setImage(?Image $image): static
+    {
+        $this->image = $image;
 
         return $this;
     }

@@ -135,41 +135,22 @@ import { Asset } from '../entity/asset';
                         this.tokenTextures = [];
                         this.map.tokens.forEach((token: Token) => {
                             let asset = token.asset as Asset;
-                            if(asset.compressedImage) {
-                                this.tokenTextures.push({
-                                    texture: twgl.createTexture(this.fog!, {
-                                        src: "./uploads/images/asset/" + asset.compressedImage,
-                                        min: this.fog!.LINEAR,
-                                        mag: this.fog!.LINEAR,
-                                        wrap: this.fog!.CLAMP_TO_EDGE
-                                    }, () => {
-                                        this.draw();
-                                    }),
-                                    width: token.width!,
-                                    height: token.height!,
-                                    position: {
-                                        x: token.leftPosition!,
-                                        y: token.topPosition!
-                                    }
-                                });
-                            }else {
-                                this.tokenTextures.push({
-                                    texture: twgl.createTexture(this.fog!, {
-                                        src: "./uploads/images/asset/" + asset.image,
-                                        min: this.fog!.LINEAR,
-                                        mag: this.fog!.LINEAR,
-                                        wrap: this.fog!.CLAMP_TO_EDGE
-                                    }, () => {
-                                        this.draw();
-                                    }),
-                                    width: token.width!,
-                                    height: token.height!,
-                                    position: {
-                                        x: token.leftPosition!,
-                                        y: token.topPosition!
-                                    }
-                                });
-                            }
+                            this.tokenTextures.push({
+                                texture: twgl.createTexture(this.fog!, {
+                                    src: "./uploads/images/asset/" + asset.image,
+                                    min: this.fog!.LINEAR,
+                                    mag: this.fog!.LINEAR,
+                                    wrap: this.fog!.CLAMP_TO_EDGE
+                                }, () => {
+                                    this.draw();
+                                }),
+                                width: token.width!,
+                                height: token.height!,
+                                position: {
+                                    x: token.leftPosition!,
+                                    y: token.topPosition!
+                                }
+                            });
                         });
                     }else {
                         this.main = (this.$refs.main as HTMLCanvasElement).getContext("2d");
