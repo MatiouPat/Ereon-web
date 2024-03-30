@@ -81,7 +81,7 @@ input {
     background: none;
     border: solid 1px #090D11;
     width: 100%;
-    padding: 0 4px;
+    padding: 2px 4px;
     transition: all .15s ease;
     font-family: Oswald, sans-serif;
 }

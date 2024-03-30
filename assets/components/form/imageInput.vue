@@ -2,7 +2,7 @@
     <div class="file-wrapper" :style="{width: width + 'px', height: height + 'px', minWidth: width + 'px'}">
         <div v-if="image.imageName || isPreview">
             <picture class="file-image">
-                <img :src="'/uploads/images/personages/' + image.imageName" :alt="image.imageName" ref="image">
+                <img :src="'/uploads/images/' + image.imageName" :alt="image.imageName" ref="image">
             </picture>
             <img width="24" height="24" src="/build/images/icons/delete_white.svg" alt="Supprimer l'image" class="file-delete-icon" @click="deleteImage">
         </div>
@@ -25,8 +25,8 @@ export default defineComponent({
     },
     props: {
         modelImage: {
-            type: Object,
-            default: {}
+            type: Object as () => Image,
+            default: {} as Image
         },
         width: {
             type: Number,

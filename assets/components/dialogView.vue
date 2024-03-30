@@ -172,8 +172,14 @@ import SelectInput from './form/selectInput.vue';
 
 <style scoped>
 
+    .dialog-box {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
     .messages {
-        height: calc(75dvh - 64px);
+        flex-grow: 1;
         overflow-y: scroll;
         margin-bottom: 16px;
     }
@@ -226,6 +232,10 @@ import SelectInput from './form/selectInput.vue';
     .dark .textinput textarea {
         background-color: #364049;
         border: solid 1px #F3F4F4;
+    }
+
+    .btn {
+        width: 100%;
     }
 
 </style>
