@@ -6,7 +6,10 @@ export class MusicPlayerRepository extends AbstractRepository
     public async findMusicPlayerByWorld(worldId: number): Promise<MusicPlayer>
     {
         return this.createQueryBuilder('GET', '/api/music_players?world.id=' + worldId)
-            .getResult()[0]
+            .getResult()
+            .then((res) => {
+                return res[0]
+            })
     }
 
     public async setIsPlaying(musicPlayerId: number, isPlaying: boolean, currentTimePlay: number): Promise<void>
