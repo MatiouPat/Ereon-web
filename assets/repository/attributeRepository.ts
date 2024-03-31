@@ -1,18 +1,12 @@
-import axios from "axios";
 import { Attribute } from "../entity/attribute";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class AttributeRepository
+export class AttributeRepository extends AbstractRepository
 {
-
     public async findAttributeByWorld(worldId: number): Promise<Attribute[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/attributes?world.id=' + worldId
-        })
-        .then(res => {
-            return res.data['hydra:member']
-        })
+        return this.createQueryBuilder('GET', '/api/attributes?world.id=' + worldId)
+            .getResult()
     }
 
 }

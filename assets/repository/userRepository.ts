@@ -1,30 +1,19 @@
-import axios from "axios";
 import { User } from "../entity/user";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class UserRepository
+export class UserRepository extends AbstractRepository
 {
-
     public async findUserByWorldAndWhereIsNotGameMaster(worldId: number): Promise<User[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/users?connections.isGameMaster=false&connections.world.id=' + worldId
-        })
-        .then(res => {
-            return res.data['hydra:member']
-        })
+        return this.createQueryBuilder('GET', '/api/users?connections.isGameMaster=false&connections.world.id=' + worldId)
+            .getResult()
     }
 
     public async updateUserPartially(user: User): Promise<void>
     {
-        axios({
-            method: 'PATCH',
-            url: '/api/users/' + user.id,
-            data: user,
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+        return this.createQueryBuilder('PATCH', '/api/users/' + user.id)
+            .addData(user)
+            .getOneOrNullResult()
     }
 
 }

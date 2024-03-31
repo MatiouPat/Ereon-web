@@ -1,18 +1,12 @@
-import axios from "axios";
 import { Music } from "../entity/music";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class MusicRepository
+export class MusicRepository extends AbstractRepository
 {
-
     public async findAllMusics(): Promise<Music[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/music'
-        })
-        .then(res => {
-            return res.data['hydra:member']
-        })
+        return this.createQueryBuilder('GET', '/api/music')
+            .getResult()
     }
 
 }

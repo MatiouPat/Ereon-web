@@ -1,34 +1,23 @@
-import axios from "axios";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class UserParameterRepository
+export class UserParameterRepository extends AbstractRepository
 {
-
     public async updateGlobalVolume(userId: number, globalVolume: number): Promise<void>
     {
-        axios({
-            method: 'PATCH',
-            url: '/api/user_parameters/' + userId,
-            data: {
+        return this.createQueryBuilder('PATCH', '/api/user_parameters/' + userId)
+            .addData({
                 globalVolume: Number(globalVolume)
-            },
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        });
+            })
+            .getOneOrNullResult()
     }
 
     public async updateTheme(userId: number, isDarkTheme: boolean): Promise<void>
     {
-        axios({
-            method: 'PATCH',
-            url: '/api/user_parameters/' + userId,
-            data: {
+        return this.createQueryBuilder('PATCH', '/api/user_parameters/' + userId)
+            .addData({
                 isDarkTheme: Boolean(isDarkTheme)
-            },
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+            })
+            .getOneOrNullResult()
     }
 
 }

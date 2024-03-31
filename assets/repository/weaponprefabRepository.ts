@@ -1,33 +1,19 @@
-import axios from "axios";
 import { WeaponPrefab } from "../entity/weaponprefab";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class WeaponPrefabRepository
+export class WeaponPrefabRepository extends AbstractRepository
 {
-
     public async findWeaponPrefabByWorld(worldId: number): Promise<WeaponPrefab[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/weapon_prefabs?world.id=' + worldId
-        })
-        .then(res => {
-            return res.data['hydra:member'];
-        })
+        return this.createQueryBuilder('GET', '/api/weapon_prefabs?world.id=' + worldId)
+            .getResult()
     }
 
     public async createWeaponPrefab(weaponPrefab: WeaponPrefab): Promise<WeaponPrefab>
     {
-        return axios({
-            method: 'POST',
-            url: '/api/weapon_prefabs',
-            data: weaponPrefab,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => {
-            return res.data;
-        })
+        return this.createQueryBuilder('POST', '/api/weapon_prefabs')
+            .addData(weaponPrefab)
+            .getOneOrNullResult()
     }
 
 }

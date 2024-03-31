@@ -1,19 +1,13 @@
-import axios from "axios";
 import { NumberOfAttribute } from "../entity/numberofattribute";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class NumberOfAttributeRepository
+export class NumberOfAttributeRepository extends AbstractRepository
 {
-
     public async updateNumberOfAttributePartially(numberOfAttribute: NumberOfAttribute): Promise<void>
     {
-        axios({
-            method: 'PATCH',
-            url: '/api/number_of_attributes/' + numberOfAttribute.id,
-            data: numberOfAttribute,
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+        return this.createQueryBuilder('PATCH', '/api/number_of_attributes/' + numberOfAttribute.id)
+            .addData(numberOfAttribute)
+            .getOneOrNullResult()
     }
 
 }
