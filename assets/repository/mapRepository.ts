@@ -1,65 +1,38 @@
-import axios from "axios";
 import { Map } from "../entity/map";
-import { Connection } from "../entity/connection";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class MapRepository
+export class MapRepository extends AbstractRepository
 {
-
     public async findAllMaps(): Promise<Map[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/maps',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => {
-            return res.data['hydra:member']
-        })
+        return this.createQueryBuilder('GET', '/api/maps')
+            .getResult()
     }
 
     public async findMapById(mapId: number): Promise<Map>
     {
-        return axios({
-            method: 'GET',
-            url: 'api/maps/' + mapId
-        })
-        .then(res => {
-            return res.data
-        })
+        return this.createQueryBuilder('GET', '/api/maps/' + mapId)
+            .getOneOrNullResult()
     }
 
     public async createMap(map: Map): Promise<void>
     {
-        return axios({
-            method: 'POST',
-            url: 'api/maps',
-            data: map,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
+        return this.createQueryBuilder('POST', '/api/maps')
+            .addData(map)
+            .getOneOrNullResult()
     }
 
     public async deleteMap(mapId: number): Promise<void>
     {
-        return axios({
-            method: 'DELETE',
-            url: 'api/maps/' + mapId
-        })
+        return this.createQueryBuilder('DELETE', '/api/maps/' + mapId)
+            .getOneOrNullResult()
     }
 
     public async updateMapPartially(map: Map): Promise<void>
     {
-        return axios({
-            method: 'PATCH',
-            url: 'api/maps/' + map.id,
-            data: map,
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+        return this.createQueryBuilder('PATCH', '/api/maps/' + map.id)
+            .addData(map)
+            .getOneOrNullResult()
     }
 
 }

@@ -1,33 +1,19 @@
-import axios from "axios";
 import { Spell } from "../entity/spell";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class SpellRepository
+export class SpellRepository extends AbstractRepository
 {
-
     public async findSpellByWorld(worldId: number): Promise<Spell[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/spells?world.id=' + worldId
-        })
-        .then(res => {
-            return res.data['hydra:member'];
-        })
+        return this.createQueryBuilder('GET', '/api/spells?world.id=' + worldId)
+            .getResult()
     }
 
     public async createSpell(spell: Spell): Promise<Spell>
     {
-        return axios({
-            method: 'POST',
-            url: '/api/spells',
-            data: spell,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => {
-            return res.data;
-        })
+        return this.createQueryBuilder('POST', '/api/spells')
+            .addData(spell)
+            .getOneOrNullResult()
     }
 
 }

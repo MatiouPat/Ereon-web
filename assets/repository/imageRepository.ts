@@ -1,41 +1,27 @@
 import axios from "axios";
 import { Image } from "../entity/image";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class ImageRepository
+export class ImageRepository extends AbstractRepository
 {
-
     public async createImage(image: Image): Promise<Image>
     {
-        return axios({
-            method: 'POST',
-            url: '/api/images',
-            data: {
+        return this.createQueryBuilder('POST', '/api/images')
+            .setIsMultipartMethod(true)
+            .addData({
                 imageFile: image.imageFile
-            },
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-        .then((res) => {
-            return res.data
-        })
+            })
+            .getOneOrNullResult()
     }
 
     public async updateImagePartially(image: Image): Promise<Image>
     {
-        return axios({
-            method: 'POST',
-            url: '/api/images/' + image.id,
-            data: {
+        return this.createQueryBuilder('POST', '/api/images' + image.id)
+            .setIsMultipartMethod(true)
+            .addData({
                 imageFile: image.imageFile
-            },
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-        .then((res) => {
-            return res.data
-        })
+            })
+            .getOneOrNullResult()
     }
 
 }

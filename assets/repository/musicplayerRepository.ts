@@ -1,75 +1,49 @@
-import axios from "axios";
 import { MusicPlayer } from "../entity/musicplayer";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class MusicPlayerRepository
+export class MusicPlayerRepository extends AbstractRepository
 {
-
     public async findMusicPlayerByWorld(worldId: number): Promise<MusicPlayer>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/music_players?world.id=' + worldId
-        })
-        .then(res => {
-            return res.data['hydra:member'][0]
-        })
+        return this.createQueryBuilder('GET', '/api/music_players?world.id=' + worldId)
+            .getResult()[0]
     }
 
     public async setIsPlaying(musicPlayerId: number, isPlaying: boolean, currentTimePlay: number): Promise<void>
     {
-        return axios({
-            method: 'PATCH',
-            url: '/api/music_players/' + musicPlayerId,
-            data: {
+        return this.createQueryBuilder('PATCH', '/api/music_players/' + musicPlayerId)
+            .addData({
                 isPlaying: isPlaying,
                 currentTimePlay: Number(currentTimePlay)
-            },
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+            })
+            .getOneOrNullResult()
     }
 
     public async setIsLooping(musicPlayerId: number, isLooping: boolean): Promise<void>
     {
-        return axios({
-            method: 'PATCH',
-            url: '/api/music_players/' + musicPlayerId,
-            data: {
+        return this.createQueryBuilder('PATCH', '/api/music_players/' + musicPlayerId)
+            .addData({
                 isLooping: isLooping
-            },
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+            })
+            .getOneOrNullResult()
     }
 
     public async setCurrentTimePlay(musicPlayerId: number, currentTimePlay: number): Promise<void>
     {
-        return axios({
-            method: 'PATCH',
-            url: '/api/music_players/' + musicPlayerId,
-            data: {
+        return this.createQueryBuilder('PATCH', '/api/music_players/' + musicPlayerId)
+            .addData({
                 currentTimePlay: Number(currentTimePlay)
-            },
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+            })
+            .getOneOrNullResult()
     }
 
     public async setCurrentMusic(musicPlayerId: number, musicId: number, currentTimePlay: number): Promise<void>
     {
-        return axios({
-            method: 'PATCH',
-            url: '/api/music_players/' + musicPlayerId,
-            data: {
+        return this.createQueryBuilder('PATCH', '/api/music_players/' + musicPlayerId)
+            .addData({
                 currentMusic: 'api/music/' + musicId,
                 currentTimePlay: Number(currentTimePlay)
-            },
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        })
+            })
+            .getOneOrNullResult()
     }
 }

@@ -1,33 +1,19 @@
-import axios from "axios";
 import { Asset } from "../entity/asset";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class AssetRepository
+export class AssetRepository extends AbstractRepository
 {
-
     public async findAllAssets(): Promise<Asset[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/assets'
-        })
-        .then(res => {
-            return res.data['hydra:member']
-        })
+        return this.createQueryBuilder('GET', '/api/assets')
+            .getResult()
     }
 
     public async createAsset(asset: Asset): Promise<Asset>
     {
-        return axios({
-            method: 'POST',
-            url: '/api/assets',
-            data: asset,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => {
-            return res.data
-        })
+        return this.createQueryBuilder('POST', '/api/assets')
+            .addData(asset)
+            .getOneOrNullResult()
     }
 
 }

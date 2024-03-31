@@ -1,39 +1,26 @@
-import axios from "axios";
 import { Token } from "../entity/token";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class TokenRepository
+export class TokenRepository extends AbstractRepository
 {
-
     public async createToken(token: Token): Promise<void>
     {
-        axios({
-            method: 'POST',
-            url: '/api/tokens',
-            data: token,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        return this.createQueryBuilder('POST', '/api/tokens')
+            .addData(token)
+            .getOneOrNullResult()
     }
 
     public async deleteToken(tokenId: number): Promise<void>
     {
-        axios({
-            method: 'DELETE',
-            url: '/api/tokens/' + tokenId
-        });
+        return this.createQueryBuilder('DELETE', '/api/tokens/' + tokenId)
+            .getOneOrNullResult()
     }
 
     public async updateTokenPartially(token: Token): Promise<void>
     {
-        axios({
-            method: 'PATCH',
-            url: '/api/tokens/' + token.id,
-            data: token,
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        });
+        return this.createQueryBuilder('PATCH', '/api/tokens/' + token.id)
+            .addData(token)
+            .getOneOrNullResult()
     }
 
 }

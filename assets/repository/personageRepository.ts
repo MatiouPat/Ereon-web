@@ -1,75 +1,44 @@
-import axios from "axios";
 import { Personage } from "../entity/personage";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class PersonageRepository
+export class PersonageRepository extends AbstractRepository
 {
-
     public async findPersonagesByWorld(worldId: number): Promise<Personage[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/personages?world.id=' + worldId
-        })
-        .then(res => {
-            return res.data['hydra:member']
-        })
+        return this.createQueryBuilder('GET', '/api/personages?world.id=' + worldId)
+            .getResult()
     }
 
     public async findNonPlayerPersonagesByWorld(worldId: number): Promise<Personage[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/personages?exists[user]=false&world.id=' + worldId
-        })
-        .then(res => {
-            return res.data['hydra:member']
-        })
+        return this.createQueryBuilder('GET', '/api/personages?exists[user]=false&world.id=' + worldId)
+            .getResult()
     }
 
     public async findPersonagesByWorldAndByUser(worldId: number, userId: number): Promise<Personage[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/personages?world.id=' + worldId + '&user.id=' + userId
-        })
-        .then(res => {
-            return res.data['hydra:member']
-        })
+        return this.createQueryBuilder('GET', '/api/personages?world.id=' + worldId + '&user.id=' + userId)
+            .getResult()
     }
 
     public async createPersonage(personage: Personage): Promise<Personage>
     {
-        return axios({
-            method: 'POST',
-            url: '/api/personages',
-            data: personage,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then((res) => {
-            return res.data
-        })
+        return this.createQueryBuilder('POST', '/api/personages')
+            .addData(personage)
+            .getOneOrNullResult()
     }
 
     public async deletePersonage(personageId: number): Promise<void>
     {
-        axios({
-            method: 'DELETE',
-            url: '/api/personages/' + personageId
-        });
+        return this.createQueryBuilder('DELETE', '/api/personages/' + personageId)
+            .getOneOrNullResult()
     }
 
     public async updatePersonagePartially(personage: Personage): Promise<void>
     {
-        axios({
-            method: 'PATCH',
-            url: '/api/personages/' + personage.id,
-            data: personage,
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        });
+        return this.createQueryBuilder('PATCH', '/api/personages/' + personage.id)
+            .addData(personage)
+            .getOneOrNullResult()
     }
 
 }
