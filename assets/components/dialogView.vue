@@ -43,7 +43,6 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex';
 import { defineComponent } from 'vue';
 import DialogMessage from './dialogMessage.vue';
 import { Dice } from '../entity/dice';
@@ -51,6 +50,8 @@ import { DiceRepository } from '../repository/diceRepository';
 import { Personage } from '../entity/personage';
 import { PersonageRepository } from '../repository/personageRepository';
 import SelectInput from './form/selectInput.vue';
+import { mapState } from 'pinia';
+import { useUserStore } from '../store/user';
 
     export default defineComponent({
         components: {
@@ -78,7 +79,7 @@ import SelectInput from './form/selectInput.vue';
             }
         },
         computed: {
-            ...mapGetters('user', [
+            ...mapState(useUserStore, [
                 'getPersonages',
                 'isGameMaster',
                 'getWorld',

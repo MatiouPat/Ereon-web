@@ -161,7 +161,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex';
 import basicInput from '../form/basicInput.vue';
 import SelectInput from '../form/selectInput.vue';
 import { AttributeService } from '../../services/attributeService';
@@ -175,6 +174,8 @@ import { Spell } from '../../entity/spell';
 import { PointService } from '../../services/pointService';
 import { SpellService } from '../../services/spellService';
 import TextInput from '../form/textInput.vue';
+import { mapState } from 'pinia';
+import { useUserStore } from '../../store/user';
 
 export default defineComponent({
     data() {
@@ -209,7 +210,7 @@ export default defineComponent({
         }
     },
     computed: {
-        ...mapGetters('user', [
+        ...mapState(useUserStore, [
             'getWorld',
             'getIsDarkTheme'
         ])

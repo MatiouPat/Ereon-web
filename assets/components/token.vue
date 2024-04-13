@@ -83,9 +83,11 @@
 
 <script lang="ts">
 import { defineComponent, inject, InputHTMLAttributes } from 'vue';
-import { mapActions, mapGetters } from 'vuex';
 import { Token } from '../entity/token';
 import { User } from '../entity/user';
+import { mapActions, mapState } from 'pinia';
+import { useMapStore } from '../store/map';
+import { useUserStore } from '../store/user';
 
     export default defineComponent({
         data() {
@@ -120,7 +122,7 @@ import { User } from '../entity/user';
             'id'
         ],
         computed: {
-            ...mapGetters('map', [
+            ...mapState(useMapStore, [
                 'map',
                 'getTokenById',
                 'canControlledBy',
@@ -128,7 +130,7 @@ import { User } from '../entity/user';
                 'getRatio',
                 'getLayer'
             ]),
-            ...mapGetters('user', [
+            ...mapState(useUserStore, [
                 'getUserId',
                 'isGameMaster',
                 'getPlayers'
@@ -141,7 +143,7 @@ import { User } from '../entity/user';
             }
         },
         methods: {
-            ...mapActions('map', [
+            ...mapActions(useMapStore, [
                 'removeTokenOnMap',
                 'updateToken',
                 'finishUpdateToken',

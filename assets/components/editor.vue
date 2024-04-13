@@ -1,9 +1,9 @@
 <template>
     <div class="editor-wrapper" id="editor-wrapper" ref="editorWrapper" @mousedown="onMouseDown" @mouseup="onMouseUp" @wheel="onWheel" @mouseleave="onMouseUp" @contextmenu="onContextMenu">
-        <div class="editor" id="editor" ref="map" :style="{ width: map.width + 'px', height: map.height + 'px', transform: 'scale(' + ratio + ')'}">
-            <canvas ref="fog" id="fog" :width="map.width" :height="map.height" :style="{zIndex: !isGameMaster && map.hasDynamicLight ? 15 : -1, width: map.width + 'px', height: map.height + 'px'}"></canvas>
-            <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="map.width" :height="map.height" :style="{zIndex: getLayer === 3 ? 10 : -100}"></canvas>   
-            <TokenComposent :id="token.id" :key="key" v-for="(token, key) in map.tokens"></TokenComposent>
+        <div class="editor" id="editor" ref="map" :style="{ width: getMap.width + 'px', height: getMap.height + 'px', transform: 'scale(' + ratio + ')'}">
+            <canvas ref="fog" id="fog" :width="getMap.width" :height="getMap.height" :style="{zIndex: !isGameMaster && getMap.hasDynamicLight ? 15 : -1, width: getMap.width + 'px', height: getMap.height + 'px'}"></canvas>
+            <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="getMap.width" :height="getMap.height" :style="{zIndex: getLayer === 3 ? 10 : -100}"></canvas>   
+            <TokenComposent :id="token.id" :key="key" v-for="(token, key) in getMap.tokens"></TokenComposent>
         </div>
         <div class="editor-zoom">
             <span class="editor-zoom-ratio">{{(ratio * 100).toFixed(0)}}</span>
@@ -17,7 +17,6 @@
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
 import TokenComposent from './token.vue'
-import { mapActions, mapGetters } from 'vuex';
 import * as twgl from 'twgl.js';
 import lightVertSrc from "../shaders/light.vert";
 import lightFragSrc from "../shaders/light.frag";
@@ -32,6 +31,9 @@ import { LightingWallService } from '../services/lightingwallService';
 import { LightingWall } from '../entity/lightingwall';
 import { Token } from '../entity/token';
 import { Asset } from '../entity/asset';
+import { mapActions, mapState } from 'pinia';
+import { useMapStore } from '../store/map';
+import { useUserStore } from '../store/user';
 
     export default defineComponent({
         components: {
@@ -82,14 +84,14 @@ import { Asset } from '../entity/asset';
             }
         },
         computed: {
-            ...mapGetters('map', [
-                'map',
+            ...mapState(useMapStore, [
+                'getMap',
                 'getRatio',
                 'getLayer',
                 'getControllableTokens',
                 'getOnDrawing'
             ]),
-            ...mapGetters('user', [
+            ...mapState(useUserStore, [
                 'isGameMaster',
                 'getUserId'
             ])
@@ -161,7 +163,7 @@ import { Asset } from '../entity/asset';
             }
         },
         methods: {
-            ...mapActions('map', [
+            ...mapActions(useMapStore, [
                 'addTokenOnMap',
                 'updateToken',
                 'removeTokenOnMap',

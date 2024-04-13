@@ -59,10 +59,12 @@
 
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import { mapGetters } from 'vuex';
 import { Music } from '../entity/music';
 import { MusicRepository } from '../repository/musicRepository';
 import { MusicPlayerRepository } from '../repository/musicplayerRepository';
+import { mapState } from 'pinia';
+import { useUserStore } from '../store/user';
+import { useMusicStore } from '../store/music';
   
     export default defineComponent({
         data() {
@@ -85,13 +87,13 @@ import { MusicPlayerRepository } from '../repository/musicplayerRepository';
             }
         },
         computed: {
-            ...mapGetters('user', [
+            ...mapState(useUserStore, [
                 'isGameMaster',
                 'getWorld',
                 'getUserId',
                 'getIsDarkTheme'
             ]),
-            ...mapGetters('music', [
+            ...mapState(useMusicStore, [
                 'getUserVolume'
             ])
         },

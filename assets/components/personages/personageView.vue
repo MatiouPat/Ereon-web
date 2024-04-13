@@ -42,7 +42,6 @@ import { AttributeRepository } from '../../repository/attributeRepository';
 import { Quill, QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { Attribute } from '../../entity/attribute';
-import { mapGetters } from 'vuex';
 import { NumberOfAttribute } from '../../entity/numberofattribute';
 import { PointRepository } from '../../repository/pointRepository';
 import { Point } from '../../entity/point';
@@ -50,6 +49,8 @@ import { NumberOfPoint } from '../../entity/numberofpoint';
 import { Image } from '../../entity/image';
 import BasicInput from '../form/basicInput.vue';
 import PersonageSheet from './personageSheet.vue';
+import { mapState } from 'pinia';
+import { useUserStore } from '../../store/user';
 
 export default defineComponent({
     data() {
@@ -66,7 +67,7 @@ export default defineComponent({
         }
     },
     computed: {
-        ...mapGetters('user', [
+        ...mapState(useUserStore, [
             'getWorld',
             'isGameMaster',
             'getPlayers',

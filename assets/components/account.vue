@@ -115,7 +115,6 @@
 
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import { mapActions, mapGetters } from 'vuex';
 import { Connection } from '../entity/connection';
 import { World } from '../entity/world';
 import { UserParameterRepository } from '../repository/userparameterRepository';
@@ -126,6 +125,10 @@ import { MapService } from '../services/mapService';
 import basicInput from './form/basicInput.vue';
 import { User } from '../entity/user';
 import { UserService } from '../services/userService';
+import { mapActions, mapState } from 'pinia';
+import { useMapStore } from '../store/map';
+import { useUserStore } from '../store/user';
+import { useMusicStore } from '../store/music';
 
     export default defineComponent({
   components: { basicInput },
@@ -159,7 +162,7 @@ import { UserService } from '../services/userService';
             'worlds'
         ],
         computed: {
-            ...mapGetters('user', [
+            ...mapState(useUserStore, [
                 'getConnectedUser',
                 'getCurrentMapId',
                 'getUsername',
@@ -167,7 +170,7 @@ import { UserService } from '../services/userService';
                 'getIsDarkTheme',
                 'getUser'
             ]),
-            ...mapGetters('map', [
+            ...mapState(useMapStore, [
                 'getLayer',
                 'getOnDrawing'
             ])
@@ -189,7 +192,7 @@ import { UserService } from '../services/userService';
             }
         },
         methods: {
-            ...mapActions('user', [
+            ...mapActions(useUserStore, [
                 'setUser',
                 'setPlayers',
                 'setConnection',
@@ -199,13 +202,13 @@ import { UserService } from '../services/userService';
                 'setPersonages',
                 'setIsDarkTheme'
             ]),
-            ...mapActions('map', [
+            ...mapActions(useMapStore, [
                 'setMap',
                 'setLayer',
                 'setOnDrawing',
                 'deleteAllLightingWalls'
             ]),
-            ...mapActions('music', [
+            ...mapActions(useMusicStore, [
                 'setUserParameter',
                 'setUserVolume'
             ]),
