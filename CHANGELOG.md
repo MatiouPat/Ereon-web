@@ -23,3 +23,11 @@ This changelog references the relevant changes (bug and security fixes) done in 
  * feature #46 Extending the character sheet with weapons/armor
  * bug #57 Changing a player's map is not taken into account locally
  * bug #63 Empty texture cache when changing map
+
+* 0.3.0 (2024-04-13)
+ * feature #15 Enable the addition of a new map from the map editor
+ * feature #16 Allow new assets to be added from the map editor
+ * feature #74 Create an account
+ * feature #79 Upgrade to Symfony 7.0
+ * feature #83 Secure Api Platform with a JWT token
+ * feature #87 Add link to discord server
