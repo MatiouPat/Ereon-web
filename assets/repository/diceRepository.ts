@@ -1,43 +1,33 @@
-import axios from "axios";
 import { Dice } from "../entity/dice";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class DiceRepository
+export class DiceRepository extends AbstractRepository
 {
-
     public async findAllDices(): Promise<Dice[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/dices'
-        })
-        .then(res => {
-            return res.data['hydra:member']
-        })
+        return this.createQueryBuilder('GET', '/api/dices')
+            .getResult()
     }
     
     public async createDice(userId: number, worldId: number, computation: string, personageId?: number): Promise<void>
     {
         if(personageId === undefined) {
-            return axios({
-                method: 'POST',
-                url: '/api/dices',
-                data: {
+            return this.createQueryBuilder('POST', '/api/dices')
+                .addData({
                     computation: computation,
                     launcher: '/api/users/' + userId,
                     world: '/api/worlds/' + worldId
-                }
-            })
+                })
+                .getOneOrNullResult()
         }else {
-            return axios({
-                method: 'POST',
-                url: '/api/dices',
-                data: {
+            return this.createQueryBuilder('POST', '/api/dices')
+                .addData({
                     computation: computation,
                     launcher: '/api/users/' + userId,
                     world: '/api/worlds/' + worldId,
                     personage: '/api/personages/' + personageId
-                }
-            })
+                })
+                .getOneOrNullResult()
         }
     }
 

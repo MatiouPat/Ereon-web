@@ -4,8 +4,12 @@
             <div class="map" @click="chooseMap(map.id)" v-for="(map, key) in maps" :key="key" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
                 <span>{{ map.name }}</span>
                 <ul class="map-actions">
+                    <li><img @click.stop="showMapDelete(key)" :src="getIsDarkTheme ? '/build/images/icons/delete_white.svg' : '/build/images/icons/delete_black.svg'" alt="Supprimer" width="16" height="16"></li>
                     <li><img @click.stop="showMapParameter(key)" :src="getIsDarkTheme ? '/build/images/icons/settings_white.svg' : '/build/images/icons/settings_black.svg'" alt="Paramètres" width="16" height="16"></li>
                 </ul>
+            </div>
+            <div class="map new-map" @click="createMap()">
+                <span>Nouvelle carte</span>
             </div>
         </div>
         <button class="map-open" name="menu" type="button" :class="{isDisplayed: isDisplayed}" @click="display">
@@ -15,47 +19,52 @@
                 <path class="line line3" d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
             </svg>
         </button>
-        <Teleport to="#editor">
-            <div class="modal-wrapper" v-if="isParametersDisplayed">
-                <div class="modal">
-                    <div class="modal-header">
-                            <h2>Informations carte</h2>
-                            <img width="24" height="24" @click="isParametersDisplayed = false" src="build/images/icons/close.svg" alt="Fermer">
-                    </div>   
-                    <div class="modal-body">
-                        <div>
-                            <h3>Positionnement</h3>
-                            <div class="form-part">
-                                <basic-input :model-value="map.name" :label="'Nom'"  @update:model-value="(modelValue) => map.name = modelValue"></basic-input>
-                                <div class="row">
-                                    <div class="field">
-                                        <label>Dynamic light</label>
-                                        <input v-model="map.hasDynamicLight" type="checkbox">
-                                    </div>
-                                </div>
-                                <basic-input :is-number="true" :model-value="map.width" :label="'Largeur'"  @update:model-value="(modelValue) => map.width = modelValue"></basic-input>
-                                <basic-input :is-number="true" :model-value="map.height" :label="'Hauteur'"  @update:model-value="(modelValue) => map.height = modelValue"></basic-input>
+        <modal
+            :isDisplayed="isParametersDisplayed"
+            :modalTitleMessage="'Informations carte'"
+            :modalValidationMessage="onCreation ? 'Créer la carte' : 'Modifier la carte'"
+            @modal:close="isParametersDisplayed = false"
+            @modal:validation="submitForm"
+        >
+            <template v-slot:modal-body>
+                <div>
+                    <h3>Positionnement</h3>
+                    <div class="form-part">
+                        <basic-input :model-value="map.name" :label="'Nom'"  @update:model-value="(modelValue) => map.name = modelValue"></basic-input>
+                        <div class="row">
+                            <div class="field">
+                                <label>Dynamic light</label>
+                                <input v-model="map.hasDynamicLight" type="checkbox">
                             </div>
                         </div>
-                        <div v-if="connections.length">
-                            <h3>Joueurs</h3>
-                            <div v-for="connection in connections" :key="connection.id">
-                                <label>{{ connection.user.username }}</label>
-                                <input type="checkbox" :value="connection" :checked="isChecked(connection)" @change.prevent="updateConnection(connection)">
-                            </div>
-                        </div>
-                        <div v-else >
-                            <h3>Joueurs</h3>
-                            <span>Aucun joueur présent sur cette partie</span>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" type="button" @click="cancel">Annuler</button>
-                        <button type="button" class="btn btn-primary" @click="submitForm">Modifier la carte</button>
+                        <basic-input :is-number="true" :model-value="map.width" :label="'Largeur'"  @update:model-value="(modelValue) => map.width = modelValue"></basic-input>
+                        <basic-input :is-number="true" :model-value="map.height" :label="'Hauteur'"  @update:model-value="(modelValue) => map.height = modelValue"></basic-input>
                     </div>
                 </div>
-            </div>
-        </Teleport>
+                <div v-if="connections.length">
+                    <h3>Joueurs</h3>
+                    <div v-for="connection in connections" :key="connection.id">
+                        <label>{{ connection.user.username }}</label>
+                        <input type="checkbox" :value="connection" :checked="isChecked(connection)" @change.prevent="updateConnection(connection)">
+                    </div>
+                </div>
+                <div v-else >
+                    <h3>Joueurs</h3>
+                    <span>Aucun joueur n'est présent sur cette partie</span>
+                </div>
+            </template>
+        </modal>
+        <modal
+            :isDisplayed="isDeleteDisplayed"
+            :type="'popup'"
+            :modalValidationMessage="'Supprimer la carte'"
+            @modal:close="isDeleteDisplayed = false"
+            @modal:validation="deleteMap"
+        >
+            <template v-slot:modal-body>
+                <span>Voulez-vous supprimer la carte ?</span>
+            </template>
+        </modal>
     </div>
 </template>
 
@@ -67,9 +76,9 @@ import { Map } from '../entity/map';
 import { MapService } from '../services/mapService';
 import { ConnectionService } from '../services/connectionService';
 import basicInput from './form/basicInput.vue';
+import Modal from './modal/modal.vue';
 
     export default defineComponent({
-  components: { basicInput },
         data() {
             return {
                 mapService: new MapService as MapService,
@@ -82,6 +91,7 @@ import basicInput from './form/basicInput.vue';
                  * If the map parameters box is displayed
                  */
                 isParametersDisplayed: false as boolean,
+                isDeleteDisplayed: false as boolean,
                 /**
                  * The map parameters related to the form
                  */
@@ -90,10 +100,15 @@ import basicInput from './form/basicInput.vue';
                 /**
                  * The list of connections between this world and the various users
                  */
-                connections: [] as Connection[]
+                connections: [] as Connection[],
+                onCreation: false as boolean,
+                chosenKey: 0 as number
             }
         },
         computed: {
+            ...mapGetters('map', {
+                getMap: 'map'
+            }),
             ...mapGetters('user', [
                 'isGameMaster',
                 'getCurrentMapId',
@@ -102,6 +117,7 @@ import basicInput from './form/basicInput.vue';
                 'getIsDarkTheme'
             ]),
         },
+        components: { basicInput, Modal },
         methods: {
             ...mapActions('user', [
                 'setCurrentMap'
@@ -132,12 +148,27 @@ import basicInput from './form/basicInput.vue';
              * @param {*} key 
              */
             showMapParameter: function (key: number) {
-                this.isParametersDisplayed = true
+                this.onCreation = false;
                 this.map = this.maps[key];
                 this.connections = [];
                 this.getPlayers.forEach((player: Connection) => {
                     this.connections.push(player)
                 });
+                this.isParametersDisplayed = true;
+            },
+            showMapDelete: function(key: number) {
+                this.isDeleteDisplayed = true;
+                this.map = this.maps[key];
+                this.chosenKey = key;
+            },
+            createMap: function() {
+                this.onCreation = true;
+                this.map = {name: '', width: 0, height: 0, hasDynamicLight: false, connections: [], world: '/api/worlds/' + this.getWorld.id};
+                this.connections = [];
+                this.getPlayers.forEach((player: Connection) => {
+                    this.connections.push(player)
+                });
+                this.isParametersDisplayed = true;
             },
             isChecked: function(searchConnection: Connection) {
                 return this.map.connections.some(
@@ -160,8 +191,12 @@ import basicInput from './form/basicInput.vue';
              * Change map settings after form submission
              */
             submitForm: function() {
-                this.mapService.updateMapPartially(this.map)
-                this.isParametersDisplayed = false
+                if(this.onCreation) {
+                    this.mapService.createMap(this.map);
+                }else {
+                    this.mapService.updateMapPartially(this.map);
+                }
+                this.isParametersDisplayed = false;
                 this.isDisplayed = false;
                 this.mapService.findAllMaps().then(maps => {
                     this.maps = maps;
@@ -176,6 +211,20 @@ import basicInput from './form/basicInput.vue';
                     window.removeEventListener('click', this.clickOutside)
                     this.isDisplayed = false;
                 }
+            },
+            deleteMap: function() {
+                if(this.maps.length > 1){
+                    if(this.maps[this.chosenKey].id === this.getMap.id) {
+                        if(this.chosenKey == 0) {
+                            this.setMap(this.maps[1]);
+                        }else {
+                            this.setMap(this.maps[0]);
+                        }
+                    }
+                    this.mapService.deleteMap(this.map.id);
+                    this.maps.splice(this.chosenKey, 1);
+                }
+                this.isDeleteDisplayed = false;
             }
         },
         mounted() {
@@ -285,68 +334,33 @@ import basicInput from './form/basicInput.vue';
         background-color: #73808C;
         width: 128px;
         height: 128px;
+        cursor: pointer;
+    }
+
+    .new-map {
+        background-color: #D87D40;
+    }
+
+    .map:hover .map-actions {
+        opacity: 1;
     }
 
     .map-actions {
         position: absolute;
-        left: calc(50% - 8px);
+        left: calc(50% - 16px);
         bottom: 0;
+        display: flex;
+        gap: 4px;
+        opacity: 0;
+        width: 40px;
+        -webkit-transition: opacity 100ms ease-in-out;
+        -moz-transition: opacity 100ms ease-in-out;
+        -o-transition: opacity 100ms ease-in-out;
+        transition: opacity 100ms ease-in-out;
     }
 
     .map-actions li {
         cursor: pointer;
-    }
-
-    .modal-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 5;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 100dvh;
-        background-color: rgba(0, 0, 0, 0.8);
-    }
-
-    .modal {
-        display: block;
-        min-width: 256px;
-        width: 800px;
-        min-height: 256px;
-        height: 100%;
-        max-height: 480px;
-        background-color: #FFFFFF;
-    }
-
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px;
-        border-bottom: solid 1px #73808C;
-        background-color: #BBBFC3;
-        height: 40px;
-    }
-
-    .modal-body {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        height: calc(100% - 88px);
-        width: 100%;
-        padding: 24px;
-    }
-
-    .modal-footer {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        height: 48px;
-        gap: 8px;
-        padding: 8px;
-        border-top: solid 1px #73808C;
     }
 
     .form-part {
@@ -364,12 +378,8 @@ import basicInput from './form/basicInput.vue';
         background-color: #364049;
     }
 
-    .dark .modal-header {
-        background-color: #0E1318;
-    }
-
-    .dark .modal-body, .dark .modal-footer {
-        background-color: #4F5A64;
+    .dark .new-map {
+        background-color: #D87D40;
     }
 
 </style>

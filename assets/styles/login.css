@@ -1,18 +1,49 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    text-rendering: optimizeLegibility;
+}
+*:before,
+*:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
 html {
     font-family: Oswald, sans-serif;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
     font-size: 14px;
     color: #090D11;
+}
+
+html.dark {
+    color: #F3F4F4;
 }
 
 body {
     height: 100vh;
     overflow: hidden;
+    line-height: 24px;
+}
+
+a {
+    color: #090D11;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 .main {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 16px;
     height: 100%;
 }
 
@@ -41,10 +72,8 @@ body {
     background-color: rgba(0, 0, 0, .2);
 }
 
-.login-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
+.login-box {
+    width: 400px;
     background-color: #FFFFFF;
     border: solid 1px #D7D9DB;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
@@ -54,23 +83,20 @@ body {
 h1 {
     font-size: 2rem;
     font-weight: 700;
-}
-
-.login-box {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    text-align: center;
+    padding-bottom: 8px;
 }
 
 .form-group {
+    position: relative;
     width: 100%;
+    margin: 8px 0;
 }
 
 label {
     display: block;
     max-width: 100%;
     transition: all .1s ease;
-    line-height: 28px;
 }
 
 input {
@@ -97,24 +123,106 @@ input:hover {
     color: #D87D40;
 }
 
+.password-forget-label {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.form-error {
+    display: block;
+    margin-bottom: 10px;
+}
+
 .form-error-prefix {
     color: #F3F4F4;
     background-color: #CB2D2A;
     border-radius: 4px;
-    padding: 0 4px;
+    padding: 1px 4px 2px 4px;
     margin-right: 4px;
     font-size: 12px;
 }
 
-.login-box button {
+.form-error span {
+    display: inline-block;
+}
+
+.btn {
+    display: block;
+    width: fit-content;
     border: none;
-    border-radius: 24px;
-    background-color: #D87D40;
-    color: #fff;
-    padding: 8px;
-    font-weight: 700;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-weight: 400;
     font-size: 1rem;
-    margin-top: 16px;
+    line-height: 28px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: #D87D40;
+    color: #F3F4F4;
+}
+
+.btn-secondary {
+    background: none;
+    color: #090D11;
+    border: solid 1px #D87D40;
+}
+
+.form-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.alert {
+    position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    z-index: 15;
+    border: 1px solid transparent;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: calc(100% - 16px);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+footer .app-version {
+    padding: 8px;
+}
+
+footer .discord-link {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 24px;
+    font-size: 1.2rem;
+    background: rgb(0,0,0);
+    background: linear-gradient(-45deg, rgba(0,0,0,1) 0%, rgba(255,255,255,0) 100%);
+}
+
+footer a:hover {
+    text-decoration: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -122,17 +230,25 @@ input:hover {
         color: #F3F4F4;
     }
 
+    a {
+        color: #F3F4F4;
+    }
+
     input {
         color: #F3F4F4;
-        border: solid 1px #F3F4F4;
+        border-color: #F3F4F4;
     }
     
     input:focus {
         background: #1F262D;
     }
 
-    .login-wrapper {
+    .login-box {
         background-color: #1F262D;
-        border: solid 1px #364049;
+        border-color: #364049;
+    }
+    
+    .btn-secondary {
+        color: #F3F4F4;
     }
 }

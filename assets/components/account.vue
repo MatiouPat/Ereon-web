@@ -10,7 +10,7 @@
                 <ul class="tools">
                     <li title="Click" @click="setOnDrawing(false)"><div class="tool" :class="!getOnDrawing ? 'selected' : ''"><img src="build/images/icons/mouse.svg" width="20" height="20" alt="Click"></div></li>
                     <li title="Light" @click="setOnDrawing(true); setLayer(3)"><div class="tool" :class="getOnDrawing ? 'selected' : ''"><img src="build/images/icons/line.svg" width="20" height="20" alt="Light"></div></li>
-                    <li title="Supprimer tous les murs" @click="deleteAllLightingWalls(); emitter.emit('drawWall')"><div class="tool"><img src="build/images/icons/delete.svg" width="20" height="20" alt="Supprimer tous les murs"></div></li>
+                    <li title="Supprimer tous les murs" @click="deleteAllLightingWalls(); emitter.emit('drawWall')"><div class="tool"><img :src="getIsDarkTheme ? '/build/images/icons/delete_white.svg' : '/build/images/icons/delete_black.svg'" width="20" height="20" alt="Supprimer tous les murs"></div></li>
                 </ul>
             </ul>
             <ul v-else>
@@ -252,7 +252,7 @@ import { UserService } from '../services/userService';
                 this.emitter.emit("hasChangedUserVolume")
             },
             changeTheme: function() {
-                this.userParameterRepository.updateTheme(this.connectedUser.id, this.isDarkTheme);
+                this.userParameterRepository.updateTheme(this.connectedUser.userParameter.id, this.isDarkTheme);
                 this.setIsDarkTheme(this.isDarkTheme);
                 this.setThemeTag();
                 
@@ -274,7 +274,7 @@ import { UserService } from '../services/userService';
                 if(new RegExp('[0-9]').test(this.newPassword)) {
                     constraints = constraints | 0b01000
                 }
-                if(new RegExp('[#~?!:=;.@$%^&*/+-]').test(this.newPassword)) {
+                if(new RegExp('[#~?!:=;.@$%\^&*\/+-]').test(this.newPassword)) {
                     constraints = constraints | 0b00100
                 }
                 if(new RegExp('.{8,}').test(this.newPassword)) {

@@ -1,33 +1,19 @@
-import axios from "axios";
 import { ItemPrefab } from "../entity/itemprefab";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class ItemPrefabRepository
+export class ItemPrefabRepository extends AbstractRepository
 {
-
     public async findItemPrefabByWorld(worldId: number): Promise<ItemPrefab[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/item_prefabs?world.id=' + worldId
-        })
-        .then(res => {
-            return res.data['hydra:member'];
-        })
+        return this.createQueryBuilder('GET', '/api/item_prefabs?world.id=' + worldId)
+            .getResult()
     }
 
     public async createItemPrefab(itemPrefab: ItemPrefab): Promise<ItemPrefab>
     {
-        return axios({
-            method: 'POST',
-            url: '/api/item_prefabs',
-            data: itemPrefab,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => {
-            return res.data;
-        })
+        return this.createQueryBuilder('POST', '/api/item_prefabs')
+            .addData(itemPrefab)
+            .getOneOrNullResult()
     }
 
 }

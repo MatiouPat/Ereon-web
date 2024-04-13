@@ -1,68 +1,42 @@
-import axios from "axios";
 import { Connection } from "../entity/connection";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class ConnectionRepository
+export class ConnectionRepository extends AbstractRepository
 {
-
     public async findAllConnectionsByWorld(worldId: number): Promise<Connection[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/connections?world.id=' + worldId
-        })
-        .then(res => {
-            return res.data['hydra:member'];
-        })
+        return this.createQueryBuilder('GET', '/api/connections?world.id=' + worldId)
+            .getResult()
     }
 
     public async findAllRecentConnectionByWorld(worldId: number, lastConnectionAt: string): Promise<Connection[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/connections?world.id=' + worldId + "&lastConnectionAt[after]=" + lastConnectionAt
-        })
-        .then(response => {
-            return response.data['hydra:member'];
-        })
+        return this.createQueryBuilder('GET', '/api/connections?world.id=' + worldId + "&lastConnectionAt[after]=" + lastConnectionAt)
+            .getResult()
     }
 
     public async findPlayerByWorldAndWhereIsNotGameMaster(worldId: number): Promise<Connection[]>
     {
-        return axios({
-            method: 'GET',
-            url: '/api/connections?isGameMaster=false&world.id=' + worldId
-        })
-        .then(response => {
-            return response.data['hydra:member'];
-        })
+        return this.createQueryBuilder('GET', '/api/connections?isGameMaster=false&world.id=' + worldId)
+            .getResult()
     }
 
     public async updateCurrentMap(connectionId: number, mapId: number): Promise<void>
     {
-        axios({
-            method: 'PATCH',
-            url: '/api/connections/' + connectionId,
-            data: {
+        return this.createQueryBuilder('PATCH', '/api/connections/' + connectionId)
+            .addData({
                 currentMap: "/api/maps/" + mapId
-            },
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        });
+            })
+            .getOneOrNullResult()
     }
 
     public async updateLastConnectionAt(connectionId: number, lastConnectionAt: string): Promise<void>
     {
-        axios({
-            method: 'PATCH',
-            url: '/api/connections/' + connectionId,
-            data: {
+        return this.createQueryBuilder('PATCH', '/api/connections/' + connectionId)
+            .addData({
                 lastConnectionAt: lastConnectionAt
-            },
-            headers: {
-                'Content-Type': 'application/merge-patch+json'
-            }
-        });
+            })
+            .getOneOrNullResult()
     }
 
 }

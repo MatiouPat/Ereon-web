@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'home/base.html.twig' %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -6,6 +6,17 @@
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
+    <script>
+        // Fonction pour stocker le token JWT dans le stockage local
+        function storeTokenInLocalStorage(token) {
+            localStorage.setItem('token', token);
+            console.log('Token JWT stocké dans le stockage local avec succès');
+        }
+
+        // Appeler la fonction pour stocker le token JWT dans le stockage local
+        var token = "{{ token }}"; // Récupérer le token JWT depuis Twig
+        storeTokenInLocalStorage(token);
+    </script>
     {{ encore_entry_script_tags('home') }}
 {% endblock %}
 

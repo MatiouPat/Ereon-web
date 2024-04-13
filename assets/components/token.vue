@@ -71,22 +71,13 @@
                 </div>
             </div>
         </Teleport>
-        <picture>
-            <source type="image/webp" :srcset="'/uploads/images/asset/' + token.asset.compressedImage">
-            <img :src="'/uploads/images/asset/' + token.asset.image" alt="Map">
-        </picture>
+        <img :src="'/uploads/images/' + token.asset.image.imageName" alt="Map">
     </div>
     <div v-else-if="!isGameMaster && canControlledBy(getUserId, id)" class="token" ref="token" style="z-index: 20;" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px'}" @mousedown.prevent="move">
-        <picture>
-            <source type="image/webp" :srcset="'/uploads/images/asset/' + token.asset.compressedImage">
-            <img :src="'/uploads/images/asset/' + token.asset.image" alt="Map">
-        </picture>
+        <img :src="'/uploads/images/' + token.asset.image.imageName" alt="Map">
     </div>
     <div v-else class="token" ref="token" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}">
-        <picture>
-            <source type="image/webp" :srcset="'/uploads/images/asset/' + token.asset.compressedImage">
-            <img :src="'/uploads/images/asset/' + token.asset.image" alt="Map">
-        </picture>
+        <img :src="'/uploads/images/' + token.asset.image.imageName" alt="Map">
     </div>
 </template>
 
@@ -500,15 +491,10 @@ import { User } from '../entity/user';
         background-color: #AAA;
     }
 
-    picture {
+    img {
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-    }
-
-    img {
         width: 100%;
         height: 100%;
     }

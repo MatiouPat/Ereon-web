@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="content-language" content="fr-FR">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Ereon{% endblock %}</title>
+        <meta name="description" content="Ereon, l'application pour vos parties de JDR.">
+        {{ encore_entry_link_tags('reset') }}
+        {{ encore_entry_link_tags('login') }}
+        <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" media="screen and print">
+        {% block javascripts %}
+        {% endblock %}
+    </head>
+    <body>
+        <main class="main">
+            <img>
+            <picture class="login-background">
+                <source media="(max-width: 1919px)" type="image/webp" srcset="{{ asset('build/images/logo/background.webp') }}">
+                <source media="(min-width: 1920px)" type="image/webp" srcset="{{ asset('build/images/logo/background@2x.webp') }}">
+                <img src="{{ asset('build/images/logo/background.webp') }}" alt="">
+            </picture>
+            {% block body %}{% endblock %}
+        </main>
+        <footer>
+            <span class="app-version">{{ app_version }}</span>
+            <a href="https://discord.gg/9VdpKW4uRN" class="discord-link">
+                <span>Rejoins-nous sur</span>
+                <img src="{{ asset('build/images/logo/discord-logo-blue.svg') }}" alt="Discord" width="127" height="24"/>
+            </a>
+        </footer>
+    </body>
+</html>

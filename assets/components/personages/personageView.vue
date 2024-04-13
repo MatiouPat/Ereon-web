@@ -2,7 +2,7 @@
     <div class="personages-box">
         <div class="personages">
             <div class="personage" :key="key" v-for="(personage, key) in personages" @click="viewPersonage(personage, key)">
-                <img v-if="personage.image" :src="'/uploads/images/personages/' + personage.image.imageName" alt="" width="64">
+                <img v-if="personage.image" :src="'/uploads/images/' + personage.image.imageName" alt="" width="64">
                 <div class="personage-info">
                     <span class="personage-name">{{ personage.name }}</span>
                     <span class="personage-category me" v-if="personage.user && personage.user.id === getUserId">MOI</span>
@@ -200,8 +200,14 @@ export default defineComponent({
 <style scoped>
 
     .personages-box {
+        display: flex;
+        flex-direction: column;
         height: 100%;
         overflow-y: scroll;
+    }
+
+    .personages {
+        flex-grow: 1;
     }
 
     .personage {
@@ -305,6 +311,10 @@ export default defineComponent({
 
     .dark .parameters-body, .dark .parameters-footer {
         background-color: #4F5A64;
+    }
+
+    .btn {
+        width: 100%;
     }
 
 </style>

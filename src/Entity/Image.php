@@ -30,7 +30,7 @@ class Image
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['image:read', "personage:read"])]
+    #[Groups(['image:read', "personage:read", "asset:read"])]
     private ?int $id = null;
 
     #[UploadableField(mapping: 'images', fileNameProperty: 'imageName')]
@@ -38,7 +38,7 @@ class Image
     private ?File $imageFile = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['image:read', "personage:read"])]
+    #[Groups(["map:read", "token:read", 'image:read', "personage:read", "asset:read"])]
     private ?string $imageName = null;
 
     #[ORM\Column(nullable: true)]

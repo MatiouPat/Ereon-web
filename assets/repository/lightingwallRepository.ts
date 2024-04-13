@@ -1,27 +1,19 @@
-import axios from "axios";
 import { LightingWall } from "../entity/lightingwall";
+import { AbstractRepository } from "../utils/abstractRepository";
 
-export class LightingWallRepository
+export class LightingWallRepository extends AbstractRepository
 {
-
     public async createLightingWall(lightingWall: LightingWall): Promise<void>
     {
-        axios({
-            method: 'POST',
-            url: '/api/lighting_walls',
-            data: lightingWall,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        return this.createQueryBuilder('POST', '/api/lighting_walls')
+            .addData(lightingWall)
+            .getOneOrNullResult()
     }
 
     public async deleteLightingWall(lightingWallId: number): Promise<void>
     {
-        axios({
-            method: 'DELETE',
-            url: '/api/lighting_walls/' + lightingWallId
-        })
+        return this.createQueryBuilder('DELETE', '/api/lighting_walls/' + lightingWallId)
+            .getOneOrNullResult()
     }
 
 }
