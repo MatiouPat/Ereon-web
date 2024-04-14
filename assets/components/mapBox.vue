@@ -70,13 +70,15 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { mapActions, mapGetters } from 'vuex';
 import { Connection } from '../entity/connection';
 import { Map } from '../entity/map';
 import { MapService } from '../services/mapService';
 import { ConnectionService } from '../services/connectionService';
 import basicInput from './form/basicInput.vue';
 import Modal from './modal/modal.vue';
+import { mapActions, mapState } from 'pinia';
+import { useMapStore } from '../store/map';
+import { useUserStore } from '../store/user';
 
     export default defineComponent({
         data() {
@@ -106,10 +108,10 @@ import Modal from './modal/modal.vue';
             }
         },
         computed: {
-            ...mapGetters('map', {
+            ...mapState(useMapStore, {
                 getMap: 'map'
             }),
-            ...mapGetters('user', [
+            ...mapState(useUserStore, [
                 'isGameMaster',
                 'getCurrentMapId',
                 'getPlayers',
@@ -119,10 +121,10 @@ import Modal from './modal/modal.vue';
         },
         components: { basicInput, Modal },
         methods: {
-            ...mapActions('user', [
+            ...mapActions(useUserStore, [
                 'setCurrentMap'
             ]),
-            ...mapActions('map', [
+            ...mapActions(useMapStore, [
                 'setMap'
             ]),
             /**

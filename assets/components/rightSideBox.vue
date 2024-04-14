@@ -26,8 +26,9 @@ import DialogView from './dialogView.vue'
 import AssetView from './assetView.vue'
 import MusicView from './musicView.vue'
 import PersonageView from './personages/personageView.vue'
-import { mapGetters } from 'vuex'
 import { defineComponent, inject } from 'vue'
+import { mapState } from 'pinia'
+import { useUserStore } from '../store/user'
 
     export default defineComponent({
         components: {
@@ -47,7 +48,7 @@ import { defineComponent, inject } from 'vue'
             }
         },
         computed: {
-            ...mapGetters('user', [
+            ...mapState(useUserStore, [
                 'isGameMaster',
                 'getIsDarkTheme'
             ])

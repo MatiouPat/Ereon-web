@@ -3,8 +3,8 @@ import Editor from './components/editor.vue'
 import RightSideBox from './components/rightSideBox.vue'
 import MapBox from './components/mapBox.vue'
 import { createApp } from 'vue';
-import store from './store'
 import { emitter } from './emitter';
+import { pinia } from './store/pinia';
 
 let editor = createApp({
     components: {
@@ -13,12 +13,10 @@ let editor = createApp({
     }
 })
 
-
-editor.provide("$store", store);
-editor.use(store)
+editor.use(pinia);
 editor.provide('emitter', emitter);
 
-editor.mount('#editor')
+editor.mount('#editor');
 
 let dialogBox = createApp({
     components: {
@@ -26,8 +24,7 @@ let dialogBox = createApp({
     }
 })
 
-dialogBox.provide("$store", store);
-dialogBox.use(store);
+dialogBox.use(pinia);
 dialogBox.provide('emitter', emitter);
 
-dialogBox.mount('#right-side-box')
+dialogBox.mount('#right-side-box');

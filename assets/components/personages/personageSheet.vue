@@ -183,7 +183,6 @@ import ImageInput from '../form/imageInput.vue';
 import TextInput from '../form/textInput.vue';
 import { Personage } from '../../entity/personage';
 import SelectInput from '../form/selectInput.vue';
-import { mapGetters } from 'vuex';
 import { Connection } from '../../entity/connection';
 import { Item } from '../../entity/item';
 import { DiceService } from '../../services/diceService';
@@ -191,6 +190,8 @@ import ItemList from './itemList.vue';
 import { WeaponPrefab } from '../../entity/weaponprefab';
 import { ArmorPrefab } from '../../entity/armorprefab';
 import { Spell } from '../../entity/spell';
+import { mapState } from 'pinia';
+import { useUserStore } from '../../store/user';
 
 export default defineComponent({
     data() {
@@ -239,7 +240,7 @@ export default defineComponent({
         }
     },
     computed: {
-        ...mapGetters('user', [
+        ...mapState(useUserStore, [
             'getUserId',
             'getPlayers',
             'getWorld',

@@ -12,18 +12,16 @@ import './styles/main.css';
 import './bootstrap';
 import Account from './components/account.vue'
 import { createApp } from 'vue';
-import store from './store';
 import { emitter } from './emitter';
+import { pinia } from './store/pinia';
 
-let account = createApp({
+const app = createApp({
     components: {
         Account
     }
 })
 
+app.use(pinia);
+app.provide('emitter', emitter);
 
-account.provide("$store", store);
-account.use(store)
-account.provide('emitter', emitter);
-
-account.mount('#content')
+app.mount('#content');

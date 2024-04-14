@@ -20,11 +20,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { mapActions, mapGetters } from 'vuex';
 import { Asset } from '../entity/asset';
 import { AssetService } from '../services/assetService';
 import ImageInput from './form/imageInput.vue';
 import Modal from './modal/modal.vue';
+import { mapActions, mapState } from 'pinia';
+import { useMapStore } from '../store/map';
 
     export default defineComponent({
         data() {
@@ -39,13 +40,13 @@ import Modal from './modal/modal.vue';
             }
         },
         computed: {
-            ...mapGetters('map', [
+            ...mapState(useMapStore, [
                 'getLayer'
             ])
         },
         components: { Modal, ImageInput },
         methods: {
-            ...mapActions('map', [
+            ...mapActions(useMapStore, [
                 'addTokenOnMap'
             ]),
             /**
