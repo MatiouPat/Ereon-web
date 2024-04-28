@@ -95,17 +95,21 @@
     </header>
     <div v-else class="worlds-page">
         <h1>Quel monde ?</h1>
-        <div class="world-layout" v-if="!worlds.length">
-            <h1>Vous n'avez aucun monde disponible</h1>
-            <span>Veuillez contacter un administrateur</span>
-        </div>
-        <div class="world-layout" v-else v-for="world in worlds" :key="world.id">
-            <div v-for="connection in world.connections" :key="connection.id">
-                <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world)">
-                    <img src="build/images/logo/background.webp" alt="">
-                    <div v-if="connection.isGameMaster == 0" class="role">Joueur</div>
-                    <div v-else class="role">MJ</div>
-                    <h2>{{ world.name }}</h2>
+        <div class="worlds">
+            <div class="world-layout" v-for="world in worlds" :key="world.id">
+                <div v-for="connection in world.connections" :key="connection.id">
+                    <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world)">
+                        <img class="world-image" src="build/images/logo/background.webp" alt="">
+                        <div v-if="connection.isGameMaster == 0" class="role">Joueur</div>
+                        <div v-else class="role">MJ</div>
+                        <h2>{{ world.name }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="world-layout" @click="createWorld">
+                <div class="world world-add">
+                    <span>Créer un monde</span>
+                    <img :src="getIsDarkTheme ? '/build/images/icons/add_white.svg' : '/build/images/icons/add_black.svg'" width="32" height="32">
                 </div>
             </div>
         </div>
@@ -312,6 +316,9 @@ import { useMusicStore } from '../store/music';
                     this.userService.updateUserPartially(this.user);
                     this.onParameters = false;
                 }
+            },
+            createWorld: function() {
+                console.log('createWorld')
             }
         },
         mounted() {
@@ -636,32 +643,46 @@ import { useMusicStore } from '../store/music';
         padding-bottom: 8px;
     }
 
+    .worlds {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .world-layout {
+        cursor: pointer;
+    }
+
     .world {
         position: relative;
         display: block;
-        width: 10dvw;
-        height: 10dvw;
-        max-height: 200px;
-        max-width: 200px;
+        height: 200px;
+        width: 200px;
         background-color: #090D11;
     }
 
-    .world:hover > picture {
+    .world-add {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .world:hover {
         outline: solid 4px #D87D40;
         transition: all 40ms ease-in-out;
     }
 
     .world:hover > h2 {
         color: #D87D40;
-        transition: all .2s ease-in-out;
+        transition: all 40ms ease-in-out;
     }
 
-    .world img {
+    .world .world-image {
         display: block;
-        width: 10dvw;
-        height: 10dvw;
-        max-height: 200px;
-        max-width: 200px;
+        height: 200px;
+        width: 200px;
     }
 
     .world h2 {

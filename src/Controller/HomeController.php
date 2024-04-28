@@ -15,7 +15,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class HomeController extends AbstractController
 {
-    #[Route('/', name: 'app_home')]
+    #[Route('/editor', name: 'app_home')]
     /**
      * View map editor
      *
