@@ -47,7 +47,7 @@ import { PointRepository } from '../../repository/pointRepository';
 import { Point } from '../../entity/point';
 import { NumberOfPoint } from '../../entity/numberofpoint';
 import { Image } from '../../entity/image';
-import BasicInput from '../form/basicInput.vue';
+import BasicInput from '../forms/inputs/basicInput.vue';
 import PersonageSheet from './personageSheet.vue';
 import { mapState } from 'pinia';
 import { useUserStore } from '../../store/user';

@@ -52,7 +52,7 @@ class Connection
     #[Groups(["connection:read", "world:read", "map:read"])]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'connections')]
+    #[ORM\ManyToOne(inversedBy: 'connections', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(["connection:read", "world:read", "map:read"])]
     #[MaxDepth(1)]

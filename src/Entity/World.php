@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
+use App\Controller\CreateWorldController;
 use App\Repository\WorldRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -11,7 +13,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: WorldRepository::class)]
 #[ApiResource(
-    operations: []
+    operations: [
+        new Post(
+            controller: CreateWorldController::class
+        )
+    ]
 )]
 class World
 {
@@ -33,7 +39,7 @@ class World
     #[Groups('dice:read')]
     private ?string $diceChannelIdentifier = null;
 
-    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Connection::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Connection::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
     #[Groups("world:read")]
     private Collection $connections;
 

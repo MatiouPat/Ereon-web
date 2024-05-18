@@ -161,8 +161,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import basicInput from '../form/basicInput.vue';
-import SelectInput from '../form/selectInput.vue';
+import basicInput from '../forms/inputs/basicInput.vue';
+import SelectInput from '../forms/inputs/selectInput.vue';
 import { AttributeService } from '../../services/attributeService';
 import { WeaponPrefabService } from '../../services/weaponprefabService';
 import { WeaponPrefab } from '../../entity/weaponprefab';
@@ -173,7 +173,7 @@ import { ItemPrefabService } from '../../services/itemprefabService';
 import { Spell } from '../../entity/spell';
 import { PointService } from '../../services/pointService';
 import { SpellService } from '../../services/spellService';
-import TextInput from '../form/textInput.vue';
+import TextInput from '../forms/inputs/textInput.vue';
 import { mapState } from 'pinia';
 import { useUserStore } from '../../store/user';
 

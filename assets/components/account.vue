@@ -1,4 +1,7 @@
 <template>
+    <Teleport to="#content">
+        <world-view v-if="onWorldCreation"></world-view>
+    </Teleport>
     <header v-if="isConnected" class="header">
         <nav class="navigation">
             <ul class="all-tools" v-if="isGameMaster">
@@ -126,16 +129,16 @@ import { LightingWallService } from '../services/lightingwallService';
 import { PersonageService } from '../services/personageService';
 import { ConnectionService } from '../services/connectionService';
 import { MapService } from '../services/mapService';
-import basicInput from './form/basicInput.vue';
+import basicInput from './forms/inputs/basicInput.vue';
 import { User } from '../entity/user';
 import { UserService } from '../services/userService';
 import { mapActions, mapState } from 'pinia';
 import { useMapStore } from '../store/map';
 import { useUserStore } from '../store/user';
 import { useMusicStore } from '../store/music';
+import WorldView from './worldView.vue';
 
     export default defineComponent({
-  components: { basicInput },
         data() {
             return {
                 emitter: inject('emitter') as any,
@@ -158,7 +161,8 @@ import { useMusicStore } from '../store/music';
                 newPassword: "" as string,
                 newPasswordCopy: "" as string,
                 newPasswordConstraint: 0b00000 as number,
-                user: {} as User
+                user: {} as User,
+                onWorldCreation: false as boolean
             }
         },
         props: [
@@ -179,6 +183,7 @@ import { useMusicStore } from '../store/music';
                 'getOnDrawing'
             ])
         },
+        components: { basicInput, WorldView },
         watch: {
             loadedParameters: {
                 handler() {
@@ -222,7 +227,6 @@ import { useMusicStore } from '../store/music';
              * @param world The selected world
              */
             chooseWorld: function(connection: Connection, world: World) {
-                console.log(connection)
                 this.mapService.findMapById(connection.currentMap.id).then(map => {
                     this.setMap(map);
                     this.loadedParameters++;
@@ -318,7 +322,7 @@ import { useMusicStore } from '../store/music';
                 }
             },
             createWorld: function() {
-                console.log('createWorld')
+                this.onWorldCreation = true;
             }
         },
         mounted() {

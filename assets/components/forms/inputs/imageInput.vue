@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Image } from '../../entity/image';
+import { Image } from '../../../entity/image';
 
 export default defineComponent({
     data() {

@@ -74,7 +74,7 @@ import { Connection } from '../entity/connection';
 import { Map } from '../entity/map';
 import { MapService } from '../services/mapService';
 import { ConnectionService } from '../services/connectionService';
-import basicInput from './form/basicInput.vue';
+import basicInput from './forms/inputs/basicInput.vue';
 import Modal from './modal/modal.vue';
 import { mapActions, mapState } from 'pinia';
 import { useMapStore } from '../store/map';

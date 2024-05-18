@@ -22,7 +22,7 @@
 import { defineComponent } from 'vue';
 import { Asset } from '../entity/asset';
 import { AssetService } from '../services/assetService';
-import ImageInput from './form/imageInput.vue';
+import ImageInput from './forms/inputs/imageInput.vue';
 import Modal from './modal/modal.vue';
 import { mapActions, mapState } from 'pinia';
 import { useMapStore } from '../store/map';
