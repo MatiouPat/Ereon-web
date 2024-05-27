@@ -34,6 +34,7 @@ import { Asset } from '../entity/asset';
 import { mapActions, mapState } from 'pinia';
 import { useMapStore } from '../store/map';
 import { useUserStore } from '../store/user';
+import { Emitter, EventType } from 'mitt';
 
     export default defineComponent({
         components: {
@@ -41,7 +42,7 @@ import { useUserStore } from '../store/user';
         },
         data() {
             return {
-                emitter: inject('emitter') as any,
+                emitter: inject('emitter') as Emitter<Record<EventType, unknown>>,
                 lightWallService: new LightingWallService as LightingWallService,
                 /**
                  * The zoom in on the map

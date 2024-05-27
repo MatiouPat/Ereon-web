@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { Connection } from '../entity/connection';
 import { Map } from '../entity/map';
 import { MapService } from '../services/mapService';
@@ -79,10 +79,12 @@ import Modal from './modal/modal.vue';
 import { mapActions, mapState } from 'pinia';
 import { useMapStore } from '../store/map';
 import { useUserStore } from '../store/user';
+import { Emitter, EventType } from 'mitt';
 
     export default defineComponent({
         data() {
             return {
+                emitter: inject('emitter') as Emitter<Record<EventType, unknown>>,
                 mapService: new MapService as MapService,
                 connectionService: new ConnectionService as ConnectionService,
                 /**
@@ -185,7 +187,7 @@ import { useUserStore } from '../store/user';
             },
             cancel: function() {
                 this.isParametersDisplayed = false;
-                this.mapService.findAllMaps().then(maps => {
+                this.mapService.findMapsByWorld(this.getWorld.id).then(maps => {
                     this.maps = maps;
                 })
             },
@@ -200,7 +202,7 @@ import { useUserStore } from '../store/user';
                 }
                 this.isParametersDisplayed = false;
                 this.isDisplayed = false;
-                this.mapService.findAllMaps().then(maps => {
+                this.mapService.findMapsByWorld(this.getWorld.id).then(maps => {
                     this.maps = maps;
                 })
             },
@@ -230,8 +232,10 @@ import { useUserStore } from '../store/user';
             }
         },
         mounted() {
-            this.mapService.findAllMaps().then(maps => {
-                this.maps = maps;
+            this.emitter.on('isDownload', () => {
+                this.mapService.findMapsByWorld(this.getWorld.id).then(maps => {
+                    this.maps = maps;
+                })
             })
         }
     })
