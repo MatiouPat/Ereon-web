@@ -1,19 +1,22 @@
 <template>
-    <nav>
-        <ul class="steps">
-            <li class="step" :class="{'completed' : key < currentStep, 'in-progress' : key == currentStep}" :key="key" v-for="(step, key) in steps">
-                <div class="step-mark">
-                    <div class="step-mark-icon">{{ key+1 }}</div>
-                </div>
-                <span class="step-content">{{ step.title }}</span>
-            </li>
-        </ul>
-    </nav>
-    <div ref="steps">
-        <slot></slot>
-    </div>
-    <div class="footer">
-        <button class="btn btn-primary" v-on="{ click: stepsNumber-1 > currentStep ? nextStep : validForm}">{{ stepsNumber-1 == currentStep ? finalMsg : 'Suivant' }}</button>
+    <div class="multi-step-form">
+        <nav>
+            <ul class="steps">
+                <li class="step" :class="{'completed' : key < currentStep, 'in-progress' : key == currentStep}" :key="key" v-for="(step, key) in steps">
+                    <div class="step-mark">
+                        <div class="step-mark-icon">{{ key+1 }}</div>
+                    </div>
+                    <span class="step-content">{{ step.title }}</span>
+                </li>
+            </ul>
+        </nav>
+        <div ref="steps" class="step-body">
+            <slot></slot>
+        </div>
+        <div class="footer">
+            <button class="btn btn-secondary" v-html="currentStep > 0 ? 'Précédent' : returnMsg" v-on="{ click: currentStep > 0 ? previousStep : cancelForm }"></button>
+            <button class="btn btn-primary" v-on="{ click: stepsNumber-1 > currentStep ? nextStep : validForm }">{{ stepsNumber-1 == currentStep ? finalMsg : 'Suivant' }}</button>
+        </div>
     </div>
 </template>
 
@@ -29,12 +32,21 @@ export default defineComponent({
         }
     },
     props: {
+        returnMsg: {
+            type: String,
+            default: 'Annuler'
+        },
         finalMsg: {
             type: String,
-            default: ''
+            default: 'Valider'
         }
     },
     methods: {
+        previousStep: function () {
+            this.steps[this.currentStep].classList.add('undisplayed')
+            this.steps[this.currentStep-1].classList.remove('undisplayed')
+            this.currentStep--;
+        },
         nextStep: function() {
             this.steps[this.currentStep].classList.add('undisplayed')
             this.steps[this.currentStep+1].classList.remove('undisplayed')
@@ -42,9 +54,12 @@ export default defineComponent({
         },
         validForm: function() {
             this.$emit('form:valid');
+        },
+        cancelForm: function() {
+            this.$emit('form:cancel');
         }
     },
-    emits: ['form:valid'],
+    emits: ['form:valid', 'form:cancel'],
     mounted(){
         this.steps = this.$refs.steps.children;
         this.stepsNumber = this.steps.length
@@ -61,6 +76,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+
+.multi-step-form {
+    height: 100%;
+}
 
 .steps {
     display: flex;
@@ -83,6 +102,18 @@ export default defineComponent({
 	z-index: -1;
 }
 
+.step::after {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 0;
+    height: 4px;
+    background: #D87D40;
+    z-index: -1;
+    transition: all .2s linear;
+}
+
 .step-mark-icon {
     display: flex;
     justify-content: center;
@@ -95,32 +126,22 @@ export default defineComponent({
     margin-top: 0;
     background-color: #1F262D;
     border-radius: 16px;
+    transition: all .2s linear;
 }
 
 .step.completed::after {
-    content: "";
-    position: absolute;
-    top: 20px;
-    left: 0;
     width: 100%;
-    height: 4px;
-    background: #D87D40;
-	z-index: -1;
+    transition: all .2s linear;
 }
 
 .step.in-progress::after {
-    content: "";
-    position: absolute;
-    top: 20px;
-    left: 0;
     width: 50%;
-    height: 4px;
-    background: #D87D40;
-	z-index: -1;
+    transition: all .2s .2s linear;
 }
 
 :is(.step.completed, .step.in-progress) .step-mark-icon {
     background-color: #D87D40;
+    transition: all .4s .2s linear;
 }
 
 .step-content {
@@ -130,9 +151,14 @@ export default defineComponent({
     margin-top: 4px;
 }
 
+.step-body {
+    height: calc(100% - 97px);
+}
+
 .footer {
     display: flex;
     justify-content: flex-end;
+    gap: 16px;
 }
 
 .dark .step-mark-icon {

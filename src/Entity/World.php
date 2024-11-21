@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Controller\CreateWorldController;
 use App\Repository\WorldRepository;
@@ -14,21 +17,26 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: WorldRepository::class)]
 #[ApiResource(
     operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['world:readCollection']]
+        ),
         new Post(
             controller: CreateWorldController::class
         )
-    ]
+    ],
+    denormalizationContext: ['groups' => ['world:write']]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['connections.user.id' => 'exact'])]
 class World
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["world:read", "user:read", "connection:read", 'dice:read'])]
+    #[Groups(["world:readCollection", "user:read", "connection:read", 'dice:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["world:read", "user:read"])]
+    #[Groups(["world:readCollection", "user:read", "world:write"])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -39,8 +47,8 @@ class World
     #[Groups('dice:read')]
     private ?string $diceChannelIdentifier = null;
 
-    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Connection::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
-    #[Groups("world:read")]
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Connection::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[Groups("world:readCollection")]
     private Collection $connections;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Personage::class, orphanRemoval: true)]
@@ -52,10 +60,12 @@ class World
     #[ORM\OneToOne(mappedBy: 'world', cascade: ['persist', 'remove'])]
     private ?MusicPlayer $musicPlayer = null;
 
-    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Attribute::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Attribute::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[Groups(["world:write"])]
     private Collection $attributes;
 
-    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Skill::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'world', targetEntity: Skill::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[Groups(["world:write"])]
     private Collection $skills;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Point::class, orphanRemoval: true)]

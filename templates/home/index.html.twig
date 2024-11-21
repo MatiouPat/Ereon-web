@@ -56,7 +56,7 @@
             {% endfor %}
         {% endfor %}
         <div class="content" id="content">
-            <account :connected-user="{{ app.user|serialize('json', { groups: 'user:read'}) }}" :worlds={{ worlds }}></account>
+            <account :connected-user="{{ app.user|serialize('json', { groups: 'user:read'}) }}"></account>
             <main id="editor">
                 <map-box></map-box>
                 <editor></editor>

@@ -1,6 +1,6 @@
 <template>
     <Teleport to="#content">
-        <world-view v-if="onWorldCreation"></world-view>
+        <world-view v-if="onWorldCreation" @world-view:cancel="onWorldCreation = false" @worldView:createdWorld="onWorldCreation = false; this.findWorlds(this.user.id)"></world-view>
     </Teleport>
     <header v-if="isConnected" class="header">
         <nav class="navigation">
@@ -99,7 +99,7 @@
     <div v-else class="worlds-page">
         <h1>Quel monde ?</h1>
         <div class="worlds">
-            <div class="world-layout" v-for="world in worlds" :key="world.id">
+            <div class="world-layout" v-for="world in getWorlds" :key="world.id">
                 <div v-for="connection in world.connections" :key="connection.id">
                     <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world)">
                         <img class="world-image" src="build/images/logo/background.webp" alt="">
@@ -166,8 +166,7 @@ import WorldView from './worldView.vue';
             }
         },
         props: [
-            'connectedUser',
-            'worlds'
+            'connectedUser'
         ],
         computed: {
             ...mapState(useUserStore, [
@@ -176,7 +175,8 @@ import WorldView from './worldView.vue';
                 'getUsername',
                 'isGameMaster',
                 'getIsDarkTheme',
-                'getUser'
+                'getUser',
+                'getWorlds'
             ]),
             ...mapState(useMapStore, [
                 'getLayer',
@@ -209,7 +209,8 @@ import WorldView from './worldView.vue';
                 'sendIsConnected',
                 'findAllRecentConnections',
                 'setPersonages',
-                'setIsDarkTheme'
+                'setIsDarkTheme',
+                'findWorlds'
             ]),
             ...mapActions(useMapStore, [
                 'setMap',
@@ -331,6 +332,7 @@ import WorldView from './worldView.vue';
             this.setUserParameter(this.connectedUser.userParameter);
             this.setThemeTag();
             this.setIsDarkTheme(this.isDarkTheme);
+            this.findWorlds(this.user.id);
         }
     })
 </script>
@@ -656,6 +658,7 @@ import WorldView from './worldView.vue';
 
     .world-layout {
         cursor: pointer;
+        margin-bottom: 48px;
     }
 
     .world {

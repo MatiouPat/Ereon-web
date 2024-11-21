@@ -38,7 +38,7 @@ class Map
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["world:read", "map:read","user:read", "connection:read"])]
+    #[Groups(["world:readCollection", "map:read","user:read", "connection:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]

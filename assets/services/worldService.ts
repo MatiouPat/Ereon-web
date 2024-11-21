@@ -7,11 +7,14 @@ export class WorldService
 
     private worldRepository: WorldRepository = new WorldRepository();
 
-    private connectionRepository: ConnectionRepository = new ConnectionRepository();
-
     public async createWorld(world: World, userId: number): Promise<World>
     {
         return this.worldRepository.createWorld(world);
+    }
+
+    public async findWorldByUser(userId: number): Promise<World[]>
+    {
+        return this.worldRepository.findWorldByUser(userId);
     }
 
 }

@@ -14,10 +14,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AttributeRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['attribute:read']],
     operations: [
         new GetCollection()
-    ]
+    ],
+    normalizationContext: ['groups' => ['attribute:read']]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['world.id'  => 'exact'])]
 class Attribute
@@ -29,11 +29,11 @@ class Attribute
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["attribute:read", "personage:read"])]
+    #[Groups(["attribute:read", "personage:read", "world:write"])]
     private ?string $name = null;
 
     #[ORM\Column(length: 3)]
-    #[Groups(["attribute:read", "personage:read", 'weaponPrefab:read', 'spell:read'])]
+    #[Groups(["attribute:read", "personage:read", 'weaponPrefab:read', 'spell:read', "world:write"])]
     private ?string $acronym = null;
 
     #[ORM\ManyToOne(inversedBy: 'attributes')]

@@ -2,11 +2,11 @@
     <div class="form-group">
         <label v-if="label">{{ label }}</label>
         <select v-if="typeof modelValue == 'string'" v-model="value" @change="$emit('update:modelValue', value)" :style="{background: background}">
-            <option v-if="hasDefault" value="-1">Selectioner une valeur</option>
+            <option v-if="hasDefault" value="-1" selected disabled hidden>Selectioner une valeur</option>
             <option :key="key" v-for="(choice, key) in choices" :value="choice.id">{{ choice.value }}</option>
         </select>
         <select v-if="typeof modelValue == 'number'" v-model.number="value" @change="$emit('update:modelValue', value)" :style="{background: background}">
-            <option v-if="hasDefault" value="-1">Selectioner une valeur</option>
+            <option v-if="hasDefault" value="-1" selected disabled hidden>Selectioner une valeur</option>
             <option :key="key" v-for="(choice, key) in choices" :value="choice.id">{{ choice.value }}</option>
         </select>
     </div>
@@ -32,7 +32,7 @@ export default defineComponent({
         },
         modelValue: {
             type: Number,
-            default: 0
+            default: -1
         },
         background: {
             type: String,
