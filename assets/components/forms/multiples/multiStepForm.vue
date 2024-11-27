@@ -24,11 +24,19 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
+    name: "MultiStepForm",
+    provide() {
+        return {
+            multiStepForm: this
+        }
+    },
     data(){
         return {
             currentStep: 0 as number,
             stepsNumber: 0 as number,
-            steps: {} as any
+            steps: {} as any,
+            stepsRef: [] as [],
+            errors: {}
         }
     },
     props: {
@@ -42,20 +50,32 @@ export default defineComponent({
         }
     },
     methods: {
-        previousStep: function () {
+        registerStep(step): void
+        {
+            this.stepsRef.push(step);
+        },
+        previousStep(): void
+        {
             this.steps[this.currentStep].classList.add('undisplayed')
             this.steps[this.currentStep-1].classList.remove('undisplayed')
             this.currentStep--;
         },
-        nextStep: function() {
-            this.steps[this.currentStep].classList.add('undisplayed')
-            this.steps[this.currentStep+1].classList.remove('undisplayed')
-            this.currentStep++;
+        nextStep(): void
+        {
+            if(this.stepsRef[this.currentStep].validate()) {
+                this.steps[this.currentStep].classList.add('undisplayed')
+                this.steps[this.currentStep+1].classList.remove('undisplayed')
+                this.currentStep++;
+            }
         },
-        validForm: function() {
-            this.$emit('form:valid');
+        validForm(): void
+        {
+            if(this.stepsRef[this.currentStep].validate()) {
+                this.$emit('form:valid');
+            }
         },
-        cancelForm: function() {
+        cancelForm(): void
+        {
             this.$emit('form:cancel');
         }
     },

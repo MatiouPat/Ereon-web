@@ -1,10 +1,10 @@
 <template>
-    <div class="form-group" :class="hasError ? 'error' : ''">  
-        <label v-if="label">{{ label }}<i v-if="isRequired">*</i></label>
-        <div v-if="hasError" class="form-error"><span class="form-error-prefix">ERREUR</span><span>{{ messageEroor }}</span></div>
+    <div class="form-group" :class="hasError ? 'error' : ''">
+        <label v-if="label">{{ label }}<i v-if="isRequired && mustShowRequiredLabel">*</i></label>
         <input v-if="isPassword" type="password" v-model="value" :autocomplete="autocomplete">
         <input v-else-if="!isNumber" v-model="value">
         <input v-else v-model.number="value">
+        <span v-if="hasError" class="form-error">{{ messageEroor }}</span>
     </div>
 </template>
 
@@ -12,10 +12,12 @@
 import { defineComponent } from 'vue';
 
 export default defineComponent({
+    name: "BasicInput",
+    inject: ["step", "collection"],
     data() {
         return {
             hasError: false as boolean,
-            messageEroor: "" as string
+            messageEroor: "Ce champs est requis" as string
         }
     },
     props: {
@@ -41,6 +43,10 @@ export default defineComponent({
         isRequired: {
             type: Boolean,
             default: false
+        },
+        mustShowRequiredLabel: {
+            type: Boolean,
+            default: true
         }
     },
     computed: {
@@ -54,12 +60,25 @@ export default defineComponent({
         }
     },
     methods: {
-        setError: function(message: string) {
-            this.messageEroor = message;
-            this.hasError = true;
+        validate(): boolean
+        {
+            if (this.isRequired && !this.value) {
+                this.hasError = true;
+                return false;
+            }else {
+                this.hasError = false;
+                return true;
+            }
         }
     },
-    emits: ['update:modelValue']
+    emits: ['update:modelValue'],
+    mounted() {
+        if (this.$parent.$options.name == "TransitionGroup") {
+            this.collection.registerInput(this)
+        }else {
+            this.step.registerInput(this)
+        }
+    }
 })
 
 </script>
@@ -105,16 +124,8 @@ input:hover {
 
 .form-error {
     display: block;
-    margin-bottom: 10px;
-}
-
-.form-error-prefix {
-    color: #F3F4F4;
-    background-color: #CB2D2A;
-    border-radius: 4px;
-    padding: 1px 4px 2px 4px;
-    margin-right: 4px;
-    font-size: 12px;
+    margin-top: 4px;
+    color: #CB2D2A;
 }
 
 .form-error span {

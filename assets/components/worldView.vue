@@ -5,22 +5,54 @@
             <multi-step-form :return-msg="'Retour au menu principal'" :final-msg="'Créer le monde'" @form:valid="createWorld" @form:cancel="cancelWorldCreation">
                 <step :title="'Base'">
                     <div>
-                        <basic-input :model-value="world.name" :label="'Nom'" @update:model-value="(modelValue) => world.name = modelValue"></basic-input>
+                        <basic-input
+                            ref="worldNameInput"
+                            :model-value="world.name"
+                            :label="'Nom'"
+                            :is-required="true"
+                            @update:model-value="(modelValue) => world.name = modelValue"
+                        ></basic-input>
                     </div>
                 </step>
                 <step :title="'Caractéristiques'">
-                    <collection-input class="attributes-group" :label="'Caractéristiques'" :model-value="world.attributes" @add:model-value="addAttribute" @remove:model-value="(attributeIndex) => removeAttribute(attributeIndex)">
+                    <collection-input class="attributes-group" :model-value="world.attributes" @add:model-value="addAttribute" @remove:model-value="(attributeIndex) => removeAttribute(attributeIndex)">
                         <template v-slot:default="{item, index}">
-                            <basic-input :label="'Nom'" :model-value="item.name" @update:model-value="(newValue) => item.name = newValue"></basic-input>
-                            <basic-input :label="'Acronyme'" :model-value="item.acronym" @update:model-value="(newValue) => item.acronym = newValue"></basic-input>
+                            <basic-input
+                                :label="'Nom'"
+                                :model-value="item.name"
+                                :is-required="true"
+                                :must-show-required-label="false"
+                                @update:model-value="(newValue) => item.name = newValue"
+                            ></basic-input>
+                            <basic-input
+                                :label="'Acronyme'"
+                                :model-value="item.acronym"
+                                :is-required="true"
+                                :must-show-required-label="false"
+                                @update:model-value="(newValue) => item.acronym = newValue"
+                            ></basic-input>
                         </template>
                     </collection-input>
                 </step>
                 <step :title="'Compétences'">
-                    <collection-input class="attributes-group" :label="'Compétences'" :model-value="world.skills" @add:model-value="addSkill" @remove:model-value="(skillIndex) => removeSkill(skillIndex)">
+                    <collection-input class="attributes-group" :model-value="world.skills" @add:model-value="addSkill" @remove:model-value="(skillIndex) => removeSkill(skillIndex)">
                         <template v-slot:default="{item, index}">
-                            <basic-input :label="'Nom'" :model-value="item.name" @update:model-value="(newValue) => item.name = newValue"></basic-input>
-                            <select-input :model-value="item.attribute.acronym" :choices="attributeChoices" :label="'Attribut lié'" :background="getIsDarkTheme ? '#1f262d' : '#FFFFFF'" @update:model-value="(modelValue) => {item.attribute.acronym = modelValue}"></select-input>
+                            <basic-input
+                                :label="'Nom'"
+                                :model-value="item.name"
+                                :is-required="true"
+                                :must-show-required-label="false"
+                                @update:model-value="(newValue) => item.name = newValue"
+                            ></basic-input>
+                            <select-input
+                                :model-value="item.attribute.acronym"
+                                :choices="attributeChoices"
+                                :label="'Attribut lié'"
+                                :background="getIsDarkTheme ? '#1f262d' : '#FFFFFF'"
+                                :is-required="true"
+                                :must-show-required-label="false"
+                                @update:model-value="(modelValue) => {item.attribute.acronym = modelValue}"
+                            ></select-input>
                         </template>
                     </collection-input>
                 </step>
@@ -138,7 +170,7 @@ export default defineComponent({
 
     .attributes-group >>> .form-collection {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
         column-gap: 16px;
     }
 
@@ -146,8 +178,24 @@ export default defineComponent({
         background-color: #1F262D;
     }
 
-    >>> .step-body {
+    >>> .multi-step-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    >>> .multi-step-form nav {
+        width: 100%;
+    }
+
+    >>> .multi-step-form .step-body {
         overflow: scroll;
+        padding-top: 32px;
         padding-bottom: 8px;
+        width: 920px;
+    }
+
+    >>> .multi-step-form .footer {
+        align-self: flex-end;
     }
 </style>

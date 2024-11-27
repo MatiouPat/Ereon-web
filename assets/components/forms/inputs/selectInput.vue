@@ -1,5 +1,5 @@
 <template>
-    <div class="form-group">
+    <div class="form-group" :class="hasError ? 'error' : ''">
         <label v-if="label">{{ label }}</label>
         <select v-if="typeof modelValue == 'string'" v-model="value" @change="$emit('update:modelValue', value)" :style="{background: background}">
             <option v-if="hasDefault" value="-1" selected disabled hidden>Selectioner une valeur</option>
@@ -9,6 +9,7 @@
             <option v-if="hasDefault" value="-1" selected disabled hidden>Selectioner une valeur</option>
             <option :key="key" v-for="(choice, key) in choices" :value="choice.id">{{ choice.value }}</option>
         </select>
+        <span v-if="hasError" class="form-error">{{ messageEroor }}</span>
     </div>
 </template>
 
@@ -16,9 +17,13 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+    name: "SelectInput",
+    inject: ["step", "collection"],
     data() {
         return {
-            value: this.modelValue
+            value: this.modelValue,
+            hasError: false as boolean,
+            messageEroor: "Ce champs est requis" as string
         }
     },
     props: {
@@ -41,9 +46,35 @@ export default defineComponent({
         hasDefault: {
             type: Boolean,
             default: true
+        },
+        isRequired: {
+            type: Boolean,
+            default: false
+        },
+        mustShowRequiredLabel: {
+            type: Boolean,
+            default: true
         }
     },
-    emits: ['update:modelValue']
+    methods: {
+        validate(): boolean {
+            if (this.isRequired && this.value == -1) {
+                this.hasError = true;
+                return false;
+            } else {
+                this.hasError = false;
+                return true;
+            }
+        }
+    },
+    emits: ['update:modelValue'],
+    mounted() {
+        if (this.$parent.$options.name == "TransitionGroup") {
+            this.collection.registerInput(this)
+        }else {
+            this.step.registerInput(this)
+        }
+    }
 })
 </script>
 
@@ -56,7 +87,7 @@ export default defineComponent({
 .form-group::after {
     content: "";
     position: absolute;
-    bottom: 10px;
+    top: 34px;
     right: 8px;
     display: block;
     width: 0.8em;
@@ -76,6 +107,7 @@ label {
     transition: all .1s ease;
 }
 
+
 select {
     display: block;
     background: none;
@@ -92,9 +124,24 @@ select {
     background-size: 0.65rem auto;
     padding: 2px 4px;
 }
+
 .dark select {
     color: #F3F4F4;
     border: solid 1px #F3F4F4;
-
 }
+
+.form-group.error select {
+    border-color: #CB2D2A;
+}
+
+.form-error {
+    display: block;
+    margin-top: 4px;
+    color: #CB2D2A;
+}
+
+.form-error span {
+    display: inline-block;
+}
+
 </style>

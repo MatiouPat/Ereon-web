@@ -17,8 +17,16 @@ import { mapState } from "pinia";
 import { useUserStore } from "../../../store/user";
 
 export default defineComponent({
+    name: "CollectionInput",
+    inject: ["step"],
+    provide() {
+        return {
+            collection: this
+        }
+    },
     data() {
         return {
+            inputs: [] as [],
             isReady: false
         }
     },
@@ -57,6 +65,19 @@ export default defineComponent({
         }
     },
     methods: {
+        registerInput(input): void
+        {
+            this.inputs.push(input);
+        },
+        validate(): boolean
+        {
+            let isValid = true;
+            for(let i = 0; i < this.inputs.length-this.inputs.length/this.modelValue.length; i++) {
+                const result = this.inputs[i].validate();
+                isValid = result && isValid;
+            }
+            return isValid;
+        },
         hasEmptyElement: function(element: Object) {
             let hasEmptyElement = true;
             Object.entries(element).forEach(entry => {
@@ -77,11 +98,13 @@ export default defineComponent({
             return hasEmptyElement;
         },
         deleteItem: function(itemId: number) {
+            this.inputs.splice((this.inputs.length/this.modelValue.length)*itemId, this.inputs.length/this.modelValue.length);
             this.$emit('remove:modelValue', itemId)
         }
     },
     emits: ['add:modelValue', 'remove:modelValue'],
     mounted() {
+        this.step.registerInput(this);
         this.$nextTick(() => {
             this.isReady = true;
             if(this.modelValue.length === 0) {
@@ -104,7 +127,6 @@ export default defineComponent({
 
 .form-collection-item {
     display: flex;
-    align-items: flex-end;
     gap: 4px;
     width: 100%;
     box-sizing: border-box;
@@ -125,11 +147,14 @@ export default defineComponent({
 }
 
 .form-collection-delete-icon {
-    display: flex;
-    align-items: center;
+    align-self: flex-end;
     width: 40px;
     height: 20px;
     margin-bottom: 2px;
+}
+
+.form-collection-item:has(.form-group.error) .form-collection-delete-icon {
+    align-self: center;
 }
 
 </style>
