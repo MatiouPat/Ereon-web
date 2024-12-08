@@ -6,12 +6,18 @@
                 <step :title="'Base'">
                     <div>
                         <basic-input
-                            ref="worldNameInput"
-                            :model-value="world.name"
                             :label="'Nom'"
+                            :model-value="world.name"
                             :is-required="true"
                             @update:model-value="(modelValue) => world.name = modelValue"
                         ></basic-input>
+                        <image-input
+                            :label="'Image'"
+                            :modelImage="world.image"
+                            :width="192"
+                            :height="192"
+                            @update:modelImage="(modelImage) => world.image = modelImage"
+                        ></image-input>
                     </div>
                 </step>
                 <step :title="'Caractéristiques'">
@@ -45,9 +51,9 @@
                                 @update:model-value="(newValue) => item.name = newValue"
                             ></basic-input>
                             <select-input
+                                :label="'Attribut lié'"
                                 :model-value="item.attribute.acronym"
                                 :choices="attributeChoices"
-                                :label="'Attribut lié'"
                                 :background="getIsDarkTheme ? '#1f262d' : '#FFFFFF'"
                                 :is-required="true"
                                 :must-show-required-label="false"
@@ -64,7 +70,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { World } from '../entity/world';
-import basicInput from './forms/inputs/basicInput.vue';
+import BasicInput from './forms/inputs/basicInput.vue';
 import MultiStepForm from './forms/multiples/multiStepForm.vue';
 import Step from './forms/multiples/step.vue';
 import { WorldService } from '../services/worldService';
@@ -72,6 +78,7 @@ import { mapState } from 'pinia';
 import { useUserStore } from '../store/user';
 import CollectionInput from "./forms/inputs/collectionInput.vue";
 import SelectInput from "./forms/inputs/selectInput.vue";
+import ImageInput from "./forms/inputs/imageInput.vue";
 
 export default defineComponent({
     data() {
@@ -100,18 +107,9 @@ export default defineComponent({
     },
     methods: {
         createWorld: function() {
-            let worldAtCreate = JSON.parse(JSON.stringify(this.world));
-            worldAtCreate.skills.pop();
-            worldAtCreate.skills.forEach(skill => {
-                skill.id = undefined;
-                skill.attribute.acronym = this.attributeChoices[skill.attribute.acronym-1].value;
+            this.worldService.createWorld(this.world, this.attributeChoices).then(world => {
+                this.$emit('worldView:createdWorld', world);
             })
-            worldAtCreate.attributes.pop();
-            worldAtCreate.attributes.forEach(attribute => {
-                attribute.id = undefined;
-            })
-            this.worldService.createWorld(worldAtCreate, this.getUserId);
-            this.$emit('worldView:createdWorld');
         },
         addAttribute: function() {
             this.world.attributes.push({ id: Date.now()})
@@ -129,7 +127,14 @@ export default defineComponent({
             this.$emit('worldView:cancel');
         }
     },
-    components: {CollectionInput, basicInput, MultiStepForm, Step, SelectInput },
+    components: {
+        ImageInput,
+        CollectionInput,
+        BasicInput,
+        MultiStepForm,
+        Step,
+        SelectInput
+    },
     emits: ['worldView:cancel', 'worldView:createdWorld'],
     mounted() {
         this.world.attributes = []
@@ -168,7 +173,7 @@ export default defineComponent({
         padding-bottom: 24px;
     }
 
-    .attributes-group >>> .form-collection {
+    .attributes-group ::v-deep(.form-collection) {
         display: grid;
         grid-template-columns: 1fr;
         column-gap: 16px;
@@ -178,24 +183,24 @@ export default defineComponent({
         background-color: #1F262D;
     }
 
-    >>> .multi-step-form {
+    ::v-deep(.multi-step-form) {
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
-    >>> .multi-step-form nav {
+    ::v-deep(.multi-step-form nav) {
         width: 100%;
     }
 
-    >>> .multi-step-form .step-body {
+    ::v-deep(.multi-step-form .step-body) {
         overflow: scroll;
         padding-top: 32px;
         padding-bottom: 8px;
         width: 920px;
     }
 
-    >>> .multi-step-form .footer {
+    ::v-deep(.multi-step-form .footer) {
         align-self: flex-end;
     }
 </style>

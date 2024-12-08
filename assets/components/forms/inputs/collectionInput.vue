@@ -104,7 +104,9 @@ export default defineComponent({
     },
     emits: ['add:modelValue', 'remove:modelValue'],
     mounted() {
-        this.step.registerInput(this);
+        if(this.step) {
+            this.step.registerInput(this);
+        }
         this.$nextTick(() => {
             this.isReady = true;
             if(this.modelValue.length === 0) {

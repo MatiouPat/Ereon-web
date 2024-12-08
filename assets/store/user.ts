@@ -142,6 +142,10 @@ export const useUserStore = defineStore('user', {
             worldService.findWorldByUser(userId).then(worlds => {
                 this.worlds = worlds;
             })
+        },
+        addWorld(world: World): void
+        {
+            this.worlds.push(world);
         }
     }
 })

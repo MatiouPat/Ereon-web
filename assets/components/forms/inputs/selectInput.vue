@@ -71,7 +71,7 @@ export default defineComponent({
     mounted() {
         if (this.$parent.$options.name == "TransitionGroup") {
             this.collection.registerInput(this)
-        }else {
+        }else if(this.step){
             this.step.registerInput(this)
         }
     }

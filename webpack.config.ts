@@ -1,5 +1,6 @@
 const Encore = require('@symfony/webpack-encore');
-require('dotenv').config({ path: '.env.local' || '.env' }); 
+
+require('dotenv').config({ path: process.env.NODE_ENV === "dev" ? '.env.local' : '.env' });
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -109,3 +110,4 @@ Encore
 ;
 
 module.exports = Encore.getWebpackConfig();
+

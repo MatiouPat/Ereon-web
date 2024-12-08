@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Connection;
 use App\Entity\Map;
+use App\Entity\MusicPlayer;
 use App\Entity\Skill;
 use App\Entity\World;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -39,6 +40,12 @@ class CreateWorldController extends AbstractController
             ->setUser($this->getUser())
             ->setCurrentMap($map);
         $world->addConnection($connection);
+
+        $musicPlayer = new MusicPlayer();
+        $musicPlayer
+            ->setIsPlaying(false)
+            ->setIsLooping(false);
+        $world->setMusicPlayer($musicPlayer);
 
         $attributes = $world->getAttributes();
         /**

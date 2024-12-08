@@ -6,21 +6,21 @@ export class ImageRepository extends AbstractRepository
 {
     public async createImage(image: Image): Promise<Image>
     {
+        let formData = new FormData();
+        formData.append("imageFile", image.imageFile);
         return this.createQueryBuilder('POST', '/api/images')
             .setIsMultipartMethod(true)
-            .addData({
-                imageFile: image.imageFile
-            })
+            .addData(formData)
             .getOneOrNullResult()
     }
 
     public async updateImagePartially(image: Image): Promise<Image>
     {
+        let formData = new FormData();
+        formData.append("imageFile", image.imageFile);
         return this.createQueryBuilder('POST', '/api/images' + image.id)
             .setIsMultipartMethod(true)
-            .addData({
-                imageFile: image.imageFile
-            })
+            .addData(formData)
             .getOneOrNullResult()
     }
 

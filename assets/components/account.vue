@@ -1,6 +1,6 @@
 <template>
     <Teleport to="#content">
-        <world-view v-if="onWorldCreation" @world-view:cancel="onWorldCreation = false" @worldView:createdWorld="onWorldCreation = false; this.findWorlds(this.user.id)"></world-view>
+        <world-view v-if="onWorldCreation" @world-view:cancel="onWorldCreation = false" @worldView:createdWorld="(world) => {onWorldCreation = false; addWorld(world)}"></world-view>
     </Teleport>
     <header v-if="isConnected" class="header">
         <nav class="navigation">
@@ -35,7 +35,7 @@
                 <div class="modal">
                     <div class="modal-header">
                         <h2>Paramètres</h2>
-                        <img @click="onParameters = false" src="build/images/icons/close.svg" alt="Fermer">
+                        <img @click="onParameters = false" :src="getIsDarkTheme ? '/build/images/icons/close_white.svg' : '/build/images/icons/close_black.svg'" alt="Fermer">
                     </div>   
                     <div class="modal-body">
                         <ul class="parameters-navigation">
@@ -102,7 +102,7 @@
             <div class="world-layout" v-for="world in getWorlds" :key="world.id">
                 <div v-for="connection in world.connections" :key="connection.id">
                     <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world)">
-                        <img class="world-image" src="build/images/logo/background.webp" alt="">
+                        <img class="world-image" :src="world.image && world.image.imageName ? world.image.imageName : 'build/images/logo/background.webp'" alt="">
                         <div v-if="connection.isGameMaster == 0" class="role">Joueur</div>
                         <div v-else class="role">MJ</div>
                         <h2>{{ world.name }}</h2>
@@ -210,7 +210,8 @@ import WorldView from './worldView.vue';
                 'findAllRecentConnections',
                 'setPersonages',
                 'setIsDarkTheme',
-                'findWorlds'
+                'findWorlds',
+                'addWorld'
             ]),
             ...mapActions(useMapStore, [
                 'setMap',
@@ -636,11 +637,12 @@ import WorldView from './worldView.vue';
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 64px;
+        gap: 48px;
         background-color: #FFFFFF;
         width: 100dvw;
         height: 100dvh;
         text-align: center;
+        padding: 48px;
     }
 
     h1 {
@@ -654,6 +656,8 @@ import WorldView from './worldView.vue';
         justify-content: center;
         flex-wrap: wrap;
         gap: 16px;
+        max-height: 640px;
+        overflow: hidden;
     }
 
     .world-layout {
@@ -717,10 +721,6 @@ import WorldView from './worldView.vue';
         max-width: 100%;
         transition: all .1s ease;
         line-height: 28px;
-    }
-
-    .worlds-page .btn {
-        margin-top: 64px;
     }
 
     .dark .navigation {

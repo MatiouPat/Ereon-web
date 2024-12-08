@@ -21,10 +21,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
             normalizationContext: ['groups' => ['world:readCollection']]
         ),
         new Post(
-            controller: CreateWorldController::class
+            controller: CreateWorldController::class,
+            normalizationContext: ['groups' => ['world:readCollection']]
         )
     ],
-    denormalizationContext: ['groups' => ['world:write']]
+    denormalizationContext: ['groups' => ['world:write']],
+    paginationEnabled: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['connections.user.id' => 'exact'])]
 class World
@@ -88,6 +90,10 @@ class World
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: ItemPrefab::class, orphanRemoval: true)]
     private Collection $itemPrefabs;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[Groups(["world:readCollection", "world:write"])]
+    private ?Image $image = null;
 
     public function __construct()
     {
@@ -524,6 +530,18 @@ class World
                 $itemPrefab->setWorld(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getImage(): ?Image
+    {
+        return $this->image;
+    }
+
+    public function setImage(?Image $image): static
+    {
+        $this->image = $image;
 
         return $this;
     }

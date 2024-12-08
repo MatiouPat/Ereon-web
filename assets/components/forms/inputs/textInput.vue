@@ -10,6 +10,8 @@ import { QuillEditor } from '@vueup/vue-quill'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+    name: "TextInput",
+    inject: ["step"],
     data() {
         return {
             options: {
@@ -47,7 +49,12 @@ export default defineComponent({
     components: {
         QuillEditor
     },
-    emits: ['update:modelValue']
+    emits: ['update:modelValue'],
+    mounted() {
+        if(this.step) {
+            this.step.registerInput(this);
+        }
+    }
 })
 </script>
 

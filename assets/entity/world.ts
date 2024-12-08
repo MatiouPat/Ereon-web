@@ -17,5 +17,6 @@ export interface World {
     alterations?: any;
     damageOrResistanceTypes?: any;
     itemPrefabs?: any;
+    image?: any;
   }
   
