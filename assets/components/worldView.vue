@@ -3,8 +3,8 @@
         <div class="world-view">
             <h1>Créer mon monde</h1>
             <multi-step-form :return-msg="'Retour au menu principal'" :final-msg="'Créer le monde'" @form:valid="createWorld" @form:cancel="cancelWorldCreation">
-                <step :title="'Base'">
-                    <div>
+                <step :title="'Informations générales'">
+                    <div class="world-informations">
                         <basic-input
                             :label="'Nom'"
                             :model-value="world.name"
@@ -202,5 +202,11 @@ export default defineComponent({
 
     ::v-deep(.multi-step-form .footer) {
         align-self: flex-end;
+    }
+
+    .world-informations {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 16px;
     }
 </style>
