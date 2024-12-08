@@ -1,9 +1,9 @@
 <template>
     <div class="form-group" :class="hasError ? 'error' : ''">
-        <label v-if="label">{{ label }}<i v-if="isRequired && mustShowRequiredLabel">*</i></label>
-        <input v-if="isPassword" type="password" v-model="value" :autocomplete="autocomplete">
-        <input v-else-if="!isNumber" v-model="value">
-        <input v-else v-model.number="value">
+        <label ref="input" v-if="label">{{ label }}<i v-if="isRequired && mustShowRequiredLabel">*</i></label>
+        <input ref="input" v-if="isPassword" type="password" v-model="value" :autocomplete="autocomplete">
+        <input ref="input" v-else-if="!isNumber" v-model="value">
+        <input ref="input" v-else v-model.number="value">
         <span v-if="hasError" class="form-error">{{ messageEroor }}</span>
     </div>
 </template>
@@ -69,6 +69,10 @@ export default defineComponent({
                 this.hasError = false;
                 return true;
             }
+        },
+        focusInput(): void
+        {
+            this.$refs.input.focus();
         }
     },
     emits: ['update:modelValue'],

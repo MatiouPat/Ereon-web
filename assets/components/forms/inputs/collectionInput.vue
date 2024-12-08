@@ -27,7 +27,8 @@ export default defineComponent({
     data() {
         return {
             inputs: [] as [],
-            isReady: false
+            isReady: false,
+            inputsPerCollection: 0 as number
         }
     },
     props: {
@@ -98,7 +99,8 @@ export default defineComponent({
             return hasEmptyElement;
         },
         deleteItem: function(itemId: number) {
-            this.inputs.splice((this.inputs.length/this.modelValue.length)*itemId, this.inputs.length/this.modelValue.length);
+            this.inputs[this.inputsPerCollection * itemId + this.inputsPerCollection].focusInput();
+            this.inputs.splice((this.inputsPerCollection)*itemId, this.inputsPerCollection);
             this.$emit('remove:modelValue', itemId)
         }
     },
@@ -112,6 +114,7 @@ export default defineComponent({
             if(this.modelValue.length === 0) {
                 this.$emit('add:modelValue')
             }
+            this.inputsPerCollection = this.inputs.length/this.modelValue.length;
         });
     }
 })
