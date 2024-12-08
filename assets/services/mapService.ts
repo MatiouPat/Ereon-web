@@ -14,6 +14,12 @@ export class MapService
         return this.mapRepository.findAllMaps();
     }
 
+    public async findMapsByWorld(worldId: number): Promise<Map[]>
+    {
+        return this.mapRepository.findMapsByWorld(worldId);
+    }
+
+
     public async findMapById(mapId: number): Promise<Map>
     {
         return this.mapRepository.findMapById(mapId);

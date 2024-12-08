@@ -1,29 +1,37 @@
 <template>
-    <div class="file-wrapper" :style="{width: width + 'px', height: height + 'px', minWidth: width + 'px'}">
-        <div v-if="image.imageName || isPreview">
-            <picture class="file-image">
-                <img :src="'/uploads/images/' + image.imageName" :alt="image.imageName" ref="image">
-            </picture>
-            <img width="24" height="24" src="/build/images/icons/delete_white.svg" alt="Supprimer l'image" class="file-delete-icon" @click="deleteImage">
-        </div>
-        <div class="file-input" v-else>
-            <label for="imageFile">Charger une image</label>
-            <input type="file" id="imageFile" @change="uploadImage">
+    <div class="form-group" :class="hasError ? 'error' : ''">
+        <label v-if="label">{{ label }}</label>
+        <div class="file-wrapper" :style="{width: width + 'px', height: height + 'px', minWidth: width + 'px'}">
+            <div v-if="image.imageName || isPreview">
+                <picture class="file-image">
+                    <img :src="'/uploads/images/' + image.imageName" :alt="image.imageName" ref="image">
+                </picture>
+                <img width="24" height="24" src="/build/images/icons/delete_white.svg" alt="Supprimer l'image" class="file-delete-icon" @click="deleteImage">
+            </div>
+            <div class="file-input" v-else>
+                <label for="imageFile">Charger une image</label>
+                <input type="file" id="imageFile" @change="uploadImage">
+            </div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Image } from '../../entity/image';
+import { Image } from '../../../entity/image';
 
 export default defineComponent({
+    name: "ImageInput",
     data() {
         return {
             isPreview: false as boolean
         }
     },
     props: {
+        label: {
+            type: String,
+            default: ""
+        },
         modelImage: {
             type: Object as () => Image,
             default: {} as Image
@@ -103,7 +111,6 @@ export default defineComponent({
     }
 
     .file-input {
-        width: 100%;
         height: 100%;
     }
 

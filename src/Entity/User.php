@@ -24,13 +24,13 @@ use Symfony\Component\Validator\Constraints\Regex;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name:"`user`")]
 #[ApiResource(
-    normalizationContext: ['groups' => ['user:read']],
-    denormalizationContext: ['groups' => ['user:write']],
     operations: [
         new GetCollection(),
         new Post(processor: UserPasswordHasher::class),
         new Patch(processor: UserPasswordHasher::class)
-    ]
+    ],
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['discordIdentifier' => 'exact', 'connections.world.serverIdentifier' => 'exact'])]
 #[UniqueEntity(fields: ['username'], message: 'user.username.uniqueEntity')]
@@ -40,7 +40,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["user:read", "world:read", "map:read", "token:read", "connection:read", "personage:read"])]
+    #[Groups(["user:read", "world:readCollection", "map:read", "token:read", "connection:read", "personage:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]

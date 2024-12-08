@@ -1,4 +1,7 @@
 <template>
+    <Teleport to="#content">
+        <world-view v-if="onWorldCreation" @world-view:cancel="onWorldCreation = false" @worldView:createdWorld="(world) => {onWorldCreation = false; addWorld(world)}"></world-view>
+    </Teleport>
     <header v-if="isConnected" class="header">
         <nav class="navigation">
             <ul class="all-tools" v-if="isGameMaster">
@@ -32,7 +35,7 @@
                 <div class="modal">
                     <div class="modal-header">
                         <h2>Paramètres</h2>
-                        <img @click="onParameters = false" src="build/images/icons/close.svg" alt="Fermer">
+                        <img @click="onParameters = false" :src="getIsDarkTheme ? '/build/images/icons/close_white.svg' : '/build/images/icons/close_black.svg'" alt="Fermer">
                     </div>   
                     <div class="modal-body">
                         <ul class="parameters-navigation">
@@ -95,17 +98,21 @@
     </header>
     <div v-else class="worlds-page">
         <h1>Quel monde ?</h1>
-        <div class="world-layout" v-if="!worlds.length">
-            <h1>Vous n'avez aucun monde disponible</h1>
-            <span>Veuillez contacter un administrateur</span>
-        </div>
-        <div class="world-layout" v-else v-for="world in worlds" :key="world.id">
-            <div v-for="connection in world.connections" :key="connection.id">
-                <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world)">
-                    <img src="build/images/logo/background.webp" alt="">
-                    <div v-if="connection.isGameMaster == 0" class="role">Joueur</div>
-                    <div v-else class="role">MJ</div>
-                    <h2>{{ world.name }}</h2>
+        <div class="worlds">
+            <div class="world-layout" v-for="world in getWorlds" :key="world.id">
+                <div v-for="connection in world.connections" :key="connection.id">
+                    <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world)">
+                        <img class="world-image" :src="world.image && world.image.imageName ? world.image.imageName : 'build/images/logo/background.webp'" alt="">
+                        <div v-if="connection.isGameMaster == 0" class="role">Joueur</div>
+                        <div v-else class="role">MJ</div>
+                        <h2>{{ world.name }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="world-layout" @click="createWorld">
+                <div class="world world-add">
+                    <span>Créer un monde</span>
+                    <img :src="getIsDarkTheme ? '/build/images/icons/add_white.svg' : '/build/images/icons/add_black.svg'" width="32" height="32">
                 </div>
             </div>
         </div>
@@ -122,16 +129,16 @@ import { LightingWallService } from '../services/lightingwallService';
 import { PersonageService } from '../services/personageService';
 import { ConnectionService } from '../services/connectionService';
 import { MapService } from '../services/mapService';
-import basicInput from './form/basicInput.vue';
+import basicInput from './forms/inputs/basicInput.vue';
 import { User } from '../entity/user';
 import { UserService } from '../services/userService';
 import { mapActions, mapState } from 'pinia';
 import { useMapStore } from '../store/map';
 import { useUserStore } from '../store/user';
 import { useMusicStore } from '../store/music';
+import WorldView from './worldView.vue';
 
     export default defineComponent({
-  components: { basicInput },
         data() {
             return {
                 emitter: inject('emitter') as any,
@@ -154,12 +161,12 @@ import { useMusicStore } from '../store/music';
                 newPassword: "" as string,
                 newPasswordCopy: "" as string,
                 newPasswordConstraint: 0b00000 as number,
-                user: {} as User
+                user: {} as User,
+                onWorldCreation: false as boolean
             }
         },
         props: [
-            'connectedUser',
-            'worlds'
+            'connectedUser'
         ],
         computed: {
             ...mapState(useUserStore, [
@@ -168,13 +175,15 @@ import { useMusicStore } from '../store/music';
                 'getUsername',
                 'isGameMaster',
                 'getIsDarkTheme',
-                'getUser'
+                'getUser',
+                'getWorlds'
             ]),
             ...mapState(useMapStore, [
                 'getLayer',
                 'getOnDrawing'
             ])
         },
+        components: { basicInput, WorldView },
         watch: {
             loadedParameters: {
                 handler() {
@@ -200,7 +209,9 @@ import { useMusicStore } from '../store/music';
                 'sendIsConnected',
                 'findAllRecentConnections',
                 'setPersonages',
-                'setIsDarkTheme'
+                'setIsDarkTheme',
+                'findWorlds',
+                'addWorld'
             ]),
             ...mapActions(useMapStore, [
                 'setMap',
@@ -218,7 +229,6 @@ import { useMusicStore } from '../store/music';
              * @param world The selected world
              */
             chooseWorld: function(connection: Connection, world: World) {
-                console.log(connection)
                 this.mapService.findMapById(connection.currentMap.id).then(map => {
                     this.setMap(map);
                     this.loadedParameters++;
@@ -312,6 +322,9 @@ import { useMusicStore } from '../store/music';
                     this.userService.updateUserPartially(this.user);
                     this.onParameters = false;
                 }
+            },
+            createWorld: function() {
+                this.onWorldCreation = true;
             }
         },
         mounted() {
@@ -320,6 +333,7 @@ import { useMusicStore } from '../store/music';
             this.setUserParameter(this.connectedUser.userParameter);
             this.setThemeTag();
             this.setIsDarkTheme(this.isDarkTheme);
+            this.findWorlds(this.user.id);
         }
     })
 </script>
@@ -623,11 +637,12 @@ import { useMusicStore } from '../store/music';
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 64px;
+        gap: 48px;
         background-color: #FFFFFF;
         width: 100dvw;
         height: 100dvh;
         text-align: center;
+        padding: 48px;
     }
 
     h1 {
@@ -636,32 +651,49 @@ import { useMusicStore } from '../store/music';
         padding-bottom: 8px;
     }
 
+    .worlds {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        max-height: 640px;
+        overflow: hidden;
+    }
+
+    .world-layout {
+        cursor: pointer;
+        margin-bottom: 48px;
+    }
+
     .world {
         position: relative;
         display: block;
-        width: 10dvw;
-        height: 10dvw;
-        max-height: 200px;
-        max-width: 200px;
+        height: 200px;
+        width: 200px;
         background-color: #090D11;
     }
 
-    .world:hover > picture {
+    .world-add {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .world:hover {
         outline: solid 4px #D87D40;
         transition: all 40ms ease-in-out;
     }
 
     .world:hover > h2 {
         color: #D87D40;
-        transition: all .2s ease-in-out;
+        transition: all 40ms ease-in-out;
     }
 
-    .world img {
+    .world .world-image {
         display: block;
-        width: 10dvw;
-        height: 10dvw;
-        max-height: 200px;
-        max-width: 200px;
+        height: 200px;
+        width: 200px;
     }
 
     .world h2 {
@@ -689,10 +721,6 @@ import { useMusicStore } from '../store/music';
         max-width: 100%;
         transition: all .1s ease;
         line-height: 28px;
-    }
-
-    .worlds-page .btn {
-        margin-top: 64px;
     }
 
     .dark .navigation {

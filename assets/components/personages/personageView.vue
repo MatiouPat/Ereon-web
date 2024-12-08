@@ -17,7 +17,7 @@
                 <div class="parameters">
                     <div class="parameters-header">
                             <h2>Informations personage</h2>
-                            <img width="24" height="24" @click="isDisplayed = false" src="build/images/icons/close.svg" alt="Fermer">
+                            <img width="24" height="24" @click="isDisplayed = false" :src="getIsDarkTheme ? '/build/images/icons/close_white.svg' : '/build/images/icons/close_black.svg'" alt="Fermer">
                     </div>   
                     <div class="parameters-body">
                         <personage-sheet :currentPersonage="currentPersonage" @update:personage="(personage) => currentPersonage = personage"></personage-sheet>
@@ -47,7 +47,7 @@ import { PointRepository } from '../../repository/pointRepository';
 import { Point } from '../../entity/point';
 import { NumberOfPoint } from '../../entity/numberofpoint';
 import { Image } from '../../entity/image';
-import BasicInput from '../form/basicInput.vue';
+import BasicInput from '../forms/inputs/basicInput.vue';
 import PersonageSheet from './personageSheet.vue';
 import { mapState } from 'pinia';
 import { useUserStore } from '../../store/user';
@@ -71,7 +71,8 @@ export default defineComponent({
             'getWorld',
             'isGameMaster',
             'getPlayers',
-            'getUserId'
+            'getUserId',
+            'getIsDarkTheme'
         ])
     },
     components: {

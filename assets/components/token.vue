@@ -58,7 +58,7 @@
                         <div class="form-part" v-if="getPlayers.length">
                             <h3>Contrôle</h3>
                             <div v-for="player in getPlayers" :key="player.id">
-                                <label>{{ player.username }}</label>
+                                <label>{{ player.user.username }}</label>
                                 <input type="checkbox" :value="player.id" :checked="canControlledBy(player.id, token.id)" @change="addTokenPlayer">
                             </div>
                         </div>
@@ -88,11 +88,12 @@ import { User } from '../entity/user';
 import { mapActions, mapState } from 'pinia';
 import { useMapStore } from '../store/map';
 import { useUserStore } from '../store/user';
+import { Emitter, EventType } from 'mitt';
 
     export default defineComponent({
         data() {
             return {
-                emitter: inject('emitter') as any,
+                emitter: inject('emitter') as Emitter<Record<EventType, unknown>>,
                 $store: inject('store') as any,
                 /**
                  * The token being resized

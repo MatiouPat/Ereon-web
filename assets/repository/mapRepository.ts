@@ -9,6 +9,12 @@ export class MapRepository extends AbstractRepository
             .getResult()
     }
 
+    public async findMapsByWorld(worldId: number): Promise<Map[]>
+    {
+        return this.createQueryBuilder('GET', '/api/maps?world.id=' + worldId)
+            .getResult()
+    }
+
     public async findMapById(mapId: number): Promise<Map>
     {
         return this.createQueryBuilder('GET', '/api/maps/' + mapId)

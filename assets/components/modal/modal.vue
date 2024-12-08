@@ -4,7 +4,7 @@
             <div class="modal">
                 <div class="modal-header" v-if="type == 'modal'">
                         <h2>{{ modalTitleMessage }}</h2>
-                        <img width="24" height="24" @click.stop="$emit('modal:close')" src="build/images/icons/close.svg" alt="Fermer">
+                        <img width="24" height="24" @click.stop="$emit('modal:close')" :src="getIsDarkTheme ? '/build/images/icons/close_white.svg' : '/build/images/icons/close_black.svg'" alt="Fermer">
                 </div> 
                 <div class="modal-body">
                     <slot name="modal-body"></slot>
@@ -20,6 +20,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import {mapState} from "pinia";
+import {useUserStore} from "../../store/user";
 
 const ModalType = Object.freeze({
     MODAL: "modal" as string,
@@ -44,6 +46,11 @@ export default defineComponent({
         modalValidationMessage: {
             type: String
         }
+    },
+    computed: {
+        ...mapState(useUserStore, [
+            'getIsDarkTheme'
+        ])
     },
     emits: ['modal:close', 'modal:validation']
 })

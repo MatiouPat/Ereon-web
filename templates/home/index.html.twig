@@ -1,31 +1,69 @@
-{% extends 'home/base.html.twig' %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="content-language" content="fr-FR">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Ereon{% endblock %}</title>
+        <meta name="description" content="Ereon, l'application pour vos parties de JDR.">
+        <!--<link rel="shortcut icon" href="/build/images/logo/favicon.ico">
+        <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/build/images/logo/icon_180.png">
+        <link rel="icon" type="image/png" sizes="180x180" href="/build/images/logo/icon_180.png">
+        <link rel="apple-touch-icon-precomposed" type="image/png" sizes="60x60" href="/build/images/logo/icon_60.png">
+        <link rel="apple-touch-icon-precomposed" type="image/png" sizes="76x76" href="/build/images/logo/icon_76.png">
+        <link rel="apple-touch-icon-precomposed" type="image/png" sizes="120x120" href="/build/images/logo/icon_120.png">
+        <link rel="apple-touch-icon-precomposed" type="image/png" sizes="152x152" href="/build/images/logo/icon_152.png">-->
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Ereon">
+        <meta property="og:url" content="https://www.ereon.matthieupays.fr">
+        <meta property="og:description" content="Ereon, l'application pour vos parties de JDR.">
+        <!-- <meta property="og:image" content="/build/images/logo/social_media_icon.png">-->
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="https://www.ereon.matthieupays.fr">
+        <meta property="twitter:title" content="Ereon">
+        <meta property="twitter:description" content="Ereon, l'application pour vos parties de JDR.">
+        <!--<meta property="twitter:image" content="/build/images/logo/social_media_icon.png">-->
+        <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('reset') }}
+            {{ encore_entry_link_tags('main') }}
+            {{ encore_entry_link_tags('home') }}
+        {% endblock %}
+        {% block javascripts %}
+            <script>
+                // Fonction pour stocker le token JWT dans le stockage local
+                function storeTokenInLocalStorage(token) {
+                    localStorage.setItem('token', token);
+                    console.log('Token JWT stocké dans le stockage local avec succès');
+                }
 
-{% block stylesheets %}
-    {{ parent() }}
-    {{ encore_entry_link_tags('home') }}
-{% endblock %}
-{% block javascripts %}
-    {{ parent() }}
-    <script>
-        // Fonction pour stocker le token JWT dans le stockage local
-        function storeTokenInLocalStorage(token) {
-            localStorage.setItem('token', token);
-            console.log('Token JWT stocké dans le stockage local avec succès');
-        }
-
-        // Appeler la fonction pour stocker le token JWT dans le stockage local
-        var token = "{{ token }}"; // Récupérer le token JWT depuis Twig
-        storeTokenInLocalStorage(token);
-    </script>
-    {{ encore_entry_script_tags('home') }}
-{% endblock %}
-
-{% block body %}
-    <main id="editor">
-        <map-box></map-box>
-        <editor></editor>
-    </main>
-    <aside id="right-side-box" class="right-side-box">
-        <right-side-box></right-side-box>
-    </aside>
-{% endblock %}
+                // Appeler la fonction pour stocker le token JWT dans le stockage local
+                var token = "{{ token }}"; // Récupérer le token JWT depuis Twig
+                storeTokenInLocalStorage(token);
+            </script>
+            {{ encore_entry_script_tags('main') }}
+            {{ encore_entry_script_tags('home') }}
+        {% endblock %}
+    </head>
+    <body>
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        <div class="content" id="content">
+            <account :connected-user="{{ app.user|serialize('json', { groups: 'user:read'}) }}"></account>
+            <main id="editor">
+                <map-box></map-box>
+                <editor></editor>
+            </main>
+            <aside id="right-side-box" class="right-side-box">
+                <right-side-box></right-side-box>
+            </aside>
+        </div>
+    </body>
+</html>

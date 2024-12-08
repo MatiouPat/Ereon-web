@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use App\Repository\SkillRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -18,10 +19,11 @@ class Skill
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", "world:write"])]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'skills')]
+    #[Groups(["world:write"])]
     private ?Attribute $attribute = null;
 
     #[ORM\ManyToOne(inversedBy: 'skills')]

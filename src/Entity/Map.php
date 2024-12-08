@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -30,12 +32,13 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['map:read'], "enable_max_depth" => true],
     paginationEnabled: false
 )]
+#[ApiFilter(SearchFilter::class, properties: ['world.id' => 'exact'])]
 class Map
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["world:read", "map:read","user:read", "connection:read"])]
+    #[Groups(["world:readCollection", "map:read","user:read", "connection:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]

@@ -178,11 +178,11 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import BasicInput from '../form/basicInput.vue';
-import ImageInput from '../form/imageInput.vue';
-import TextInput from '../form/textInput.vue';
+import BasicInput from '../forms/inputs/basicInput.vue';
+import ImageInput from '../forms/inputs/imageInput.vue';
+import TextInput from '../forms/inputs/textInput.vue';
 import { Personage } from '../../entity/personage';
-import SelectInput from '../form/selectInput.vue';
+import SelectInput from '../forms/inputs/selectInput.vue';
 import { Connection } from '../../entity/connection';
 import { Item } from '../../entity/item';
 import { DiceService } from '../../services/diceService';

@@ -4,8 +4,10 @@ import { Personage } from "../entity/personage"
 import { Connection } from "../entity/connection"
 import { ConnectionService } from "../services/connectionService"
 import { defineStore } from "pinia"
+import { WorldService } from "../services/worldService";
 
 let connectionService = new ConnectionService();
+let worldService = new WorldService();
 
 export const useUserStore = defineStore('user', {
     state: () => ({
@@ -33,7 +35,8 @@ export const useUserStore = defineStore('user', {
          * The list of characters that can be played by the user
          */
         personages: [] as Personage[],
-        isDarkTheme: false as boolean
+        isDarkTheme: false as boolean,
+        worlds: [] as World[]
     }),
     getters: {
         isGameMaster: (state) => {
@@ -68,6 +71,9 @@ export const useUserStore = defineStore('user', {
         },
         getIsDarkTheme: (state) => {
             return state.isDarkTheme;
+        },
+        getWorlds: (state) => {
+            return state.worlds;
         }
     },
     actions: {
@@ -130,6 +136,16 @@ export const useUserStore = defineStore('user', {
         setIsDarkTheme(isDarkTheme: boolean): void
         {
             this.isDarkTheme = isDarkTheme;
+        },
+        findWorlds(userId: number): void
+        {
+            worldService.findWorldByUser(userId).then(worlds => {
+                this.worlds = worlds;
+            })
+        },
+        addWorld(world: World): void
+        {
+            this.worlds.push(world);
         }
     }
 })

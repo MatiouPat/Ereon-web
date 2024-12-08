@@ -3,26 +3,44 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Repository\ImageRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\NotNull;
 use Vich\UploaderBundle\Mapping\Annotation\Uploadable;
 use Vich\UploaderBundle\Mapping\Annotation\UploadableField;
 
 #[ORM\Entity(repositoryClass: ImageRepository::class)]
 #[ApiResource(
+    types: ['https://schema.org/MediaObject'],
+    operations: [
+        new Post(
+            inputFormats: ['multipart' => ['multipart/form-data']],
+            openapi: new Operation(
+                requestBody: new RequestBody(
+                    content: new \ArrayObject([
+                        'multipart/form-data' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'imageFile' => [
+                                        'type' => 'string',
+                                        'format' => 'binary'
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ])
+                )
+            )
+        )
+    ],
     normalizationContext: ['groups' => ['image:read']],
     denormalizationContext: ['groups' => ['image:write']],
-    operations: [
-        new Post(),
-        new Post(
-            uriTemplate: '/images/{id}',
-            requirements: ['id' => '\d+']
-        )
-    ]
 )]
 #[Uploadable]
 class Image
@@ -30,16 +48,17 @@ class Image
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['image:read', "personage:read", "asset:read"])]
+    #[Groups(['image:read', "personage:read", "asset:read", "world:readCollection"])]
     private ?int $id = null;
 
     #[UploadableField(mapping: 'images', fileNameProperty: 'imageName')]
-    #[Groups('image:write')]
+    #[Groups(['image:write', "world:write"])]
+    #[NotNull]
     private ?File $imageFile = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["map:read", "token:read", 'image:read', "personage:read", "asset:read"])]
-    private ?string $imageName = null;
+    #[Groups(["map:read", "token:read", 'image:read', "personage:read", "asset:read", "world:readCollection"])]
+    public ?string $imageName = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;

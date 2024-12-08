@@ -49,7 +49,7 @@ import { Dice } from '../entity/dice';
 import { DiceRepository } from '../repository/diceRepository';
 import { Personage } from '../entity/personage';
 import { PersonageRepository } from '../repository/personageRepository';
-import SelectInput from './form/selectInput.vue';
+import SelectInput from './forms/inputs/selectInput.vue';
 import { mapState } from 'pinia';
 import { useUserStore } from '../store/user';
 

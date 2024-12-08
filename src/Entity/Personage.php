@@ -19,14 +19,14 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PersonageRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['personage:read']],
-    denormalizationContext: ['groups' => ['personage:write']],
     operations: [
         new GetCollection(),
         new Post(),
         new Delete(),
         new Patch()
-    ]
+    ],
+    normalizationContext: ['groups' => ['personage:read']],
+    denormalizationContext: ['groups' => ['personage:write']]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact'])]
 #[ApiFilter(ExistsFilter::class, properties: ['user'])]
