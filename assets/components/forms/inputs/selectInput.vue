@@ -1,5 +1,5 @@
 <template>
-    <div class="form-group" :class="hasError ? 'error' : ''">
+    <div class="form-group" :class="{ 'error': hasError, 'has-label': label}">
         <label v-if="label">{{ label }}</label>
         <select v-if="typeof modelValue == 'string'" v-model="value" @change="$emit('update:modelValue', value)" :style="{background: background}">
             <option v-if="hasDefault" value="-1" selected disabled hidden>Selectioner une valeur</option>
@@ -18,7 +18,16 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
     name: "SelectInput",
-    inject: ["step", "collection"],
+    inject: {
+        step: {
+            from: 'step',
+            default: null
+        },
+        collection: {
+            from: 'collection',
+            default: null
+        }
+    },
     data() {
         return {
             value: this.modelValue,
@@ -80,6 +89,9 @@ export default defineComponent({
 
 <style scoped>
 .form-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
     position: relative;
     width: 100%;
 }
@@ -87,7 +99,7 @@ export default defineComponent({
 .form-group::after {
     content: "";
     position: absolute;
-    top: 34px;
+    bottom: 9px;
     right: 8px;
     display: block;
     width: 0.8em;
@@ -95,6 +107,10 @@ export default defineComponent({
     background-color: #090D11;
     -webkit-clip-path: polygon(100% 0%, 0 0%, 50% 100%);
     clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+}
+
+.form-group.has-label::after {
+    top: 34px;
 }
 
 .dark .form-group::after {

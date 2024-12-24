@@ -197,7 +197,8 @@ export default defineComponent({
         overflow: scroll;
         padding-top: 32px;
         padding-bottom: 8px;
-        width: 920px;
+        width: 100%;
+        max-width: 920px;
     }
 
     ::v-deep(.multi-step-form .footer) {

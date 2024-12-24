@@ -1,5 +1,5 @@
 import { ItemPrefab } from "../entity/itemprefab";
-import { ItemPrefabRepository } from "../repository/itemprefabRepository";
+import { ItemPrefabRepository } from "../repository/itemPrefabRepository";
 
 export class ItemPrefabService
 {

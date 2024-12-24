@@ -1,8 +1,8 @@
 <template>
     <div class="personages-box">
         <div class="personages">
-            <div class="personage" :key="key" v-for="(personage, key) in personages" @click="viewPersonage(personage, key)">
-                <img v-if="personage.image" :src="'/uploads/images/' + personage.image.imageName" alt="" width="64">
+            <div class="personage" :key="key" v-for="(personage, key) in getPersonages" @click="viewPersonage(personage, key)">
+                <img v-if="personage.image" :src="personage.image.imageUrl" alt="" width="64">
                 <div class="personage-info">
                     <span class="personage-name">{{ personage.name }}</span>
                     <span class="personage-category me" v-if="personage.user && personage.user.id === getUserId">MOI</span>
@@ -51,6 +51,7 @@ import BasicInput from '../forms/inputs/basicInput.vue';
 import PersonageSheet from './personageSheet.vue';
 import { mapState } from 'pinia';
 import { useUserStore } from '../../store/user';
+import {useWorldStore} from "../../store/world";
 
 export default defineComponent({
     data() {
@@ -58,21 +59,26 @@ export default defineComponent({
             personageService: new PersonageService() as PersonageService,
             attributeRepository: new AttributeRepository() as AttributeRepository,
             pointRepository: new PointRepository() as PointRepository,
-            personages: [] as Personage[],
             currentPersonage: {} as Personage,
             isDisplayed: false as boolean,
             isModification: false as boolean,
-            key: -1 as number
+            key: -1 as number,
+            personages: [] as Personage[]
             
         }
     },
     computed: {
         ...mapState(useUserStore, [
-            'getWorld',
             'isGameMaster',
             'getPlayers',
             'getUserId',
             'getIsDarkTheme'
+        ]),
+        ...mapState(useWorldStore, [
+            "getWorldId",
+            "getPersonages",
+            "getWorldAttributes",
+            "getWorldPoints"
         ])
     },
     components: {
@@ -108,7 +114,8 @@ export default defineComponent({
                 this.isDisplayed = false;
                 this.personages[this.key] = this.currentPersonage;
                 if(this.isModification) {
-                    this.personageService.updatePersonagePartially(this.currentPersonage);
+                    console.log(this.currentPersonage)
+                    //this.personageService.updatePersonagePartially(this.currentPersonage);
                 }else {
                     this.personageService.createPersonage(this.currentPersonage).then((res) => {
                         this.personages.push(res)
@@ -122,32 +129,28 @@ export default defineComponent({
             personage.inventory = '';
             personage.biography = '';
             personage.image = {} as Image;
-            personage.world = '/api/worlds/' + this.getWorld.id;
+            personage.world = '/api/worlds/' + this.getWorldId;
             personage.items = [];
             personage.spells = [];
-            this.attributeRepository.findAttributeByWorld(this.getWorld.id).then((attributes) => {
-                personage.numberOfAttributes = [];
-                attributes.forEach((attribute: Attribute) => {
-                    let numberOfAttribute: NumberOfAttribute = {};
-                    numberOfAttribute.attribute = attribute;
-                    numberOfAttribute.value = 0;
-                    personage.numberOfAttributes?.push(numberOfAttribute);
-                });
-                this.pointRepository.findPointByWorld(this.getWorld.id).then((points) => {
-                    personage.numberOfPoints = [];
-                    points.forEach((point: Point) => {
-                        let numberOfPoint: NumberOfPoint = {};
-                        numberOfPoint.point = point;
-                        numberOfPoint.min = 0;
-                        numberOfPoint.current = 0;
-                        numberOfPoint.max = 0;
-                        personage.numberOfPoints.push(numberOfPoint);
-                    })
-                    this.currentPersonage = personage;
-                    this.isModification = false;
-                    this.isDisplayed = true;
-                })
+            personage.numberOfAttributes = [];
+            this.getWorldAttributes.forEach((attribute: Attribute) => {
+                let numberOfAttribute: NumberOfAttribute = {};
+                numberOfAttribute.attribute = attribute;
+                numberOfAttribute.value = 0;
+                personage.numberOfAttributes?.push(numberOfAttribute);
+            });
+            personage.numberOfPoints = [];
+            this.getWorldPoints.forEach((point: Point) => {
+                let numberOfPoint: NumberOfPoint = {};
+                numberOfPoint.point = point;
+                numberOfPoint.min = 0;
+                numberOfPoint.current = 0;
+                numberOfPoint.max = 0;
+                personage.numberOfPoints.push(numberOfPoint);
             })
+            this.currentPersonage = personage;
+            this.isModification = false;
+            this.isDisplayed = true;
         },
         deletePersonage: function() {
             this.personageService.deletePersonage(this.currentPersonage.id!);
@@ -185,12 +188,8 @@ export default defineComponent({
         }
     },
     mounted() {
-        if(this.isGameMaster) {
-            this.personageService.findPersonagesByWorld(this.getWorld.id).then(res => {
-                this.personages = res;
-            })
-        }else {
-            this.personageService.findPersonagesByWorldAndByUser(this.getWorld.id, this.getUserId).then(res => {
+        if(!this.isGameMaster) {
+            this.personageService.findPersonagesByWorldAndByUser(this.getWorldId, this.getUserId).then(res => {
                 this.personages = res;
             })
         }

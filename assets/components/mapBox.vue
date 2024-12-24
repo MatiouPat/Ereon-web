@@ -1,7 +1,7 @@
 <template>
     <div class="map-box" v-if="isGameMaster" :class="{isDisplayed: isDisplayed}">
         <div class="maps">
-            <div class="map" @click="chooseMap(map.id)" v-for="(map, key) in maps" :key="key" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
+            <div class="map" @click="chooseMap(key)" v-for="(map, key) in getMaps" :key="key" :style="map.id == getCurrentMapId ? 'border: solid 4px #D68836' : ''">
                 <span>{{ map.name }}</span>
                 <ul class="map-actions">
                     <li><img @click.stop="showMapDelete(key)" :src="getIsDarkTheme ? '/build/images/icons/delete_white.svg' : '/build/images/icons/delete_black.svg'" alt="Supprimer" width="16" height="16"></li>
@@ -24,7 +24,7 @@
             :modalTitleMessage="'Informations carte'"
             :modalValidationMessage="onCreation ? 'Créer la carte' : 'Modifier la carte'"
             @modal:close="isParametersDisplayed = false"
-            @modal:validation="submitForm"
+            @modal:validation="validMapForm"
         >
             <template v-slot:modal-body>
                 <div>
@@ -41,11 +41,11 @@
                         <basic-input :is-number="true" :model-value="map.height" :label="'Hauteur'"  @update:model-value="(modelValue) => map.height = modelValue"></basic-input>
                     </div>
                 </div>
-                <div v-if="connections.length">
+                <div v-if="playerConnections.length">
                     <h3>Joueurs</h3>
-                    <div v-for="connection in connections" :key="connection.id">
-                        <label>{{ connection.user.username }}</label>
-                        <input type="checkbox" :value="connection" :checked="isChecked(connection)" @change.prevent="updateConnection(connection)">
+                    <div v-for="connection in playerConnections" :key="connection.id">
+                        <label>{{ connection.connection.user.username }}</label>
+                        <input type="checkbox" :value="connection" :checked="connection.currentIsOnMap" @change.prevent="checkConnection(connection)" :disabled="connection.isOnMap">
                     </div>
                 </div>
                 <div v-else >
@@ -73,172 +73,183 @@ import { defineComponent, inject } from 'vue';
 import { Connection } from '../entity/connection';
 import { Map } from '../entity/map';
 import { MapService } from '../services/mapService';
-import { ConnectionService } from '../services/connectionService';
 import basicInput from './forms/inputs/basicInput.vue';
 import Modal from './modal/modal.vue';
 import { mapActions, mapState } from 'pinia';
 import { useMapStore } from '../store/map';
 import { useUserStore } from '../store/user';
 import { Emitter, EventType } from 'mitt';
+import {useWorldStore} from "../store/world";
 
-    export default defineComponent({
-        data() {
-            return {
-                emitter: inject('emitter') as Emitter<Record<EventType, unknown>>,
-                mapService: new MapService as MapService,
-                connectionService: new ConnectionService as ConnectionService,
-                /**
-                 * If the maps are displayed
-                 */
-                isDisplayed: false as boolean,
-                /**
-                 * If the map parameters box is displayed
-                 */
-                isParametersDisplayed: false as boolean,
-                isDeleteDisplayed: false as boolean,
-                /**
-                 * The map parameters related to the form
-                 */
-                map: {} as Map,
-                maps: [] as Map[],
-                /**
-                 * The list of connections between this world and the various users
-                 */
-                connections: [] as Connection[],
-                onCreation: false as boolean,
-                chosenKey: 0 as number
-            }
-        },
-        computed: {
-            ...mapState(useMapStore, {
-                getMap: 'map'
-            }),
-            ...mapState(useUserStore, [
-                'isGameMaster',
-                'getCurrentMapId',
-                'getPlayers',
-                "getWorld",
-                'getIsDarkTheme'
-            ]),
-        },
-        components: { basicInput, Modal },
-        methods: {
-            ...mapActions(useUserStore, [
-                'setCurrentMap'
-            ]),
-            ...mapActions(useMapStore, [
-                'setMap'
-            ]),
+type ConnectionCheckField = {
+    connection: Connection,
+    isOnMap: boolean,
+    currentIsOnMap: boolean
+}
+
+export default defineComponent({
+    data() {
+        return {
+            emitter: inject('emitter') as Emitter<Record<EventType, unknown>>,
+            mapService: new MapService as MapService,
             /**
-             * Display maps
+             * If the maps are displayed
              */
-            display: function () {
-                this.isDisplayed = !this.isDisplayed;
-                window.addEventListener('click', this.clickOutside)
-            },
+            isDisplayed: false as boolean,
             /**
-             * Change current map 
-             * @param {*} mapId 
+             * If the map parameters box is displayed
              */
-            chooseMap: function (mapId: number) {
-                this.mapService.findMapById(mapId).then(map => {
-                    this.setMap(map);
-                })
-                this.setCurrentMap(mapId)
-                this.isDisplayed = false;
-            },
+            isParametersDisplayed: false as boolean,
+            isDeleteDisplayed: false as boolean,
             /**
-             * Display map parameters by calling the API
-             * @param {*} key 
+             * The map parameters related to the form
              */
-            showMapParameter: function (key: number) {
-                this.onCreation = false;
-                this.map = this.maps[key];
-                this.connections = [];
-                this.getPlayers.forEach((player: Connection) => {
-                    this.connections.push(player)
-                });
-                this.isParametersDisplayed = true;
-            },
-            showMapDelete: function(key: number) {
-                this.isDeleteDisplayed = true;
-                this.map = this.maps[key];
-                this.chosenKey = key;
-            },
-            createMap: function() {
-                this.onCreation = true;
-                this.map = {name: '', width: 0, height: 0, hasDynamicLight: false, connections: [], world: '/api/worlds/' + this.getWorld.id};
-                this.connections = [];
-                this.getPlayers.forEach((player: Connection) => {
-                    this.connections.push(player)
-                });
-                this.isParametersDisplayed = true;
-            },
-            isChecked: function(searchConnection: Connection) {
-                return this.map.connections.some(
-                    (connection: Connection) => connection.id === searchConnection.id
-                );
-            },
-            updateConnection: function(connection: Connection) {
-                if(!this.isChecked(connection)) {
-                    this.map.connections.push(connection)
-                }
-                return
-            },
-            cancel: function() {
-                this.isParametersDisplayed = false;
-                this.mapService.findMapsByWorld(this.getWorld.id).then(maps => {
-                    this.maps = maps;
-                })
-            },
+            map: {} as Map,
             /**
-             * Change map settings after form submission
+             * The list of connections between this world and the various users
              */
-            submitForm: function() {
-                if(this.onCreation) {
-                    this.mapService.createMap(this.map);
-                }else {
-                    this.mapService.updateMapPartially(this.map);
-                }
-                this.isParametersDisplayed = false;
-                this.isDisplayed = false;
-                this.mapService.findMapsByWorld(this.getWorld.id).then(maps => {
-                    this.maps = maps;
-                })
-            },
-            /**
-             * Hide context box when clicked outside it
-             * @param {*} e 
-             */
-            clickOutside: function(e: MouseEvent) {
-                if(!this.$el.contains(e.target)){
-                    window.removeEventListener('click', this.clickOutside)
-                    this.isDisplayed = false;
-                }
-            },
-            deleteMap: function() {
-                if(this.maps.length > 1){
-                    if(this.maps[this.chosenKey].id === this.getMap.id) {
-                        if(this.chosenKey == 0) {
-                            this.setMap(this.maps[1]);
-                        }else {
-                            this.setMap(this.maps[0]);
-                        }
-                    }
-                    this.mapService.deleteMap(this.map.id);
-                    this.maps.splice(this.chosenKey, 1);
-                }
-                this.isDeleteDisplayed = false;
-            }
-        },
-        mounted() {
-            this.emitter.on('isDownload', () => {
-                this.mapService.findMapsByWorld(this.getWorld.id).then(maps => {
-                    this.maps = maps;
-                })
-            })
+            playerConnections: [] as ConnectionCheckField[],
+            onCreation: false as boolean,
+            chosenKey: 0 as number
         }
-    })
+    },
+    computed: {
+        ...mapState(useMapStore, [
+            'getMap'
+        ]),
+        ...mapState(useUserStore, [
+            'isGameMaster',
+            'getCurrentMapId',
+            'getPlayers',
+            'getIsDarkTheme'
+        ]),
+        ...mapState(useWorldStore, [
+            'getMaps',
+            'getWorldId',
+            'getPlayerConnectionsInWorld'
+        ])
+    },
+    components: { basicInput, Modal },
+    methods: {
+        ...mapActions(useUserStore, [
+            'setCurrentMap'
+        ]),
+        ...mapActions(useMapStore, [
+            'setMap'
+        ]),
+        ...mapActions(useWorldStore, [
+            'moveConnectionFromMap'
+        ]),
+        /**
+         * Display maps
+         */
+        display(): void
+        {
+            this.isDisplayed = !this.isDisplayed;
+            window.addEventListener('click', this.clickOutside)
+        },
+        /**
+         * Change current map
+         * @param {*} mapIndex
+         */
+        chooseMap(mapIndex: number): void
+        {
+            this.setMap(this.getMaps[mapIndex]);
+            this.setCurrentMap(this.getMaps[mapIndex].id);
+            this.isDisplayed = false;
+        },
+        /**
+         * Display map parameters by calling the API
+         * @param {*} key
+         */
+        showMapParameter(key: number): void
+        {
+            this.onCreation = false;
+            this.map = this.getMaps[key];
+            this.playerConnections = [];
+            this.getPlayerConnectionsInWorld.forEach((playerConnection: Connection) => {
+                this.playerConnections.push({
+                    connection: playerConnection,
+                    isOnMap: playerConnection.currentMap.id === this.map.id,
+                    currentIsOnMap: playerConnection.currentMap.id === this.map.id
+                })
+            });
+            this.isParametersDisplayed = true;
+        },
+        showMapDelete(key: number): void
+        {
+            this.isDeleteDisplayed = true;
+            this.map = this.getMaps[key];
+            this.chosenKey = key;
+        },
+        createMap(): void
+        {
+            this.onCreation = true;
+            this.map = {name: '', width: 0, height: 0, hasDynamicLight: false, connections: [], world: '/api/worlds/' + this.getWorldId};
+            this.playerConnections = [];
+            this.getPlayerConnectionsInWorld.forEach((playerConnection: Connection) => {
+                this.playerConnections.push(playerConnection)
+            });
+            this.isParametersDisplayed = true;
+        },
+        cancel(): void
+        {
+            this.isParametersDisplayed = false;
+            this.mapService.findMapsByWorld(this.getWorld.id).then(maps => {
+                this.maps = maps;
+            })
+        },
+        checkConnection(connection: ConnectionCheckField): void
+        {
+            connection.currentIsOnMap = true
+        },
+        /**
+         * Change map settings after form submission
+         */
+        validMapForm(): void
+        {
+            this.playerConnections.forEach((playerConnection) => {
+                if(playerConnection.currentIsOnMap && !playerConnection.isOnMap){
+                    this.moveConnectionFromMap(playerConnection.connection, this.map)
+                }
+            })
+
+            if(this.onCreation) {
+                this.mapService.createMap(this.map, this.playerConnections);
+            }else {
+                this.mapService.updateMapPartially(this.map, this.playerConnections);
+            }
+            this.isParametersDisplayed = false;
+            this.isDisplayed = false;
+        },
+        /**
+         * Hide context box when clicked outside it
+         * @param {*} e
+         */
+        clickOutside(e: MouseEvent): void
+        {
+            if(!this.$el.contains(e.target)){
+                window.removeEventListener('click', this.clickOutside)
+                this.isDisplayed = false;
+            }
+        },
+        deleteMap(): void
+        {
+            if(this.maps.length > 1){
+                if(this.maps[this.chosenKey].id === this.getMap.id) {
+                    if(this.chosenKey == 0) {
+                        this.setMap(this.maps[1]);
+                    }else {
+                        this.setMap(this.maps[0]);
+                    }
+                }
+                this.mapService.deleteMap(this.map.id);
+                this.maps.splice(this.chosenKey, 1);
+            }
+            this.isDeleteDisplayed = false;
+        }
+    }
+})
 </script>
 
 <style scoped>

@@ -7,7 +7,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Vich\UploaderBundle\Storage\StorageInterface;
 
-final class ImageNormalizer implements NormalizerInterface
+class ImageNormalizer implements NormalizerInterface
 {
 
     private const ALREADY_CALLED = 'MEDIA_OBJECT_NORMALIZER_ALREADY_CALLED';
@@ -23,7 +23,7 @@ final class ImageNormalizer implements NormalizerInterface
     {
         $context[self::ALREADY_CALLED] = true;
 
-        $object->imageName = $this->storage->resolveUri($object, 'imageFile');
+        $object->setImageUrl($this->storage->resolveUri($object, 'imageFile'));
 
         return $this->normalizer->normalize($object, $format, $context);
     }

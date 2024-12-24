@@ -6,13 +6,13 @@
         <nav class="navigation">
             <ul class="all-tools" v-if="isGameMaster">
                 <ul class="layers">
-                    <li title="Maps" @click="setLayer(1)"><div class="layer" :class="getLayer == 1 ? 'selected' : ''"><img src="build/images/icons/map.svg" width="16" height="16" alt="Maps"></div><span>Maps</span></li>
-                    <li title="Tokens" @click="setLayer(2)"><div class="layer" :class="getLayer == 2 ? 'selected' : ''"><img src="build/images/icons/token.svg" width="16" height="16" alt="Tokens"></div><span>Tokens</span></li>
-                    <li title="Light" @click="setLayer(3)"><div class="layer" :class="getLayer == 3 ? 'selected' : ''"><img src="build/images/icons/light.svg" width="16" height="16" alt="Light"></div><span>Light</span></li>
+                    <li title="Maps" @click="setLayer(1)"><div class="layer" :class="getLayer == 1 ? 'selected' : ''"><img src="/build/images/icons/map.svg" width="16" height="16" alt="Maps"></div><span>Maps</span></li>
+                    <li title="Tokens" @click="setLayer(2)"><div class="layer" :class="getLayer == 2 ? 'selected' : ''"><img src="/build/images/icons/token.svg" width="16" height="16" alt="Tokens"></div><span>Tokens</span></li>
+                    <li title="Light" @click="setLayer(3)"><div class="layer" :class="getLayer == 3 ? 'selected' : ''"><img src="/build/images/icons/light.svg" width="16" height="16" alt="Light"></div><span>Light</span></li>
                 </ul>
                 <ul class="tools">
-                    <li title="Click" @click="setOnDrawing(false)"><div class="tool" :class="!getOnDrawing ? 'selected' : ''"><img src="build/images/icons/mouse.svg" width="20" height="20" alt="Click"></div></li>
-                    <li title="Light" @click="setOnDrawing(true); setLayer(3)"><div class="tool" :class="getOnDrawing ? 'selected' : ''"><img src="build/images/icons/line.svg" width="20" height="20" alt="Light"></div></li>
+                    <li title="Click" @click="setOnDrawing(false)"><div class="tool" :class="!getOnDrawing ? 'selected' : ''"><img :src="getIsDarkTheme ? '/build/images/icons/mouse_white.svg' : '/build/images/icons/mouse_black.svg'" width="20" height="20" alt="Click"></div></li>
+                    <li title="Light" @click="setOnDrawing(true); setLayer(3)"><div class="tool" :class="getOnDrawing ? 'selected' : ''"><img :src="getIsDarkTheme ? '/build/images/icons/line_white.svg' : '/build/images/icons/line_black.svg'" width="20" height="20" alt="Light"></div></li>
                     <li title="Supprimer tous les murs" @click="deleteAllLightingWalls(); emitter.emit('drawWall')"><div class="tool"><img :src="getIsDarkTheme ? '/build/images/icons/delete_white.svg' : '/build/images/icons/delete_black.svg'" width="20" height="20" alt="Supprimer tous les murs"></div></li>
                 </ul>
             </ul>
@@ -20,14 +20,14 @@
 
             </ul>
             <ul>
-                <li title="Paramètres" @click="onParameters = true"><img :src="getIsDarkTheme ? '/build/images/icons/settings_white.svg' : '/build/images/icons/settings_black.svg'" width="20" height="20" alt="Paramètres"></li>
-                <li title="Se déconnecter"><a href="/logout"><img src="build/images/icons/logout.svg" width="20" height="20" alt="Se déconnecter"></a></li>
+                <li title="Paramètres" @click="onParameters = true; this.user = this.getUser"><img :src="getIsDarkTheme ? '/build/images/icons/settings_white.svg' : '/build/images/icons/settings_black.svg'" width="20" height="20" alt="Paramètres"></li>
+                <li title="Se déconnecter"><a href="/logout"><img :src="getIsDarkTheme ? '/build/images/icons/logout_white.svg' : '/build/images/icons/logout_black.svg'" width="20" height="20" alt="Se déconnecter"></a></li>
             </ul>
         </nav>
-        <div class="connected-users" v-for="connectedUser in getConnectedUser" :key="connectedUser.id">
+        <div class="connected-users" v-for="connectedPlayer in getConnectedPlayer" :key="connectedPlayer.id">
             <div class="header-title-box">
-                <img class="account-picture" src="build/images/logo/icon_120.png" alt="Ereon" width="64" height="64">
-                <span class="account-username">{{ connectedUser.username }}</span>
+                <img class="account-picture" src="/build/images/logo/icon_120.png" alt="Ereon" width="64" height="64">
+                <span class="account-username">{{ connectedPlayer.username }}</span>
             </div>
         </div>
         <Teleport to="#content">
@@ -101,8 +101,8 @@
         <div class="worlds">
             <div class="world-layout" v-for="world in getWorlds" :key="world.id">
                 <div v-for="connection in world.connections" :key="connection.id">
-                    <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world)">
-                        <img class="world-image" :src="world.image && world.image.imageName ? world.image.imageName : 'build/images/logo/background.webp'" alt="">
+                    <div class="world" v-if="connection.user.id === connectedUser.id" @click="chooseWorld(connection, world.id)">
+                        <img class="world-image" :src="world.image && world.image.imageUrl ? world.image.imageUrl : 'build/images/logo/background.webp'" alt="">
                         <div v-if="connection.isGameMaster == 0" class="role">Joueur</div>
                         <div v-else class="role">MJ</div>
                         <h2>{{ world.name }}</h2>
@@ -122,21 +122,22 @@
 
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import { Connection } from '../entity/connection';
-import { World } from '../entity/world';
-import { UserParameterRepository } from '../repository/userparameterRepository';
-import { LightingWallService } from '../services/lightingwallService';
+import { UserParameterRepository } from '../repository/userParameterRepository';
+import { LightingWallService } from '../services/lightingWallService';
 import { PersonageService } from '../services/personageService';
 import { ConnectionService } from '../services/connectionService';
 import { MapService } from '../services/mapService';
 import basicInput from './forms/inputs/basicInput.vue';
-import { User } from '../entity/user';
 import { UserService } from '../services/userService';
 import { mapActions, mapState } from 'pinia';
 import { useMapStore } from '../store/map';
 import { useUserStore } from '../store/user';
 import { useMusicStore } from '../store/music';
 import WorldView from './worldView.vue';
+import {WorldService} from "../services/worldService";
+import {Connection} from "../entity/connection";
+import {useWorldStore} from "../store/world";
+import {User} from "../entity/user";
 
     export default defineComponent({
         data() {
@@ -148,6 +149,7 @@ import WorldView from './worldView.vue';
                 lightingWallService: new LightingWallService as LightingWallService,
                 mapService: new MapService as MapService,
                 userService: new UserService as UserService,
+                worldService: new WorldService as WorldService,
                 /**
                  * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
                  */
@@ -156,13 +158,12 @@ import WorldView from './worldView.vue';
                 layer: 1 as number,
                 globalVolume: this.connectedUser.userParameter.globalVolume as number,
                 isDarkTheme: this.connectedUser.userParameter.isDarkTheme as boolean,
-                loadedParameters: 0 as number,
                 pageIndex: 0 as number,
                 newPassword: "" as string,
                 newPasswordCopy: "" as string,
                 newPasswordConstraint: 0b00000 as number,
-                user: {} as User,
-                onWorldCreation: false as boolean
+                onWorldCreation: false as boolean,
+                user: {} as User
             }
         },
         props: [
@@ -170,12 +171,12 @@ import WorldView from './worldView.vue';
         ],
         computed: {
             ...mapState(useUserStore, [
-                'getConnectedUser',
+                'getUser',
                 'getCurrentMapId',
                 'getUsername',
                 'isGameMaster',
                 'getIsDarkTheme',
-                'getUser',
+                'getConnectedPlayer',
                 'getWorlds'
             ]),
             ...mapState(useMapStore, [
@@ -185,14 +186,6 @@ import WorldView from './worldView.vue';
         },
         components: { basicInput, WorldView },
         watch: {
-            loadedParameters: {
-                handler() {
-                    if(this.loadedParameters >= 3) {
-                        this.emitter.emit("isDownload");
-                    }
-                },
-                flush: 'post'
-            },
             newPassword: {
                 handler() {
                     this.newPasswordConstraint = this.isValidPassword()
@@ -205,13 +198,15 @@ import WorldView from './worldView.vue';
                 'setUser',
                 'setPlayers',
                 'setConnection',
-                'setWorld',
                 'sendIsConnected',
                 'findAllRecentConnections',
                 'setPersonages',
                 'setIsDarkTheme',
                 'findWorlds',
                 'addWorld'
+            ]),
+            ...mapActions(useWorldStore, [
+                'setWorld'
             ]),
             ...mapActions(useMapStore, [
                 'setMap',
@@ -220,15 +215,28 @@ import WorldView from './worldView.vue';
                 'deleteAllLightingWalls'
             ]),
             ...mapActions(useMusicStore, [
-                'setUserParameter',
-                'setUserVolume'
+                "setUserParameter",
+                "setUserVolume",
+                "setMusicPlayer",
+                "setCurrentMusic"
             ]),
             /**
              * Loading information after choosing a world
-             * @param connection The connection between player and world
-             * @param world The selected world
+             * @param connection
+             * @param worldId The selected world
              */
-            chooseWorld: function(connection: Connection, world: World) {
+            chooseWorld: function(connection: Connection, worldId: number) {
+                this.setConnection(connection);
+                this.worldService.findWorldById(worldId).then(world => {
+                    this.setWorld(world);
+                    this.setMap(world.connections.filter((connection) => connection.user.id === this.getUser.id)[0].currentMap);
+                    this.setMusicPlayer(world.musicPlayer);
+                    this.setCurrentMusic(world.musicPlayer.currentMusic);
+                    this.sendIsConnected();
+                    this.findAllRecentConnections(world.id);
+                    this.emitter.emit("isDownload");
+                })
+                /*
                 this.mapService.findMapById(connection.currentMap.id).then(map => {
                     this.setMap(map);
                     this.loadedParameters++;
@@ -257,7 +265,7 @@ import WorldView from './worldView.vue';
                         })
                         this.setConnection(data)
                     }
-                }
+                }*/
                 this.isConnected = true;
             },
             changeUserVolume: function() {
@@ -319,8 +327,8 @@ import WorldView from './worldView.vue';
                     }
                 }
                 if(!isError) {
-                    this.userService.updateUserPartially(this.user);
                     this.onParameters = false;
+                    this.userService.updateUserPartially(this.user);
                 }
             },
             createWorld: function() {
@@ -328,12 +336,11 @@ import WorldView from './worldView.vue';
             }
         },
         mounted() {
-            this.user = this.connectedUser
-            this.setUser(this.user)
+            this.setUser(this.connectedUser)
             this.setUserParameter(this.connectedUser.userParameter);
             this.setThemeTag();
             this.setIsDarkTheme(this.isDarkTheme);
-            this.findWorlds(this.user.id);
+            this.findWorlds(this.connectedUser.id);
         }
     })
 </script>
@@ -694,6 +701,7 @@ import WorldView from './worldView.vue';
         display: block;
         height: 200px;
         width: 200px;
+        object-fit: cover;
     }
 
     .world h2 {

@@ -13,12 +13,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AssetRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['asset:read']],
-    denormalizationContext: ['groups' => ['asset:write']],
     operations: [
         new GetCollection(),
         new Post()
     ],
+    normalizationContext: ['groups' => ['asset:read']],
+    denormalizationContext: ['groups' => ['asset:write']],
     paginationEnabled: false
 )]
 class Asset
@@ -33,7 +33,7 @@ class Asset
     private Collection $tokens;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[Groups(["map:read", "token:read", "asset:read", "asset:write"])]
+    #[Groups(["map:read", "token:read", "asset:read", "asset:write", "world:read"])]
     private ?Image $image = null;
 
     public function __construct()

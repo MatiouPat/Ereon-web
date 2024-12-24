@@ -23,12 +23,12 @@ export class ConnectionService
 
     public async updateCurrentMap(connectionId: number, mapId: number): Promise<void>
     {
-        this.connectionRepository.updateCurrentMap(connectionId, mapId);
+        return this.connectionRepository.updateCurrentMap(connectionId, mapId);
     }
 
     public async updateLastConnectionAt(connectionId: number, lastConnectionAt: string): Promise<void>
     {
-        this.connectionRepository.updateLastConnectionAt(connectionId, lastConnectionAt);
+        return this.connectionRepository.updateLastConnectionAt(connectionId, lastConnectionAt);
     }
 
 }

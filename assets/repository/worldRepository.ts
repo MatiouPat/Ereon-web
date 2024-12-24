@@ -11,6 +11,12 @@ export class WorldRepository extends AbstractRepository
             .getOneOrNullResult()
     }
 
+    public async findWorldById(worldId: number): Promise<World>
+    {
+        return this.createQueryBuilder('GET', '/api/worlds/' + worldId)
+            .getOneOrNullResult()
+    }
+
     public async findWorldByUser(userId: number): Promise<World[]>
     {
         return this.createQueryBuilder('GET', '/api/worlds?connections.user.id=' + userId)

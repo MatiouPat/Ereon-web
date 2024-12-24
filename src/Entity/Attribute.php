@@ -25,15 +25,15 @@ class Attribute
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["attribute:read", "personage:read"])]
+    #[Groups(["attribute:read", "personage:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["attribute:read", "personage:read", "world:write"])]
+    #[Groups(["attribute:read", "personage:read", "world:write", "world:read"])]
     private ?string $name = null;
 
     #[ORM\Column(length: 3)]
-    #[Groups(["attribute:read", "personage:read", 'weaponPrefab:read', 'spell:read', "world:write"])]
+    #[Groups(["attribute:read", "personage:read", 'weaponPrefab:read', 'spell:read', "world:write", "world:read"])]
     private ?string $acronym = null;
 
     #[ORM\ManyToOne(inversedBy: 'attributes')]

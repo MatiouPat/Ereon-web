@@ -12,16 +12,16 @@ class NumberOfSkill
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", "world:read"])]
     private ?int $value = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfSkills')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", "world:read"])]
     private ?Skill $skill = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfSkills')]

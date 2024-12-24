@@ -11,7 +11,12 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
     name: "TextInput",
-    inject: ["step"],
+    inject: {
+        step: {
+            from: 'step',
+            default: null
+        }
+    },
     data() {
         return {
             options: {
@@ -83,13 +88,13 @@ export default defineComponent({
 
     .dark .form-group:has(.ql-editor:focus) .ql-toolbar {
         border: solid 1px #D87D40 !important;
-        background: #1c1b22;
+        background: #1F262D;
     }
 
     .dark .form-group:has(.ql-editor:focus) .html-editor {
         border: solid 1px #D87D40 !important;
         border-top: none !important;
-        background: #1c1b22;
+        background: #1F262D;
     }
 
     .dark .form-group:has(.ql-editor:focus) .text-label {

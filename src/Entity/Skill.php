@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\SkillRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -10,20 +10,23 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: SkillRepository::class)]
+#[ApiResource(
+    operations: []
+)]
 class Skill
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read", "world:write"])]
+    #[Groups(["personage:read", "world:write", "world:read"])]
     private ?string $name = null;
 
-    #[ORM\ManyToOne(inversedBy: 'skills')]
-    #[Groups(["world:write"])]
+    #[ORM\ManyToOne(inversedBy: 'skills',)]
+    #[Groups(["world:write", "world:read"])]
     private ?Attribute $attribute = null;
 
     #[ORM\ManyToOne(inversedBy: 'skills')]

@@ -3,7 +3,7 @@
         <div class="editor" id="editor" ref="map" :style="{ width: getMap.width + 'px', height: getMap.height + 'px', transform: 'scale(' + ratio + ')'}">
             <canvas ref="fog" id="fog" :width="getMap.width" :height="getMap.height" :style="{zIndex: !isGameMaster && getMap.hasDynamicLight ? 15 : -1, width: getMap.width + 'px', height: getMap.height + 'px'}"></canvas>
             <canvas ref="main" id="main" v-on="{ mousedown: getOnDrawing ? drawStart : null }" :width="getMap.width" :height="getMap.height" :style="{zIndex: getLayer === 3 ? 10 : -100}"></canvas>   
-            <TokenComposent :id="token.id" :key="key" v-for="(token, key) in getMap.tokens"></TokenComposent>
+            <TokenComponent :token="token" :key="key" v-for="(token, key) in getMap.tokens"></TokenComponent>
         </div>
         <div class="editor-zoom">
             <span class="editor-zoom-ratio">{{(ratio * 100).toFixed(0)}}</span>
@@ -15,8 +15,8 @@
 </template>
 
 <script lang="ts">
+import TokenComponent from './token.vue'
 import { defineComponent, inject } from 'vue';
-import TokenComposent from './token.vue'
 import * as twgl from 'twgl.js';
 import lightVertSrc from "../shaders/light.vert";
 import lightFragSrc from "../shaders/light.frag";
@@ -27,7 +27,7 @@ import sceneFragSrc from "../shaders/scene.frag";
 import tokenVertSrc from "../shaders/token.vert";
 import tokenFragSrc from "../shaders/token.frag";
 import { calculateGeometry } from "../geometry";
-import { LightingWallService } from '../services/lightingwallService';
+import { LightingWallService } from '../services/lightingWallService';
 import { LightingWall } from '../entity/lightingwall';
 import { Token } from '../entity/token';
 import { Asset } from '../entity/asset';
@@ -38,7 +38,7 @@ import { Emitter, EventType } from 'mitt';
 
     export default defineComponent({
         components: {
-            TokenComposent
+            TokenComponent
         },
         data() {
             return {

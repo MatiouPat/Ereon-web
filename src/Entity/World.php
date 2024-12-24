@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Controller\CreateWorldController;
@@ -13,6 +14,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: WorldRepository::class)]
 #[ApiResource(
@@ -23,6 +25,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Post(
             controller: CreateWorldController::class,
             normalizationContext: ['groups' => ['world:readCollection']]
+        ),
+        new Get(
+            normalizationContext: ['groups' => ['world:read'], "enable_max_depth" => true],
         )
     ],
     denormalizationContext: ['groups' => ['world:write']],
@@ -34,11 +39,11 @@ class World
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["world:readCollection", "user:read", "connection:read", 'dice:read'])]
+    #[Groups(["world:readCollection", "user:read", "connection:read", 'dice:read', "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["world:readCollection", "user:read", "world:write"])]
+    #[Groups(["world:readCollection", "user:read", "world:write", "world:read"])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -50,30 +55,38 @@ class World
     private ?string $diceChannelIdentifier = null;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Connection::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[Groups("world:readCollection")]
+    #[Groups(["world:readCollection", "world:read"])]
     private Collection $connections;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Personage::class, orphanRemoval: true)]
+    #[Groups(["world:read"])]
     private Collection $personages;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Map::class, orphanRemoval: true)]
+    #[Groups(["world:read"])]
     private Collection $maps;
 
     #[ORM\OneToOne(mappedBy: 'world', cascade: ['persist', 'remove'])]
+    #[Groups(["world:read"])]
     private ?MusicPlayer $musicPlayer = null;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Attribute::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[Groups(["world:write"])]
+    #[Groups(["world:write", "world:read"])]
+    #[MaxDepth(1)]
     private Collection $attributes;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Skill::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[Groups(["world:write"])]
+    #[Groups(["world:write", "world:read"])]
+    #[MaxDepth(1)]
     private Collection $skills;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Point::class, orphanRemoval: true)]
+    #[Groups(["world:read"])]
+    #[MaxDepth(1)]
     private Collection $points;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Dice::class, orphanRemoval: true)]
+    #[Groups(["world:read"])]
     private Collection $dices;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Spell::class, orphanRemoval: true)]

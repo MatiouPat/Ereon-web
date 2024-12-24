@@ -3,8 +3,8 @@ import { NumberOfAttribute } from "../entity/numberofattribute";
 import { NumberOfPoint } from "../entity/numberofpoint";
 import { Personage } from "../entity/personage";
 import { Spell } from "../entity/spell";
-import { NumberOfAttributeRepository } from "../repository/numberofattributeRepository";
-import { NumberOfPointRepository } from "../repository/numberofpointRepository";
+import { NumberOfAttributeRepository } from "../repository/numberOfAttributeRepository";
+import { NumberOfPointRepository } from "../repository/numberOfPointRepository";
 import { PersonageRepository } from "../repository/personageRepository";
 import { ImageService } from "./imageService";
 

@@ -3,7 +3,7 @@ import { User } from "../entity/user"
 import { Map } from "../entity/map"
 import { TokenService } from "../services/tokenService"
 import { LightingWall } from "../entity/lightingwall"
-import { LightingWallService } from "../services/lightingwallService"
+import { LightingWallService } from "../services/lightingWallService"
 import { defineStore } from "pinia"
 
 export const useMapStore = defineStore('map', {
@@ -11,10 +11,7 @@ export const useMapStore = defineStore('map', {
         /**
         * The current map
         */
-        map: {
-            width: 0,
-            height: 0
-        } as Map,
+        map: {} as Map,
         ratio: 1 as number,
         layer: 1 as number,
         onDrawing: false as boolean

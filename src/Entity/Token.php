@@ -16,13 +16,13 @@ use Symfony\Component\Validator\Constraints\Range;
 
 #[ORM\Entity(repositoryClass: TokenRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['token:read']],
     operations: [
         new GetCollection(),
         new Post(output: false),
         new Patch(output: false),
         new Delete()
     ],
+    normalizationContext: ['groups' => ['token:read']],
     paginationEnabled: false
 )]
 class Token
@@ -30,40 +30,40 @@ class Token
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["map:read", "token:read"])]
+    #[Groups(["map:read", "token:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["map:read", "token:read"])]
+    #[Groups(["map:read", "token:read", "world:read"])]
     private ?int $width = null;
 
     #[ORM\Column]
-    #[Groups(["map:read", "token:read"])]
+    #[Groups(["map:read", "token:read","world:read"])]
     private ?int $height = null;
 
     #[ORM\Column]
-    #[Groups(["map:read", "token:read"])]
+    #[Groups(["map:read", "token:read", "world:read"])]
     private ?int $topPosition = null;
 
     #[ORM\Column]
-    #[Groups(["map:read", "token:read"])]
+    #[Groups(["map:read", "token:read", "world:read"])]
     private ?int $leftPosition = null;
 
     #[ORM\Column]
-    #[Groups(["map:read", "token:read"])]
+    #[Groups(["map:read", "token:read", "world:read"])]
     private ?int $zIndex = null;
 
     #[ORM\Column]
     #[Range(
+        notInRangeMessage: 'You must be 1(Token) 2(Map) and 3(GM) layer',
         min: 1,
-        max: 3,
-        notInRangeMessage: 'You must be 1(Token) 2(Map) and 3(GM) layer'
+        max: 3
     )]
-    #[Groups(["map:read", "token:read"])]
+    #[Groups(["map:read", "token:read", "world:read"])]
     private ?int $layer = null;
 
     #[ORM\ManyToOne(inversedBy: 'tokens')]
-    #[Groups(["map:read", "token:read"])]
+    #[Groups(["map:read", "token:read", "world:read"])]
     private ?Asset $asset = null;
 
     #[ORM\ManyToOne(inversedBy: 'tokens')]
@@ -71,7 +71,7 @@ class Token
     private ?Map $map = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'tokens')]
-    #[Groups(["map:read", "token:read"])]
+    #[Groups(["map:read", "token:read", "world:read"])]
     private Collection $users;
 
     public function __construct()

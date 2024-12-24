@@ -18,7 +18,12 @@ import { useUserStore } from "../../../store/user";
 
 export default defineComponent({
     name: "CollectionInput",
-    inject: ["step"],
+    inject: {
+        step: {
+            from: 'step',
+            default: null
+        }
+    },
     provide() {
         return {
             collection: this
