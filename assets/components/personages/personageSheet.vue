@@ -192,6 +192,7 @@ import { ArmorPrefab } from '../../entity/armorprefab';
 import { Spell } from '../../entity/spell';
 import { mapState } from 'pinia';
 import { useUserStore } from '../../store/user';
+import {useWorldStore} from "../../store/world";
 
 export default defineComponent({
     data() {
@@ -242,16 +243,18 @@ export default defineComponent({
     computed: {
         ...mapState(useUserStore, [
             'getUserId',
-            'getPlayers',
             'getWorld',
             'getIsDarkTheme'
+        ]),
+        ...mapState(useWorldStore, [
+            'getPlayerConnectionsInWorld'
         ]),
         userChoices() {
             let choices = [] as {
                 id: string
                 value: string
             }[];
-            this.getPlayers.forEach((player: Connection) => {
+            this.getPlayerConnectionsInWorld.forEach((player: Connection) => {
                 choices.push({
                     id: player.user.id,
                     value: player.user.username

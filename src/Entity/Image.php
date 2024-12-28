@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\OpenApi\Model\Operation;
@@ -57,8 +58,12 @@ class Image
     private ?File $imageFile = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["map:read", "token:read", 'image:read', "personage:read", "asset:read", "world:readCollection"])]
-    public ?string $imageName = null;
+    #[Groups(["map:read", "token:read", 'image:read', "personage:read"])]
+    private ?string $imageName = null;
+
+    #[ApiProperty(writable: false, types: ['https://schema.org/contentUrl'])]
+    #[Groups(["world:readCollection", "world:read", "asset:read"])]
+    private ?string $imageUrl = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
@@ -88,6 +93,18 @@ class Image
     public function setImageName(?string $imageName): static
     {
         $this->imageName = $imageName;
+
+        return $this;
+    }
+
+    public function getImageUrl(): ?string
+    {
+        return $this->imageUrl;
+    }
+
+    public function setImageUrl(?string $imageUrl): static
+    {
+        $this->imageUrl = $imageUrl;
 
         return $this;
     }

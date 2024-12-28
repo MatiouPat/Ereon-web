@@ -19,24 +19,24 @@ class NumberOfPoint
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", 'personage:write', "world:read"])]
     private ?int $current = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", 'personage:write', "world:read"])]
     private ?int $min = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", 'personage:write', "world:read"])]
     private ?int $max = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfPoints')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", 'personage:write', "world:read"])]
     private ?Point $point = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfPoints')]

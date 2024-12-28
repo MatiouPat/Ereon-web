@@ -19,16 +19,16 @@ class NumberOfAttribute
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", 'personage:write', "world:read"])]
     private ?int $value = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfAttributes')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", 'personage:write', "world:read"])]
     private ?Attribute $attribute = null;
 
     #[ORM\ManyToOne(inversedBy: 'numberOfAttributes')]

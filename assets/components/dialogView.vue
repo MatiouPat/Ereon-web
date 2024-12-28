@@ -45,13 +45,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import DialogMessage from './dialogMessage.vue';
-import { Dice } from '../entity/dice';
 import { DiceRepository } from '../repository/diceRepository';
 import { Personage } from '../entity/personage';
 import { PersonageRepository } from '../repository/personageRepository';
 import SelectInput from './forms/inputs/selectInput.vue';
 import { mapState } from 'pinia';
 import { useUserStore } from '../store/user';
+import {useWorldStore} from "../store/world";
 
     export default defineComponent({
         components: {
@@ -80,11 +80,13 @@ import { useUserStore } from '../store/user';
         },
         computed: {
             ...mapState(useUserStore, [
-                'getPersonages',
                 'isGameMaster',
-                'getWorld',
                 'getUserId',
                 'getIsDarkTheme'
+            ]),
+            ...mapState(useWorldStore, [
+                "getDices",
+                "getPersonages"
             ]),
             /**
              * If the user has a character in the world
@@ -129,6 +131,8 @@ import { useUserStore } from '../store/user';
             }
         },
         mounted: function() {
+            this.messages = this.getDices
+
             const u = new URL(process.env.MERCURE_PUBLIC_URL!);
             u.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/dice');
 
@@ -139,23 +143,15 @@ import { useUserStore } from '../store/user';
                 this.scollToBottom();
             }
 
-            this.diceRepository.findAllDices().then(res => {
-                res.forEach((dice: Dice) => {
-                    this.messages.push(dice)
-                });
-            })
-
             if(this.isGameMaster){
                 this.launchersChoice.push({
                     id: '0',
                     value: 'MJ'
                 });
-                this.personageRepository.findNonPlayerPersonagesByWorld(this.getWorld.id).then(personages => {
-                    personages.forEach(personage => {
-                        this.launchersChoice.push({
-                            id: personage.id?.toString(),
-                            value: personage.name
-                        })
+                this.getPersonages.forEach(personage => {
+                    this.launchersChoice.push({
+                        id: personage.id?.toString(),
+                        value: personage.name
                     })
                 })
             }else {

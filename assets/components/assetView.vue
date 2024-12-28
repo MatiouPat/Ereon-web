@@ -1,7 +1,7 @@
 <template>
     <div class="assets-box">
         <div class="assets">
-            <img v-for="asset in assets" :key="asset.id" v-on="{ dragend: getLayer !== 3 ? addToken : null }" :src="'/uploads/images/' + asset.image.imageName" :alt="asset.id.toString()" width="64" height="64">
+            <img v-for="asset in assets" :key="asset.id" v-on="{ dragend: getLayer !== 3 ? addToken : null }" :src="asset.image.imageUrl" :alt="asset.id.toString()" width="64" height="64">
         </div>
         <button class="btn btn-primary" @click="openAssetPage">Ajouter un asset</button>
         <modal
@@ -73,8 +73,8 @@ import { useMapStore } from '../store/map';
             }
         },
         mounted: function() {
-            this.assetService.findAllAssets().then((res: Asset[]) => {
-                this.assets = res;
+            this.assetService.findAllAssets().then(assets => {
+                this.assets = assets;
             })
         }
     })

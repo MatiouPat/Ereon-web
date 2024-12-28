@@ -15,12 +15,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ArmorPrefabRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['armorPrefab:read']],
-    denormalizationContext: ['groups' => ['armorPrefab:write']],
     operations: [
         new GetCollection(),
         new Post()
-    ]
+    ],
+    normalizationContext: ['groups' => ['armorPrefab:read']],
+    denormalizationContext: ['groups' => ['armorPrefab:write']]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['world.id' => 'exact'])]
 class ArmorPrefab extends ItemPrefab

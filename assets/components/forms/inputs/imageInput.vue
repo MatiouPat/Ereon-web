@@ -2,9 +2,9 @@
     <div class="form-group" :class="hasError ? 'error' : ''">
         <label v-if="label">{{ label }}</label>
         <div class="file-wrapper" :style="{width: width + 'px', height: height + 'px', minWidth: width + 'px'}">
-            <div v-if="image.imageName || isPreview">
+            <div v-if="image.imageUrl || isPreview">
                 <picture class="file-image">
-                    <img :src="'/uploads/images/' + image.imageName" :alt="image.imageName" ref="image">
+                    <img :src="image.imageUrl" :alt="image.imageUrl" ref="image">
                 </picture>
                 <img width="24" height="24" src="/build/images/icons/delete_white.svg" alt="Supprimer l'image" class="file-delete-icon" @click="deleteImage">
             </div>

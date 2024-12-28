@@ -17,6 +17,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\MaxDepth;
 
 #[ORM\Entity(repositoryClass: MapRepository::class)]
 #[ApiResource(
@@ -27,7 +28,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Delete(
             controller: DeleteMapController::class
         ),
-        new Patch()
+        new Patch(output: false)
     ],
     normalizationContext: ['groups' => ['map:read'], "enable_max_depth" => true],
     paginationEnabled: false
@@ -38,28 +39,28 @@ class Map
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["world:readCollection", "map:read","user:read", "connection:read"])]
+    #[Groups(["world:readCollection", "map:read","user:read", "connection:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("map:read")]
+    #[Groups(["map:read", "world:read"])]
     private ?string $name = null;
 
     #[ORM\Column]
-    #[Groups("map:read")]
+    #[Groups(["map:read", "world:read"])]
     private ?int $width = null;
 
     #[ORM\Column]
-    #[Groups("map:read")]
+    #[Groups(["map:read", "world:read"])]
     private ?int $height = null;
 
     #[ORM\Column]
-    #[Groups("map:read")]
+    #[Groups(["map:read", "world:read"])]
     private ?bool $hasDynamicLight = null;
 
     #[ORM\OneToMany(mappedBy: 'map', targetEntity: Token::class, orphanRemoval: true)]
     #[OrderBy(["zIndex" => "ASC"])]
-    #[Groups("map:read")]
+    #[Groups(["map:read", "world:read"])]
     private Collection $tokens;
 
     #[ORM\ManyToOne(inversedBy: 'maps')]
@@ -67,7 +68,8 @@ class Map
     private ?World $world = null;
 
     #[ORM\OneToMany(mappedBy: 'currentMap', targetEntity: Connection::class)]
-    #[Groups("map:read")]
+    #[Groups(["map:read", "world:read"])]
+    #[MaxDepth(1)]
     private Collection $connections;
 
     #[ORM\OneToMany(mappedBy: 'map', targetEntity: LightingWall::class, orphanRemoval: true)]

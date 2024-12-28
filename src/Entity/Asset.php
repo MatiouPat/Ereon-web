@@ -10,15 +10,16 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: AssetRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['asset:read']],
-    denormalizationContext: ['groups' => ['asset:write']],
     operations: [
         new GetCollection(),
         new Post()
     ],
+    normalizationContext: ['groups' => ['asset:read']],
+    denormalizationContext: ['groups' => ['asset:write']],
     paginationEnabled: false
 )]
 class Asset
@@ -33,7 +34,8 @@ class Asset
     private Collection $tokens;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[Groups(["map:read", "token:read", "asset:read", "asset:write"])]
+    #[Groups(["map:read", "token:read", "asset:read", "asset:write", "world:read"])]
+    #[MaxDepth(1)]
     private ?Image $image = null;
 
     public function __construct()

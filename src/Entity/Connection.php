@@ -13,7 +13,6 @@ use App\Repository\ConnectionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: ConnectionRepository::class)]
 #[ApiResource(
@@ -31,15 +30,15 @@ class Connection
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["connection:read", "world:readCollection", "map:read"])]
+    #[Groups(["connection:read", "world:readCollection", "map:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(["connection:read", "world:readCollection", "user:read"])]
+    #[Groups(["connection:read", "world:readCollection", "user:read", "world:read"])]
     private ?bool $isGameMaster = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(["connection:read", "world:readCollection"])]
+    #[Groups(["connection:read", "world:readCollection", "world:read"])]
     private ?\DateTimeInterface $lastConnectionAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'connections')]
@@ -49,13 +48,12 @@ class Connection
 
     #[ORM\ManyToOne(inversedBy: 'connections')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["connection:read", "world:readCollection", "map:read"])]
+    #[Groups(["connection:read", "world:readCollection", "map:read", "world:read"])]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'connections', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(cascade: ['persist', 'remove'], inversedBy: 'connections')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["connection:read", "world:readCollection", "map:read"])]
-    #[MaxDepth(1)]
+    #[Groups(["connection:read", "world:readCollection", "map:read", "world:read"])]
     private ?Map $currentMap = null;
 
     public function getId(): ?int

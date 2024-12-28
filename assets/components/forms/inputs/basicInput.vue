@@ -2,8 +2,8 @@
     <div class="form-group" :class="hasError ? 'error' : ''">
         <label ref="input" v-if="label">{{ label }}<i v-if="isRequired && mustShowRequiredLabel">*</i></label>
         <input ref="input" v-if="isPassword" type="password" v-model="value" :autocomplete="autocomplete">
-        <input ref="input" v-else-if="!isNumber" v-model="value">
-        <input ref="input" v-else v-model.number="value">
+        <input ref="input" v-else-if="isNumber" v-model.number="value">
+        <input ref="input" v-else v-model="value">
         <span v-if="hasError" class="form-error">{{ messageEroor }}</span>
     </div>
 </template>
@@ -13,7 +13,16 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: "BasicInput",
-    inject: ["step", "collection"],
+    inject: {
+        step: {
+            from: 'step',
+            default: null
+        },
+        collection: {
+            from: 'collection',
+            default: null
+        }
+    },
     data() {
         return {
             hasError: false as boolean,

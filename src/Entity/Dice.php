@@ -15,12 +15,12 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 #[ORM\Entity(repositoryClass: DiceRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['dice:read']],
-    denormalizationContext: ['groups' => ['dice:write']],
     operations: [
         new GetCollection(),
         new Post()
     ],
+    normalizationContext: ['groups' => ['dice:read']],
+    denormalizationContext: ['groups' => ['dice:write']],
     paginationEnabled: false
 )]
 class Dice
@@ -28,20 +28,21 @@ class Dice
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["world:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
     #[GreaterThan(1)]
     #[LessThanOrEqual(100)]
-    #[Groups('dice:read')]
+    #[Groups(["world:read", "dice:read"])]
     private ?int $diceNumber = null;
 
     #[ORM\Column]
-    #[Groups('dice:read')]
+    #[Groups(["world:read", "dice:read"])]
     private ?int $brutValue = null;
 
     #[ORM\Column]
-    #[Groups('dice:read')]
+    #[Groups(["world:read", "dice:read"])]
     private ?int $finalValue = null;
 
     #[ORM\Column(length: 255)]
@@ -49,7 +50,7 @@ class Dice
         pattern: '/^([1-9]\d*)?d([1-9]\d?|100)([\-\+][1-9]\d*)*$/',
         message: 'Cette valeur n\'est pas un jet de dé valide.'
     )]
-    #[Groups(['dice:read', 'dice:write'])]
+    #[Groups(["world:read", "dice:read", "dice:write"])]
     #[ApiProperty(
         openapiContext: [
             'example' => "d100+20"
@@ -66,7 +67,7 @@ class Dice
 
     #[ORM\ManyToOne(inversedBy: 'dices')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['dice:read', 'dice:write'])]
+    #[Groups(["world:read", "dice:read", "dice:write"])]
     private ?User $launcher = null;
 
     #[ORM\ManyToOne(inversedBy: 'dices')]

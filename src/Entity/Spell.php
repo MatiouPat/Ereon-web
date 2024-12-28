@@ -16,12 +16,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: SpellRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['spell:read']],
-    denormalizationContext: ['groups' => ['spell:write']],
     operations: [
         new GetCollection(),
         new Post()
-    ]
+    ],
+    normalizationContext: ['groups' => ['spell:read']],
+    denormalizationContext: ['groups' => ['spell:write']]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['world.id' => 'exact'])]
 class Spell

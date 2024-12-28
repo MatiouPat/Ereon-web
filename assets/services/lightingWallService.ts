@@ -1,5 +1,5 @@
 import { LightingWall } from "../entity/lightingwall";
-import { LightingWallRepository } from "../repository/lightingwallRepository";
+import { LightingWallRepository } from "../repository/lightingWallRepository";
 
 export class LightingWallService
 {

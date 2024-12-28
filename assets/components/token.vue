@@ -15,69 +15,94 @@
             <li @click="downZIndex">Vers l'arrière</li>
             <li @click="showProperties">Propriétés</li>
         </ul>
-        <Teleport to="#editor">
-            <div v-if="isPropertiesContexting" class="modal-wrapper">
-                <div class="modal-box">
-                    <form>
-                        <div class="form-part">
-                            <h3>Positionnement</h3>
-                            <div class="row">
-                                <div class="form-group">
-                                    <label class="form-label">Width</label>
-                                    <input class="form-control" :value="token.width" type="number" @input="setTokenWidth">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Height</label>
-                                    <input class="form-control" :value="token.height" type="number" @input="setTokenHeight">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="form-group">
-                                    <label class="form-label">Top</label>
-                                    <input class="form-control" :value="token.topPosition" type="number" @input="setTokenTop">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Left</label>
-                                    <input class="form-control" :value="token.leftPosition" type="number" @input="setTokenLeft">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="form-group">
-                                    <label class="form-label">Zindex</label>
-                                    <input class="form-control" :value="token.zIndex" type="number" @input="setTokenZIndex">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Layer</label>
-                                    <select class="form-control" :value="token.layer" @input="setTokenLayer">
-                                        <option :value="1">Map</option>
-                                        <option :value="2">Token</option>
-                                    </select>
-                                </div>
-                            </div>
+        <modal
+            :is-displayed="isPropertiesContexting"
+            :type="'popup'"
+            :modalValidationMessage="'Valider'"
+            @modal:close="isPropertiesContexting = false"
+            @modal:validation="modifyToken"
+        >
+            <template v-slot:modal-body>
+                <form>
+                    <div class="form-part">
+                        <h3>Positionnement</h3>
+                        <div class="row">
+                            <basic-input
+                                :label="'Width'"
+                                :is-number="true"
+                                :is-required="true"
+                                :must-show-required-label="false"
+                                :model-value="token.width"
+                                @update:model-value="(newValue) => token.width = newValue"
+                            ></basic-input>
+                            <basic-input
+                                :label="'Height'"
+                                :is-number="true"
+                                :is-required="true"
+                                :must-show-required-label="false"
+                                :model-value="token.height"
+                                @update:model-value="(newValue) => token.height = newValue"
+                            ></basic-input>
                         </div>
-                        <div class="form-part" v-if="getPlayers.length">
-                            <h3>Contrôle</h3>
-                            <div v-for="player in getPlayers" :key="player.id">
-                                <label>{{ player.user.username }}</label>
-                                <input type="checkbox" :value="player.id" :checked="canControlledBy(player.id, token.id)" @change="addTokenPlayer">
-                            </div>
+                        <div class="row">
+                            <basic-input
+                                :label="'Top'"
+                                :is-number="true"
+                                :is-required="true"
+                                :must-show-required-label="false"
+                                :model-value="token.topPosition"
+                                @update:model-value="(newValue) => token.topPosition = newValue"
+                            ></basic-input>
+                            <basic-input
+                                :label="'Left'"
+                                :is-number="true"
+                                :is-required="true"
+                                :must-show-required-label="false"
+                                :model-value="token.leftPosition"
+                                @update:model-value="(newValue) => token.leftPosition = newValue"
+                            ></basic-input>
                         </div>
-                        <div class="form-part" v-else >
-                            <h3>Contrôle</h3>
-                            <span>Aucun joueur présent sur cette partie</span>
+                        <div class="row">
+                            <basic-input
+                                :label="'Zindex'"
+                                :is-number="true"
+                                :is-required="true"
+                                :must-show-required-label="false"
+                                :model-value="token.zIndex"
+                                @update:model-value="(newValue) => token.zIndex = newValue"
+                            ></basic-input>
+                            <select-input
+                                :label="'Layer'"
+                                :model-value="token.layer"
+                                :choices="layerChoices"
+                                :background="getIsDarkTheme ? '#4f5a64' : '#FFFFFF'"
+                                :is-required="true"
+                                :must-show-required-label="false"
+                                @update:model-value="(modelValue) => {token.layer = modelValue}"
+                            ></select-input>
                         </div>
-                        <button type="button" class="btn btn-primary" @click="submitForm">Valider</button>
-                    </form>
-                </div>
-            </div>
-        </Teleport>
-        <img :src="'/uploads/images/' + token.asset.image.imageName" alt="Map">
+                    </div>
+                    <div class="form-part" v-if="getPlayerConnectionsInWorld.length">
+                        <h3>Contrôle</h3>
+                        <div v-for="player in getPlayerConnectionsInWorld" :key="player.id">
+                            <label>{{ player.user.username }}</label>
+                            <input type="checkbox" :value="player.id" :checked="canControlledBy(player.id, token.id)" @change="addTokenPlayer">
+                        </div>
+                    </div>
+                    <div class="form-part" v-else >
+                        <h3>Contrôle</h3>
+                        <span>Aucun joueur présent sur cette partie</span>
+                    </div>
+                </form>
+            </template>
+        </modal>
+        <img :src="token.asset.image.imageUrl" alt="Map" decoding="async">
     </div>
     <div v-else-if="!isGameMaster && canControlledBy(getUserId, id)" class="token" ref="token" style="z-index: 20;" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px'}" @mousedown.prevent="move">
-        <img :src="'/uploads/images/' + token.asset.image.imageName" alt="Map">
+        <img :src="token.asset.image.imageUrl" alt="Map" decoding="async">
     </div>
     <div v-else class="token" ref="token" :style="{top: token.topPosition + 'px', left: token.leftPosition + 'px', width: token.width + 'px', height: token.height + 'px', zIndex: token.zIndex}">
-        <img :src="'/uploads/images/' + token.asset.image.imageName" alt="Map">
+        <img :src="token.asset.image.imageUrl" alt="Map" decoding="async">
     </div>
 </template>
 
@@ -89,12 +114,18 @@ import { mapActions, mapState } from 'pinia';
 import { useMapStore } from '../store/map';
 import { useUserStore } from '../store/user';
 import { Emitter, EventType } from 'mitt';
+import BasicInput from "./forms/inputs/basicInput.vue";
+import SelectInput from "./forms/inputs/selectInput.vue";
+import Modal from "./modal/modal.vue";
+import {useWorldStore} from "../store/world";
 
     export default defineComponent({
+        name: "TokenComponent",
+        inject: ["editor"],
+        components: {Modal, SelectInput, BasicInput},
         data() {
             return {
                 emitter: inject('emitter') as Emitter<Record<EventType, unknown>>,
-                $store: inject('store') as any,
                 /**
                  * The token being resized
                  */
@@ -116,11 +147,15 @@ import { Emitter, EventType } from 'mitt';
                 startWidth: 0 as number,
                 startHeight: 0 as number,
                 startMouseX: 0 as number,
-                startMouseY: 0 as number
+                startMouseY: 0 as number,
+                layerChoices: [
+                    { id: 1, value: 'Map' },
+                    { id: 2, value: 'Token' }
+                ]
             }
         },
         props: [
-            'id'
+            'token'
         ],
         computed: {
             ...mapState(useMapStore, [
@@ -134,14 +169,17 @@ import { Emitter, EventType } from 'mitt';
             ...mapState(useUserStore, [
                 'getUserId',
                 'isGameMaster',
-                'getPlayers'
+                'getIsDarkTheme'
+            ]),
+            ...mapState(useWorldStore, [
+                "getPlayerConnectionsInWorld"
             ]),
             /**
              * The token to display
              */
-            token(): Token {
+            /*token(): Token {
                 return this.getTokenById(this.id)
-            }
+            }*/
         },
         methods: {
             ...mapActions(useMapStore, [
@@ -154,7 +192,7 @@ import { Emitter, EventType } from 'mitt';
              * Show contextual box
              * @param {*} e 
              */
-            showActions: function (e: MouseEvent) {
+            showActions(e: MouseEvent) {
                 this.isContexting = true;
                 (this.$refs.token as HTMLElement).addEventListener('mouseleave', () => {
                     this.isContexting = false;
@@ -163,7 +201,7 @@ import { Emitter, EventType } from 'mitt';
             /**
              * Putting the token a little further forward
              */
-            upZIndex: function () {
+            upZIndex() {
                 this.changeZIndex({
                     id: this.token.id,
                     zIndex: this.token.zIndex! + 1
@@ -174,7 +212,7 @@ import { Emitter, EventType } from 'mitt';
             /**
              * Put the token a little further back
              */
-            downZIndex: function () {
+            downZIndex() {
                 this.changeZIndex({
                     id: this.token.id,
                     zIndex: this.token.zIndex! - 1
@@ -185,7 +223,7 @@ import { Emitter, EventType } from 'mitt';
             /**
              * Display token parameters
              */
-            showProperties: function () {
+            showProperties() {
                 this.isPropertiesContexting = true
                 this.isResizing = false;
                 this.isContexting = false;
@@ -194,7 +232,7 @@ import { Emitter, EventType } from 'mitt';
              * Start moving the token on the map by left-clicking on it
              * @param {*} e 
              */
-            move: function (e: MouseEvent) {
+            move(e: MouseEvent) {
                 if(e.button === 0) {
                     this.isResizing = true;
                     this.startX = (e.screenX / this.getRatio) - (this.$refs.token as HTMLElement).offsetLeft
@@ -214,7 +252,7 @@ import { Emitter, EventType } from 'mitt';
              * Moving the token on the map
              * @param {*} e 
              */
-            onMove: function(e: MouseEvent) {
+            onMove(e: MouseEvent) {
                 let left = this.token.leftPosition
                 let top = this.token.topPosition
                 if ((e.screenX / this.getRatio) - this.startX > -this.token.width!/2 && (e.screenX / this.getRatio) - this.startX < this.map.width - this.token.width!/2) {
@@ -233,7 +271,7 @@ import { Emitter, EventType } from 'mitt';
              * Start token resizing after clicking on a resizer
              * @param {*} e 
              */
-            resize: function(e: MouseEvent) {
+            resize(e: MouseEvent) {
                 this.resizer = e.target as HTMLElement
                 this.startWidth = this.token.width!;
                 this.startHeight = this.token.height!;
@@ -251,7 +289,7 @@ import { Emitter, EventType } from 'mitt';
              * Resize token
              * @param {*} e 
              */
-            onResize: function(e: MouseEvent) {
+            onResize(e: MouseEvent) {
                 let width = this.startWidth
                 let height = this.startHeight
                 let top = this.startY
@@ -299,7 +337,7 @@ import { Emitter, EventType } from 'mitt';
              * 
              * @param {*} e 
              */
-            removeToken: function(e: KeyboardEvent) {
+            removeToken(e: KeyboardEvent) {
                 if (e.key === "Delete") {
                     this.isResizing = false;
                     this.isContexting = false;
@@ -311,7 +349,7 @@ import { Emitter, EventType } from 'mitt';
              * Hide context box when clicked outside it
              * @param {*} e 
              */
-            clickOutside: function(e: MouseEvent) {
+            clickOutside(e: MouseEvent) {
                 if(!this.$el.contains(e.target)){
                     window.removeEventListener('click', this.clickOutside)
                     this.isResizing = false;
@@ -319,43 +357,7 @@ import { Emitter, EventType } from 'mitt';
                     document.removeEventListener('keydown', this.removeToken)
                 }
             },
-            setTokenWidth: function(e: Event) {
-                this.$store.commit('map/setTokenWidth', {
-                    token: this.token,
-                    width: Number((e.target as InputHTMLAttributes).value)
-                })
-            },
-            setTokenHeight: function(e: Event) {
-                this.$store.commit('map/setTokenHeight', {
-                    token: this.token,
-                    height: Number((e.target as InputHTMLAttributes).value)
-                })
-            },
-            setTokenTop: function(e: Event) {
-                this.$store.commit('map/setTokenTop', {
-                    token: this.token,
-                    topPosition: Number((e.target as InputHTMLAttributes).value)
-                })
-            },
-            setTokenLeft: function(e: Event) {
-                this.$store.commit('map/setTokenLeft', {
-                    token: this.token,
-                    leftPosition: Number((e.target as InputHTMLAttributes).value)
-                })
-            },
-            setTokenZIndex: function(e: Event) {
-                this.$store.commit('map/setTokenZIndex', {
-                    token: this.token,
-                    zIndex: Number((e.target as InputHTMLAttributes).value)
-                })
-            },
-            setTokenLayer: function(e: Event) {
-                this.$store.commit('map/setTokenLayer', {
-                    token: this.token,
-                    layer: Number((e.target as InputHTMLAttributes).value)
-                })
-            },
-            addTokenPlayer: function(e: Event) {
+            addTokenPlayer(e: Event) {
                 if((e.target! as InputHTMLAttributes).checked) {
                     this.$store.commit('map/addTokenPlayer', {
                         token: this.token,
@@ -371,7 +373,7 @@ import { Emitter, EventType } from 'mitt';
             /**
              * Change token settings after form submission
              */
-            submitForm: function() {
+            modifyToken() {
                 let users: string[] = []
                 this.token.users.forEach((user: User) => {
                     users.push('api/users/' + user.id.toString())
@@ -386,9 +388,20 @@ import { Emitter, EventType } from 'mitt';
                     users: users
                 })
                 this.isPropertiesContexting = false
+            },
+            checkImageLoaded(): Promise<any>
+            {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = this.token.asset.image.imageUrl;
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                });
             }
         },
         mounted() {
+            this.editor.registerToken(this);
+
             const url = new URL(process.env.MERCURE_PUBLIC_URL!);
             url.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/tokens/' + this.id);
             const updateEs = new EventSource(url);
@@ -502,25 +515,6 @@ import { Emitter, EventType } from 'mitt';
         height: 100%;
     }
 
-    .modal-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 10;
-        display: flex;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.75);
-    }
-
-    .modal-box {
-        display: block;
-        width: 400px;
-        margin: auto;
-        padding: 16px;
-        background-color: #FFF;
-    }
-
     form {
         display: flex;
         flex-direction: column;
@@ -537,12 +531,6 @@ import { Emitter, EventType } from 'mitt';
         gap: 8px;
     }
 
-    .field {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-    }
-
     h3 {
         font-size: 1.2rem;
         font-weight: 700;
@@ -556,10 +544,6 @@ import { Emitter, EventType } from 'mitt';
 
     .context-menu li:hover {
         background-color: #1c1b22;
-    }
-
-    .dark .modal-box {
-        background-color: #2b2a33;
     }
 
     .dark h3 {

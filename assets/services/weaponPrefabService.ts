@@ -1,5 +1,5 @@
 import { WeaponPrefab } from "../entity/weaponprefab";
-import { WeaponPrefabRepository } from "../repository/weaponprefabRepository";
+import { WeaponPrefabRepository } from "../repository/weaponPrefabRepository";
 
 export class WeaponPrefabService
 {

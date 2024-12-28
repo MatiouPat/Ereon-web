@@ -25,15 +25,15 @@ class Music
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("music:read")]
+    #[Groups(["music:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["music:read", "musicPlayer:read"])]
+    #[Groups(["music:read", "musicPlayer:read", "world:read"])]
     private ?string $title = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["music:read", "musicPlayer:read"])]
+    #[Groups(["music:read", "musicPlayer:read", "world:read"])]
     private ?string $link = null;
 
     #[ORM\ManyToMany(targetEntity: Playlist::class, mappedBy: 'musics')]

@@ -164,12 +164,12 @@ import { defineComponent } from 'vue'
 import basicInput from '../forms/inputs/basicInput.vue';
 import SelectInput from '../forms/inputs/selectInput.vue';
 import { AttributeService } from '../../services/attributeService';
-import { WeaponPrefabService } from '../../services/weaponprefabService';
+import { WeaponPrefabService } from '../../services/weaponPrefabService';
 import { WeaponPrefab } from '../../entity/weaponprefab';
 import { ArmorPrefab } from '../../entity/armorprefab';
-import { ArmorPrefabService } from '../../services/armorprefabService';
+import { ArmorPrefabService } from '../../services/armorPrefabService';
 import { ItemPrefab } from '../../entity/itemprefab';
-import { ItemPrefabService } from '../../services/itemprefabService';
+import { ItemPrefabService } from '../../services/itemPrefabService';
 import { Spell } from '../../entity/spell';
 import { PointService } from '../../services/pointService';
 import { SpellService } from '../../services/spellService';

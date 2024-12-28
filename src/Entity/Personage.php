@@ -16,6 +16,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: PersonageRepository::class)]
 #[ApiResource(
@@ -26,7 +27,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Patch()
     ],
     normalizationContext: ['groups' => ['personage:read']],
-    denormalizationContext: ['groups' => ['personage:write']]
+    denormalizationContext: ['groups' => ['personage:write']],
+    paginationEnabled: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact'])]
 #[ApiFilter(ExistsFilter::class, properties: ['user'])]
@@ -35,63 +37,66 @@ class Personage
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["personage:read", 'personage:write', 'dice:read', "user:read"])]
+    #[Groups(["personage:read", 'personage:write', 'dice:read', "user:read", "world:read"])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", 'personage:write', "world:read"])]
     private ?string $race = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", 'personage:write', "world:read"])]
     private ?string $alignment = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", 'personage:write', "world:read"])]
     private ?string $class = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", 'personage:write', "world:read"])]
     private ?string $biography = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", "personage:write", "world:read"])]
     private ?Image $image = null;
 
     #[ORM\ManyToOne(inversedBy: 'personages')]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", "personage:write", "world:read"])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'personages')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", "personage:write"])]
     private ?World $world = null;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfAttribute::class, orphanRemoval: true, cascade: ["persist", "remove"])]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", "personage:write", "world:read"])]
+    #[MaxDepth(1)]
     private Collection $numberOfAttributes;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfSkill::class, orphanRemoval: true)]
-    #[Groups(["personage:read"])]
+    #[Groups(["personage:read", "world:read"])]
+    #[MaxDepth(1)]
     private Collection $numberOfSkills;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: NumberOfPoint::class, orphanRemoval: true, cascade: ["persist", "remove"])]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", "personage:write", "world:read"])]
+    #[MaxDepth(1)]
     private Collection $numberOfPoints;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Dice::class, cascade: ["remove"])]
     private Collection $dices;
 
     #[ORM\ManyToMany(targetEntity: Spell::class, mappedBy: 'personages')]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", "personage:write", "world:read"])]
     private Collection $spells;
 
     #[ORM\OneToMany(mappedBy: 'personage', targetEntity: Item::class, orphanRemoval: true, cascade: ["persist", "remove"])]
-    #[Groups(["personage:read", 'personage:write'])]
+    #[Groups(["personage:read", "personage:write", "world:read"])]
     private Collection $items;
 
     #[ORM\ManyToMany(targetEntity: Alteration::class, mappedBy: 'personages')]

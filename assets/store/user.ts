@@ -14,11 +14,7 @@ export const useUserStore = defineStore('user', {
         /**
          * The logged-in user
          */
-        user: {} as User,
-        /**
-         * The list of players in the world
-         */
-        players: [] as Connection[],
+        connectedUser: {} as User,
         /**
          * The connection between the connected user and the world
          */
@@ -26,11 +22,7 @@ export const useUserStore = defineStore('user', {
         /**
          * The list of users connected to this world except the current user
          */
-        connectedUser: [] as User[],
-        /**
-         * The user's chosen world
-         */
-        world: {} as World,
+        connectedPlayer: [] as User[],
         /**
          * The list of characters that can be played by the user
          */
@@ -43,25 +35,22 @@ export const useUserStore = defineStore('user', {
             return state.connection.isGameMaster;
         },
         getUserId: (state) => {
-            return state.user.id;
+            return state.connectedUser.id;
         },
         getUsername: (state) => {
-            return state.user.username;
+            return state.connectedUser.username;
         },
         getUser: (state) => {
-            return state.user;
-        },
-        getPlayers: (state) => {
-            return state.players;
+            return state.connectedUser;
         },
         getConnection: (state) => {
             return state.connection;
         },
-        getWorld: (state) => {
-            return state.world;
+        getWorld: () => {
+            return {};
         },
-        getConnectedUser: (state) => {
-            return state.connectedUser;
+        getConnectedPlayer: (state) => {
+            return state.connectedPlayer;
         },
         getCurrentMapId: (state) => {
             return state.connection.currentMap.id;
@@ -79,7 +68,7 @@ export const useUserStore = defineStore('user', {
     actions: {
         setUser(user: User): void
         {
-            this.user = user;
+            this.connectedUser = user;
         },
         setPlayers(players: Connection[]): void
         {
@@ -88,10 +77,6 @@ export const useUserStore = defineStore('user', {
         setConnection(connection: Connection): void
         {
             this.connection = connection;
-        },
-        setWorld(world: World): void
-        {
-            this.world = world;
         },
         setLastConnectionAt(lastConnectionAt: Date): void
         {
@@ -102,27 +87,27 @@ export const useUserStore = defineStore('user', {
             const lastConnectionAt = new Date();
             connectionService.updateLastConnectionAt(this.getConnection.id, lastConnectionAt.toJSON());
             this.setLastConnectionAt(lastConnectionAt);
-            setTimeout(() => {
+            /*setTimeout(() => {
                 this.sendIsConnected();
-            }, 20000)
+            }, 20000)*/
         },
-        findAllRecentConnections(): void
+        findAllRecentConnections(worldId: number): void
         {
             let lastConnectionAt = new Date(Date.parse(this.getConnection.lastConnectionAt) - 18000)
-            connectionService.findAllRecentConnectionByWorld(this.getWorld.id, lastConnectionAt.toJSON())
+            connectionService.findAllRecentConnectionByWorld(worldId, lastConnectionAt.toJSON())
                 .then(connections => {
-                    this.connectedUser = []
+                    this.connectedPlayer = []
                     connections.forEach(userConnection => {
                         if(userConnection.id != this.connection.id) {
-                            this.connectedUser.push({
+                            this.connectedPlayer.push({
                                 username: userConnection.user.username
                             })
                         }
                     });
                 })
-            setTimeout(() => {
+            /*setTimeout(() => {
                 this.findAllRecentConnections()
-            }, 30000)
+            }, 30000)*/
         },
         setCurrentMap(currentMapId: number): void
         {

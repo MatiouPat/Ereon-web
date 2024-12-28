@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Patch;
 use App\Repository\MusicPlayerRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: MusicPlayerRepository::class)]
 #[ApiResource(
@@ -25,15 +26,15 @@ class MusicPlayer
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("musicPlayer:read")]
+    #[Groups(["musicPlayer:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups("musicPlayer:read")]
+    #[Groups(["musicPlayer:read", "world:read"])]
     private ?bool $isPlaying = null;
 
     #[ORM\Column]
-    #[Groups("musicPlayer:read")]
+    #[Groups(["musicPlayer:read", "world:read"])]
     private ?bool $isLooping = null;
 
     #[ORM\OneToOne(inversedBy: 'musicPlayer', cascade: ['persist', 'remove'])]
@@ -41,11 +42,12 @@ class MusicPlayer
     private ?World $world = null;
 
     #[ORM\ManyToOne(inversedBy: 'musicPlayers')]
-    #[Groups("musicPlayer:read")]
+    #[Groups(["musicPlayer:read", "world:read"])]
+    #[MaxDepth(1)]
     private ?Music $currentMusic = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups("musicPlayer:read")]
+    #[Groups(["musicPlayer:read", "world:read"])]
     private ?float $currentTimePlay = null;
 
     public function getId(): ?int

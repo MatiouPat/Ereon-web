@@ -14,10 +14,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PointRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['point:read']],
     operations: [
         new GetCollection()
-    ]
+    ],
+    normalizationContext: ['groups' => ['point:read']]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['world.id'  => 'exact'])]
 class Point
@@ -25,11 +25,11 @@ class Point
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['point:read', "personage:read"])]
+    #[Groups(['point:read', "personage:read", "world:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 3)]
-    #[Groups(['point:read', "personage:read", 'spell:read'])]
+    #[Groups(['point:read', "personage:read", 'spell:read', "world:read"])]
     private ?string $acronym = null;
 
     #[ORM\ManyToOne(inversedBy: 'points')]

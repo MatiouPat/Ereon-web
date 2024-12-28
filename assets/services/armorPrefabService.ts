@@ -1,5 +1,5 @@
 import { ArmorPrefab } from "../entity/armorprefab";
-import { ArmorPrefabRepository } from "../repository/armorprefabRepository";
+import { ArmorPrefabRepository } from "../repository/armorPrefabRepository";
 
 export class ArmorPrefabService
 {

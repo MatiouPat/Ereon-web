@@ -1,7 +1,6 @@
 import { World } from "../entity/world";
 import { WorldRepository } from "../repository/worldRepository";
 import {ImageService} from "./imageService";
-import {Attribute} from "../entity/attribute";
 
 export class WorldService
 {
@@ -37,6 +36,11 @@ export class WorldService
             return this.worldRepository.createWorld(req);
         }
 
+    }
+
+    public async findWorldById(worldId: number): Promise<World>
+    {
+        return this.worldRepository.findWorldById(worldId);
     }
 
     public async findWorldByUser(userId: number): Promise<World[]>

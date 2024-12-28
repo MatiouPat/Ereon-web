@@ -22,12 +22,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[DiscriminatorColumn(name:"item", type: "string")]
 #[DiscriminatorMap(["item" => ItemPrefab::class, "armor" => ArmorPrefab::class, "weapon" => WeaponPrefab::class])]
 #[ApiResource(
-    normalizationContext: ['groups' => ['itemPrefab:read']],
-    denormalizationContext: ['groups' => ['itemPrefab:write']],
     operations: [
         new GetCollection(),
         new Post()
-    ]
+    ],
+    normalizationContext: ['groups' => ['itemPrefab:read']],
+    denormalizationContext: ['groups' => ['itemPrefab:write']]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['world.id' => 'exact'])]
 class ItemPrefab
