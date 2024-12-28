@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Patch;
 use App\Repository\MusicPlayerRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: MusicPlayerRepository::class)]
 #[ApiResource(
@@ -42,6 +43,7 @@ class MusicPlayer
 
     #[ORM\ManyToOne(inversedBy: 'musicPlayers')]
     #[Groups(["musicPlayer:read", "world:read"])]
+    #[MaxDepth(1)]
     private ?Music $currentMusic = null;
 
     #[ORM\Column(nullable: true)]

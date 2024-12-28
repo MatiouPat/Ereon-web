@@ -34,12 +34,16 @@ export class MapService
 
     public async createMap(map: Map, playerConnections?: ConnectionCheckField[]): Promise<void>
     {
-        /*let req: Map = structuredClone(map);
+        let req: Map = structuredClone(map);
         req.connections.forEach((connection: Connection, key: number) => {
-            this.connectionRepository.updateCurrentMap(connection.id, map.id);
             req.connections[key] = '/api/connections/' + connection.id
         })
-        return this.mapRepository.createMap(req);*/
+        playerConnections.forEach((playerConnection: ConnectionCheckField) => {
+            if(playerConnection.currentIsOnMap && !playerConnection.isOnMap) {
+                req.connections.push('/api/connections/' + playerConnection.connection.id)
+            }
+        })
+        return this.mapRepository.createMap(req);
     }
 
     public async deleteMap(mapId: number): Promise<void>

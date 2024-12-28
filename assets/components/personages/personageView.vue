@@ -70,7 +70,6 @@ export default defineComponent({
     computed: {
         ...mapState(useUserStore, [
             'isGameMaster',
-            'getPlayers',
             'getUserId',
             'getIsDarkTheme'
         ]),
@@ -114,8 +113,7 @@ export default defineComponent({
                 this.isDisplayed = false;
                 this.personages[this.key] = this.currentPersonage;
                 if(this.isModification) {
-                    console.log(this.currentPersonage)
-                    //this.personageService.updatePersonagePartially(this.currentPersonage);
+                    this.personageService.updatePersonagePartially(this.currentPersonage);
                 }else {
                     this.personageService.createPersonage(this.currentPersonage).then((res) => {
                         this.personages.push(res)

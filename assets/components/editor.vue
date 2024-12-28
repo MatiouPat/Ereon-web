@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import TokenComponent from './token.vue'
-import { defineComponent, inject } from 'vue';
+import {defineComponent, inject} from 'vue';
 import * as twgl from 'twgl.js';
 import lightVertSrc from "../shaders/light.vert";
 import lightFragSrc from "../shaders/light.frag";
@@ -37,8 +37,14 @@ import { useUserStore } from '../store/user';
 import { Emitter, EventType } from 'mitt';
 
     export default defineComponent({
+        name: "Editor",
         components: {
             TokenComponent
+        },
+        provide() {
+            return {
+                editor: this
+            }
         },
         data() {
             return {
@@ -81,7 +87,8 @@ import { Emitter, EventType } from 'mitt';
                 shadowBuffer: {} as twgl.BufferInfo,
                 quadBuffer: {} as twgl.BufferInfo,
                 shadowFramebuffer: {} as twgl.FramebufferInfo,
-                lightFramebuffer: {} as twgl.FramebufferInfo
+                lightFramebuffer: {} as twgl.FramebufferInfo,
+                tokens: [] as []
             }
         },
         computed: {
@@ -401,6 +408,24 @@ import { Emitter, EventType } from 'mitt';
                     x: (x / this.map.width) * 2 - 1,
                     y: -((y / this.map.height) * 2 - 1),
                 };
+            },
+            registerToken(token: any): void
+            {
+                this.tokens.push(token);
+            },
+            checkImageLoaded():void
+            {
+                const promises = this.tokens.map((token) => {
+                    return token.checkImageLoaded()
+                });
+
+                Promise.all(promises)
+                    .then(() => {
+                        this.emitter.emit("hasImageDownloaded")
+                    })
+                    .catch((error) => {
+                        console.error("Erreur lors du préchargement des images :", error);
+                    });
             }
         },
         mounted() {
@@ -433,6 +458,12 @@ import { Emitter, EventType } from 'mitt';
 
             this.emitter.on("drawWall", () => {
                 this.drawGameMasterVue();
+            })
+
+            this.emitter.on('isDownload', () => {
+                this.$nextTick(() => {
+                    this.checkImageLoaded()
+                })
             })
         }
     })

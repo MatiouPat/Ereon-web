@@ -16,10 +16,6 @@ export const useUserStore = defineStore('user', {
          */
         connectedUser: {} as User,
         /**
-         * The list of players in the world
-         */
-        players: [] as Connection[],
-        /**
          * The connection between the connected user and the world
          */
         connection: {} as Connection,
@@ -46,9 +42,6 @@ export const useUserStore = defineStore('user', {
         },
         getUser: (state) => {
             return state.connectedUser;
-        },
-        getPlayers: (state) => {
-            return state.players;
         },
         getConnection: (state) => {
             return state.connection;

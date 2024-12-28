@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: AssetRepository::class)]
 #[ApiResource(
@@ -34,6 +35,7 @@ class Asset
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[Groups(["map:read", "token:read", "asset:read", "asset:write", "world:read"])]
+    #[MaxDepth(1)]
     private ?Image $image = null;
 
     public function __construct()

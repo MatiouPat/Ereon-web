@@ -120,7 +120,6 @@ export default defineComponent({
         ...mapState(useUserStore, [
             'isGameMaster',
             'getCurrentMapId',
-            'getPlayers',
             'getIsDarkTheme'
         ]),
         ...mapState(useWorldStore, [
@@ -188,7 +187,11 @@ export default defineComponent({
             this.map = {name: '', width: 0, height: 0, hasDynamicLight: false, connections: [], world: '/api/worlds/' + this.getWorldId};
             this.playerConnections = [];
             this.getPlayerConnectionsInWorld.forEach((playerConnection: Connection) => {
-                this.playerConnections.push(playerConnection)
+                this.playerConnections.push({
+                    connection: playerConnection,
+                    isOnMap: playerConnection.currentMap.id === this.map.id,
+                    currentIsOnMap: playerConnection.currentMap.id === this.map.id
+                })
             });
             this.isParametersDisplayed = true;
         },

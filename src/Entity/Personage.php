@@ -27,7 +27,8 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
         new Patch()
     ],
     normalizationContext: ['groups' => ['personage:read']],
-    denormalizationContext: ['groups' => ['personage:write']]
+    denormalizationContext: ['groups' => ['personage:write']],
+    paginationEnabled: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['user.id' => 'exact', 'world.id' => 'exact'])]
 #[ApiFilter(ExistsFilter::class, properties: ['user'])]

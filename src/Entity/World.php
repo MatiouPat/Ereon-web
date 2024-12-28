@@ -56,14 +56,17 @@ class World
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Connection::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[Groups(["world:readCollection", "world:read"])]
+    #[MaxDepth(1)]
     private Collection $connections;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Personage::class, orphanRemoval: true)]
     #[Groups(["world:read"])]
+    #[MaxDepth(1)]
     private Collection $personages;
 
     #[ORM\OneToMany(mappedBy: 'world', targetEntity: Map::class, orphanRemoval: true)]
     #[Groups(["world:read"])]
+    #[MaxDepth(1)]
     private Collection $maps;
 
     #[ORM\OneToOne(mappedBy: 'world', cascade: ['persist', 'remove'])]

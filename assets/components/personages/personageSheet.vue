@@ -243,7 +243,6 @@ export default defineComponent({
     computed: {
         ...mapState(useUserStore, [
             'getUserId',
-            'getPlayers',
             'getWorld',
             'getIsDarkTheme'
         ]),

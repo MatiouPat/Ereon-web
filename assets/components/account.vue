@@ -1,8 +1,8 @@
 <template>
     <Teleport to="#content">
-        <world-view v-if="onWorldCreation" @world-view:cancel="onWorldCreation = false" @worldView:createdWorld="(world) => {onWorldCreation = false; addWorld(world)}"></world-view>
+        <world-view v-if="currentState == WorldState.ON_CREATION" @world-view:cancel="currentState = WorldState.ON_CHOOSE" @worldView:createdWorld="(world) => {currentState = WorldState.ON_CHOOSE; addWorld(world)}"></world-view>
     </Teleport>
-    <header v-if="isConnected" class="header">
+    <header v-if="currentState == WorldState.ON_EDITOR" class="header">
         <nav class="navigation">
             <ul class="all-tools" v-if="isGameMaster">
                 <ul class="layers">
@@ -96,7 +96,7 @@
             </div>
         </Teleport>
     </header>
-    <div v-else class="worlds-page">
+    <div v-if="currentState == WorldState.ON_CHOOSE" class="worlds-page">
         <h1>Quel monde ?</h1>
         <div class="worlds">
             <div class="world-layout" v-for="world in getWorlds" :key="world.id">
@@ -118,11 +118,13 @@
         </div>
         <a class="btn btn-secondary" href="/logout">Se déconnecter</a>
     </div>
+    <div v-if="currentState == WorldState.ON_DOWNLOAD" class="world-download">
+        <h1>Chargement du monde...</h1>
+    </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import { UserParameterRepository } from '../repository/userParameterRepository';
 import { LightingWallService } from '../services/lightingWallService';
 import { PersonageService } from '../services/personageService';
 import { ConnectionService } from '../services/connectionService';
@@ -138,211 +140,200 @@ import {WorldService} from "../services/worldService";
 import {Connection} from "../entity/connection";
 import {useWorldStore} from "../store/world";
 import {User} from "../entity/user";
+import {UserParameterService} from "../services/userParameterService";
 
-    export default defineComponent({
-        data() {
-            return {
-                emitter: inject('emitter') as any,
-                connectionService: new ConnectionService as ConnectionService,
-                userParameterRepository: new UserParameterRepository as UserParameterRepository,
-                personageService: new PersonageService as PersonageService,
-                lightingWallService: new LightingWallService as LightingWallService,
-                mapService: new MapService as MapService,
-                userService: new UserService as UserService,
-                worldService: new WorldService as WorldService,
-                /**
-                 * If the world has been chosen and all related variables are updated (players, map, tokens, etc.)
-                 */
-                isConnected: false as boolean,
-                onParameters: false as boolean,
-                layer: 1 as number,
-                globalVolume: this.connectedUser.userParameter.globalVolume as number,
-                isDarkTheme: this.connectedUser.userParameter.isDarkTheme as boolean,
-                pageIndex: 0 as number,
-                newPassword: "" as string,
-                newPasswordCopy: "" as string,
-                newPasswordConstraint: 0b00000 as number,
-                onWorldCreation: false as boolean,
-                user: {} as User
-            }
-        },
-        props: [
-            'connectedUser'
-        ],
-        computed: {
-            ...mapState(useUserStore, [
-                'getUser',
-                'getCurrentMapId',
-                'getUsername',
-                'isGameMaster',
-                'getIsDarkTheme',
-                'getConnectedPlayer',
-                'getWorlds'
-            ]),
-            ...mapState(useMapStore, [
-                'getLayer',
-                'getOnDrawing'
-            ])
-        },
-        components: { basicInput, WorldView },
-        watch: {
-            newPassword: {
-                handler() {
-                    this.newPasswordConstraint = this.isValidPassword()
-                },
-                flush: 'post' 
-            }
-        },
-        methods: {
-            ...mapActions(useUserStore, [
-                'setUser',
-                'setPlayers',
-                'setConnection',
-                'sendIsConnected',
-                'findAllRecentConnections',
-                'setPersonages',
-                'setIsDarkTheme',
-                'findWorlds',
-                'addWorld'
-            ]),
-            ...mapActions(useWorldStore, [
-                'setWorld'
-            ]),
-            ...mapActions(useMapStore, [
-                'setMap',
-                'setLayer',
-                'setOnDrawing',
-                'deleteAllLightingWalls'
-            ]),
-            ...mapActions(useMusicStore, [
-                "setUserParameter",
-                "setUserVolume",
-                "setMusicPlayer",
-                "setCurrentMusic"
-            ]),
-            /**
-             * Loading information after choosing a world
-             * @param connection
-             * @param worldId The selected world
-             */
-            chooseWorld: function(connection: Connection, worldId: number) {
-                this.setConnection(connection);
-                this.worldService.findWorldById(worldId).then(world => {
-                    this.setWorld(world);
-                    this.setMap(world.connections.filter((connection) => connection.user.id === this.getUser.id)[0].currentMap);
-                    this.setMusicPlayer(world.musicPlayer);
-                    this.setCurrentMusic(world.musicPlayer.currentMusic);
-                    this.sendIsConnected();
-                    this.findAllRecentConnections(world.id);
-                    this.emitter.emit("isDownload");
-                })
-                /*
-                this.mapService.findMapById(connection.currentMap.id).then(map => {
-                    this.setMap(map);
-                    this.loadedParameters++;
-                });
-                this.personageService.findPersonagesByWorldAndByUser(world.id, connection.user.id).then(personages => {
-                    this.setPersonages(personages);
-                    this.loadedParameters++;
-                });
-                this.connectionService.findPlayerByWorldAndWhereIsNotGameMaster(world.id).then(connections => {
-                    this.setPlayers(connections);
-                    this.loadedParameters++;
-                });
-                this.setConnection(connection);
-                this.setWorld(world);
-                this.sendIsConnected();
-                this.findAllRecentConnections();
-                const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
-                updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
+enum WorldState  {
+    ON_CREATION = 0,
+    ON_CHOOSE = 1,
+    ON_DOWNLOAD = 2,
+    ON_EDITOR = 3
+}
 
-                const updateEs = new EventSource(updateUrl);
-                updateEs.onmessage = e => {
-                    let data = JSON.parse(e.data)
-                    if (data.currentMap.id !== this.getCurrentMapId) {
-                        this.mapService.findMapById(data.currentMap.id).then(map => {
-                            this.setMap(map);
-                        })
-                        this.setConnection(data)
-                    }
-                }*/
-                this.isConnected = true;
-            },
-            changeUserVolume: function() {
-                this.setUserVolume(this.globalVolume);
-                this.emitter.emit("hasChangedUserVolume")
-            },
-            changeTheme: function() {
-                this.userParameterRepository.updateTheme(this.connectedUser.userParameter.id, this.isDarkTheme);
-                this.setIsDarkTheme(this.isDarkTheme);
-                this.setThemeTag();
-                
-            },
-            setThemeTag: function() {
-                if(this.isDarkTheme) {
-                    document.documentElement.classList.remove('light')
-                    document.documentElement.classList.add('dark')
-                } else {
-                    document.documentElement.classList.remove('dark')
-                    document.documentElement.classList.add('light')
-                }
-            },
-            isValidPassword: function() {
-                let constraints = 0b00000;
-                if(new RegExp('[A-Z]').test(this.newPassword)) {
-                    constraints = constraints | 0b10000
-                }
-                if(new RegExp('[0-9]').test(this.newPassword)) {
-                    constraints = constraints | 0b01000
-                }
-                if(new RegExp('[#~?!:=;.@$%\^&*\/+-]').test(this.newPassword)) {
-                    constraints = constraints | 0b00100
-                }
-                if(new RegExp('.{8,}').test(this.newPassword)) {
-                    constraints = constraints | 0b00010
-                }
-                if(this.newPassword == this.newPasswordCopy) {
-                    constraints = constraints | 0b000001
-                }
-                return constraints
-            },
-            submitForm: function() {
-                let validationStatus = this.isValidPassword();
-                let isError = false;
-                if(this.user.username === "") {
-                    (this.$refs.username as any).setError("Cette valeur ne peut pas être vide");
-                    isError = true;
-                }
-                if(this.newPassword != "") {
-                    if((validationStatus & 0b11110) != 0b11110) {
-                        (this.$refs.newPassword as any).setError("Cette valeur ne respecte pas les contraintes ci-dessous");
-                    isError = true;
-                    }
-                    else if((validationStatus & 0b00001) != 0b00001) {
-                        (this.$refs.newPasswordCopy as any).setError("Cette valeur n'est pas identique");
-                        isError = true;
-                    }
-                    else {
-                        this.user.plainPassword = this.newPassword;
-                    }
-                }
-                if(!isError) {
-                    this.onParameters = false;
-                    this.userService.updateUserPartially(this.user);
-                }
-            },
-            createWorld: function() {
-                this.onWorldCreation = true;
-            }
-        },
-        mounted() {
-            this.setUser(this.connectedUser)
-            this.setUserParameter(this.connectedUser.userParameter);
-            this.setThemeTag();
-            this.setIsDarkTheme(this.isDarkTheme);
-            this.findWorlds(this.connectedUser.id);
+export default defineComponent({
+    data() {
+        return {
+            WorldState,
+            emitter: inject('emitter') as any,
+            connectionService: new ConnectionService as ConnectionService,
+            userParameterService: new UserParameterService() as UserParameterService,
+            personageService: new PersonageService as PersonageService,
+            lightingWallService: new LightingWallService as LightingWallService,
+            mapService: new MapService as MapService,
+            userService: new UserService as UserService,
+            worldService: new WorldService as WorldService,
+            onParameters: false as boolean,
+            currentState: WorldState.ON_CHOOSE,
+            layer: 1 as number,
+            globalVolume: this.connectedUser.userParameter.globalVolume as number,
+            isDarkTheme: this.connectedUser.userParameter.isDarkTheme as boolean,
+            pageIndex: 0 as number,
+            newPassword: "" as string,
+            newPasswordCopy: "" as string,
+            newPasswordConstraint: 0b00000 as number,
+            user: {} as User
         }
-    })
+    },
+    props: [
+        'connectedUser'
+    ],
+    computed: {
+        ...mapState(useUserStore, [
+            'getUser',
+            'getUsername',
+            'isGameMaster',
+            'getIsDarkTheme',
+            'getConnectedPlayer',
+            'getWorlds'
+        ]),
+        ...mapState(useMapStore, [
+            'getLayer',
+            'getOnDrawing'
+        ])
+    },
+    components: { basicInput, WorldView },
+    watch: {
+        newPassword: {
+            handler() {
+                this.newPasswordConstraint = this.isValidPassword()
+            },
+            flush: 'post'
+        }
+    },
+    methods: {
+        ...mapActions(useUserStore, [
+            'setUser',
+            'setConnection',
+            'sendIsConnected',
+            'findAllRecentConnections',
+            'setIsDarkTheme',
+            'findWorlds',
+            'addWorld'
+        ]),
+        ...mapActions(useWorldStore, [
+            'setWorld'
+        ]),
+        ...mapActions(useMapStore, [
+            'setMap',
+            'setLayer',
+            'setOnDrawing',
+            'deleteAllLightingWalls'
+        ]),
+        ...mapActions(useMusicStore, [
+            "setUserParameter",
+            "setUserVolume",
+            "setMusicPlayer",
+            "setCurrentMusic"
+        ]),
+        /**
+         * Loading information after choosing a world
+         * @param connection
+         * @param worldId The selected world
+         */
+        chooseWorld: function(connection: Connection, worldId: number) {
+            this.setConnection(connection);
+            this.currentState = WorldState.ON_DOWNLOAD;
+            this.worldService.findWorldById(worldId).then(world => {
+                this.setWorld(world);
+                this.setMap(world.connections.filter((connection) => connection.user.id === this.getUser.id)[0].currentMap);
+                this.setMusicPlayer(world.musicPlayer);
+                this.setCurrentMusic(world.musicPlayer.currentMusic);
+                this.sendIsConnected();
+                this.findAllRecentConnections(world.id);
+                this.emitter.emit("isDownload");
+                this.emitter.on("hasImageDownloaded", () => {
+                    this.currentState = WorldState.ON_EDITOR;
+                })
+            })
+            /*
+            const updateUrl = new URL(process.env.MERCURE_PUBLIC_URL!);
+            updateUrl.searchParams.append('topic', 'https://lescanardsmousquetaires.fr/connection/' + connection.id);
+
+            const updateEs = new EventSource(updateUrl);
+            updateEs.onmessage = e => {
+                let data = JSON.parse(e.data)
+                if (data.currentMap.id !== this.getCurrentMapId) {
+                    this.mapService.findMapById(data.currentMap.id).then(map => {
+                        this.setMap(map);
+                    })
+                    this.setConnection(data)
+                }
+            }*/
+        },
+        changeUserVolume: function() {
+            this.setUserVolume(this.globalVolume);
+            this.emitter.emit("hasChangedUserVolume")
+        },
+        changeTheme: function() {
+            this.userParameterService.updateTheme(this.connectedUser.userParameter.id, this.isDarkTheme);
+            this.setIsDarkTheme(this.isDarkTheme);
+            this.setThemeTag();
+
+        },
+        setThemeTag: function() {
+            if(this.isDarkTheme) {
+                document.documentElement.classList.remove('light')
+                document.documentElement.classList.add('dark')
+            } else {
+                document.documentElement.classList.remove('dark')
+                document.documentElement.classList.add('light')
+            }
+        },
+        isValidPassword: function() {
+            let constraints = 0b00000;
+            if(new RegExp('[A-Z]').test(this.newPassword)) {
+                constraints = constraints | 0b10000
+            }
+            if(new RegExp('[0-9]').test(this.newPassword)) {
+                constraints = constraints | 0b01000
+            }
+            if(new RegExp('[#~?!:=;.@$%\^&*\/+-]').test(this.newPassword)) {
+                constraints = constraints | 0b00100
+            }
+            if(new RegExp('.{8,}').test(this.newPassword)) {
+                constraints = constraints | 0b00010
+            }
+            if(this.newPassword == this.newPasswordCopy) {
+                constraints = constraints | 0b000001
+            }
+            return constraints
+        },
+        submitForm: function() {
+            let validationStatus = this.isValidPassword();
+            let isError = false;
+            if(this.user.username === "") {
+                (this.$refs.username as any).setError("Cette valeur ne peut pas être vide");
+                isError = true;
+            }
+            if(this.newPassword != "") {
+                if((validationStatus & 0b11110) != 0b11110) {
+                    (this.$refs.newPassword as any).setError("Cette valeur ne respecte pas les contraintes ci-dessous");
+                isError = true;
+                }
+                else if((validationStatus & 0b00001) != 0b00001) {
+                    (this.$refs.newPasswordCopy as any).setError("Cette valeur n'est pas identique");
+                    isError = true;
+                }
+                else {
+                    this.user.plainPassword = this.newPassword;
+                }
+            }
+            if(!isError) {
+                this.onParameters = false;
+                this.userService.updateUserPartially(this.user);
+            }
+        },
+        createWorld: function() {
+            this.currentState = WorldState.ON_CREATION;
+        }
+    },
+    mounted() {
+        this.setUser(this.connectedUser)
+        this.setUserParameter(this.connectedUser.userParameter);
+        this.setThemeTag();
+        this.setIsDarkTheme(this.isDarkTheme);
+        this.findWorlds(this.connectedUser.id);
+    }
+})
 </script>
 
 <style scoped>
@@ -508,6 +499,23 @@ import {User} from "../entity/user";
     .parameters-navigation li {
         position: relative;
         margin-bottom: 8px;
+    }
+
+    .world-download {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100dvw;
+        height: 100dvh;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #FFFFFF;
+    }
+
+    .dark .world-download {
+        background-color: #1F262D;;
     }
 
     @keyframes appear {
